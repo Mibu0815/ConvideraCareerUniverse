@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { compareRoles } from '@/lib/services/career-logic';
-import { getMentorAdvice, getMentorGreeting, chatWithMentor } from '@/lib/services/mentor-chat';
+import { getMentorAdvice, getMentorGreeting, chatWithMentor, MissingApiKeyError } from '@/lib/services/mentor-chat';
 
 interface MentorMessage {
   role: 'user' | 'assistant';
@@ -96,6 +96,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Mentor API error:', error);
+
+    // Handle missing API key error specifically
+    if (error instanceof MissingApiKeyError) {
+      return NextResponse.json(
+        {
+          error: 'AI Mentor ist nicht konfiguriert',
+          message: 'Der ANTHROPIC_API_KEY ist nicht in den Umgebungsvariablen hinterlegt. Bitte kontaktieren Sie den Administrator.',
+          code: 'MISSING_API_KEY'
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

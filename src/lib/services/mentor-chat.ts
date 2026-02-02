@@ -5,9 +5,26 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { RoleComparisonResult } from './career-logic';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Check if API key is configured
+const API_KEY = process.env.ANTHROPIC_API_KEY;
+
+// Custom error for missing API key
+export class MissingApiKeyError extends Error {
+  constructor() {
+    super('ANTHROPIC_API_KEY is not configured. Please add it to your environment variables.');
+    this.name = 'MissingApiKeyError';
+  }
+}
+
+// Lazy initialization of Anthropic client
+function getAnthropicClient(): Anthropic {
+  if (!API_KEY || API_KEY === 'sk-ant-api03-...') {
+    throw new MissingApiKeyError();
+  }
+  return new Anthropic({
+    apiKey: API_KEY,
+  });
+}
 
 // Convidera Skill-Level Definitionen für den System-Kontext
 const SKILL_LEVEL_DEFINITIONS = `
@@ -205,7 +222,8 @@ ${question || 'Bitte gib mir eine personalisierte Karriereberatung basierend auf
     messages.push({ role: 'user', content: initialUserMessage });
   }
 
-  const response = await anthropic.messages.create({
+  const client = getAnthropicClient();
+  const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1500,
     system: SYSTEM_PROMPT,
