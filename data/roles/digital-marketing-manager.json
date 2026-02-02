@@ -1,0 +1,455 @@
+{
+  "roleFamily": "Digital Marketing Manager",
+  "category": "Digital Marketing",
+  "team": "Marketing Excellence",
+  "directReportTo": "Head of Marketing",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "junior-digital-marketing-manager",
+      "slug": "junior-digital-marketing-manager",
+      "title": "Junior Digital Marketing Manager",
+      "level": "Junior",
+      "levelOrder": 1,
+      "traxId": "3f1aabca-10d5-4774-98ed-2538bbf8d9c0",
+      "description": "Der Junior Digital Marketing Manager unterstützt digitale Marketingmaßnahmen bei der Entwicklung, Umsetzung und Optimierung innerhalb eines Projekts. Dabei übernimmt er auch Schnittstellenfunktion zum Kunden. Er hat enge Schnittstellen zu Beratern, Content-Strategists, Social Media-Manager, Webdesigner, Digital Analysts, Software Dev).",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Unterstützung bei Briefing, Konzeption, der Umsetzung und Messung von digitalen Marketing Kampagnen für unsere Kunden",
+        "Begleitung der kreativen Entwicklung von multi-formaten Marketing Maßnahmen zur Marken- und Produktaktivierung (Ideenfindung Bewegtbild, Bilderwelten, Story Telling, Influencer Management…) auf Basis von Social Media und Kundendaten sowie die qualitative Sicherstellung des Outputs",
+        "Unterstützung bei Analyse und Ermittlung von Kundenbedürfnissen, zielgruppen-/kanal-gerechter Kommunikationsansätze",
+        "Support bei Datengetriebener Erfolgsmessung anhand relevanter KPIs"
+      ],
+      "softSkills": [
+        "Service Orientation",
+        "Solution Orientation",
+        "Strategic Thinking",
+        "Structuredness",
+        "Communication Skills",
+        "Collaboration",
+        "Creativity",
+        "Proactivity",
+        "Flexibility"
+      ],
+      "skills": [
+        {
+          "name": "Ideation",
+          "level": 1,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativmethoden",
+          "level": 2,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativ-Konzeption",
+          "level": 2,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativ-Briefing",
+          "level": 1,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Bild- und Videoauswahl",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Bild- und Medienverwaltung",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Produktionssteuerung",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Adaption / Operationalisierung von Bild- und Tonmaterial",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Postproduktion",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Medienrecht",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Texterstellung / Writing",
+          "level": 1,
+          "competenceField": "Content Management"
+        },
+        {
+          "name": "Copywriting",
+          "level": 1,
+          "competenceField": "Content Management"
+        },
+        {
+          "name": "Web Analytics",
+          "level": 1,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Reporting",
+          "level": 1,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Social Media Analytics",
+          "level": 1,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Suchmaschinenkompetenz",
+          "level": 1,
+          "competenceField": "SEO"
+        },
+        {
+          "name": "Kampagnenplanung / Werbestrategie",
+          "level": 1,
+          "competenceField": "Paid Advertising"
+        },
+        {
+          "name": "Projektplanung",
+          "level": 1,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "Projektstatus Dokumentation",
+          "level": 1,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "Anforderungs- und Änderungsmanagement",
+          "level": 1,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "(Sales) Presentation / Pitching",
+          "level": 1,
+          "competenceField": "Sales"
+        },
+        {
+          "name": "Gesprächsführung",
+          "level": 2,
+          "competenceField": "Sales"
+        },
+        {
+          "name": "Stakeholder Management",
+          "level": 2,
+          "competenceField": "Account Management"
+        }
+      ]
+    },
+    {
+      "id": "professional-digital-marketing-manager",
+      "slug": "professional-digital-marketing-manager",
+      "title": "Professional Digital Marketing Manager",
+      "level": "Professional",
+      "levelOrder": 2,
+      "traxId": "b6fe131d-7e70-4259-bb3b-000a8c4000ca",
+      "description": "Der Digital Marketing Manager verantwortet digitale Marketingmaßnahmen bei der Entwicklung, Umsetzung und Optimierung innerhalb eines Projekts. Dabei übernimmt er auch Schnittstellenfunktion zum Kunden. Er hat enge Schnittstellen zu Beratern, Content-Strategists, Social Media-Manager, Webdesigner, Digital Analysts, Software Dev).",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Briefing, Konzeption, Steuerung der Umsetzung und Messung von digitalen Marketing Kampagnen für unsere Kunden",
+        "Kreative Entwicklung von multi-formaten Marketing Maßnahmen zur Marken- und Produktaktivierung (Ideenfindung Bewegtbild, Bilderwelten, Story Telling, Influencer Management…) auf Basis von Social Media und Kundendaten",
+        "Analyse und Ermittlung von Kundenbedürfnissen, zielgruppen-/kanal-gerechter Kommunikationsansätze",
+        "Datengetriebene Erfolgsmessung anhand relevanter KPI",
+        "Schnittstelle zum Kunden"
+      ],
+      "softSkills": [
+        "Service Orientation",
+        "Decision-Making Skills",
+        "Resilience",
+        "Time Management",
+        "Solution Orientation",
+        "Strategic Thinking",
+        "Structuredness",
+        "Communication Skills",
+        "Collaboration",
+        "Creativity",
+        "Proactivity",
+        "Flexibility"
+      ],
+      "skills": [
+        {
+          "name": "Ideation",
+          "level": 2,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativmethoden",
+          "level": 2,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativ-Konzeption",
+          "level": 2,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativ-Briefing",
+          "level": 2,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Bild- und Videoauswahl",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Bild- und Medienverwaltung",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Produktionssteuerung",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Adaption / Operationalisierung von Bild- und Tonmaterial",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Postproduktion",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Medienrecht",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Texterstellung / Writing",
+          "level": 1,
+          "competenceField": "Content Management"
+        },
+        {
+          "name": "Copywriting",
+          "level": 1,
+          "competenceField": "Content Management"
+        },
+        {
+          "name": "Web Analytics",
+          "level": 1,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Reporting",
+          "level": 2,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Social Media Analytics",
+          "level": 1,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Suchmaschinenkompetenz",
+          "level": 1,
+          "competenceField": "SEO"
+        },
+        {
+          "name": "Kampagnenplanung / Werbestrategie",
+          "level": 2,
+          "competenceField": "Paid Advertising"
+        },
+        {
+          "name": "Projektplanung",
+          "level": 2,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "Projektstatus Dokumentation",
+          "level": 2,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "Anforderungs- und Änderungsmanagement",
+          "level": 2,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "(Sales) Presentation / Pitching",
+          "level": 2,
+          "competenceField": "Sales"
+        },
+        {
+          "name": "Gesprächsführung",
+          "level": 2,
+          "competenceField": "Sales"
+        },
+        {
+          "name": "Stakeholder Management",
+          "level": 2,
+          "competenceField": "Account Management"
+        }
+      ]
+    },
+    {
+      "id": "senior-digital-marketing-manager",
+      "slug": "senior-digital-marketing-manager",
+      "title": "Senior Digital Marketing Manager",
+      "level": "Senior",
+      "levelOrder": 3,
+      "traxId": "aa57d1e8-43d7-4ef5-bad3-3a5e4d39e2be",
+      "team": "Digital Marketing",
+      "description": "Der Senior Digital Marketing Manager:in verantwortet alle digitalen Marketingmaßnahmen zur Entwicklung, Umsetzung und Optimierung innerhalb eines (Kunden-)Projekts. Dabei agiert er als Account-Lead für den Kunden. Er hat enge Schnittstellen zu Beratern, Content-Strategists, Social Media-Managern, Webdesignern, Digital Analysts, Software Dev).",
+      "leadership": false,
+      "budgetResponsibility": true,
+      "responsibilities": [
+        "Eigenverantwortlicher Marketing Account-Lead unseres/r Kunden",
+        "Verantwortung von Briefing, Konzeption, Steuerung der Umsetzung und Messung von digitalen Marketing Kampagnen für unsere Kunden",
+        "Kreative Entwicklung von multi-formaten Marketing Maßnahmen zur Marken- und Produktaktivierung (Ideenfindung Bewegtbild, Bilderwelten, Story Telling, Influencer Management…) auf Basis von Social Media und Kundendaten",
+        "Analyse und Ermittlung von Kundenbedürfnissen, zielgruppen-/kanal-gerechter Kommunikationsansätze",
+        "Kontinuierliche Steuerung und Optimierung digitaler Kampagnen",
+        "Datengetriebene Erfolgsmessung anhand relevanter KPI",
+        "Verantwortlich für Pitching & Account Mngmt. und Nachverkauf"
+      ],
+      "softSkills": [
+        "Service Orientation",
+        "Decision-Making Skills",
+        "Entrepreneurial Thinking",
+        "Resilience",
+        "Time Management",
+        "Analytical Thinking",
+        "Solution Orientation",
+        "Strategic Thinking",
+        "Structuredness",
+        "Communication Skills",
+        "Collaboration",
+        "Creativity"
+      ],
+      "skills": [
+        {
+          "name": "Ideation",
+          "level": 3,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativmethoden",
+          "level": 3,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativ-Konzeption",
+          "level": 3,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Kreativ-Briefing",
+          "level": 3,
+          "competenceField": "Creative Strategy"
+        },
+        {
+          "name": "Bild- und Videoauswahl",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Bild- und Medienverwaltung",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Produktionssteuerung",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Adaption / Operationalisierung von Bild- und Tonmaterial",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Postproduktion",
+          "level": 2,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Medienrecht",
+          "level": 1,
+          "competenceField": "Producing (Bild & Ton)"
+        },
+        {
+          "name": "Texterstellung / Writing",
+          "level": 2,
+          "competenceField": "Content Management"
+        },
+        {
+          "name": "Copywriting",
+          "level": 2,
+          "competenceField": "Content Management"
+        },
+        {
+          "name": "Web Analytics",
+          "level": 2,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Reporting",
+          "level": 3,
+          "competenceField": "Analysis"
+        },
+        {
+          "name": "Suchmaschinenkompetenz",
+          "level": 2,
+          "competenceField": "SEO"
+        },
+        {
+          "name": "Kampagnenplanung / Werbestrategie",
+          "level": 3,
+          "competenceField": "Paid Advertising"
+        },
+        {
+          "name": "Anzeigenerstellung",
+          "level": 2,
+          "competenceField": "Paid Advertising"
+        },
+        {
+          "name": "Projektplanung",
+          "level": 3,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "Projektstatus Dokumentation",
+          "level": 3,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "Anforderungs- und Änderungsmanagement",
+          "level": 3,
+          "competenceField": "Projektmanagement"
+        },
+        {
+          "name": "(Sales) Presentation / Pitching",
+          "level": 3,
+          "competenceField": "Sales"
+        },
+        {
+          "name": "Gesprächsführung",
+          "level": 3,
+          "competenceField": "Sales"
+        },
+        {
+          "name": "Stakeholder Management",
+          "level": 3,
+          "competenceField": "Account Management"
+        }
+      ]
+    }
+  ]
+}

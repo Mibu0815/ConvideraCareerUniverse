@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Convidera Brand Colors */
+  --brand-black: #000000;
+  --brand-white: #FFFFFF;
+  --brand-gray-50: #F9FAFB;
+  --brand-gray-100: #F3F4F6;
+  --brand-gray-200: #E5E7EB;
+  --brand-gray-300: #D1D5DB;
+  --brand-gray-400: #9CA3AF;
+  --brand-gray-500: #6B7280;
+  --brand-gray-600: #4B5563;
+  --brand-gray-700: #374151;
+  --brand-gray-800: #1F2937;
+  --brand-gray-900: #111827;
+  --brand-accent: #3B82F6;
+
+  --background: var(--brand-white);
+  --foreground: var(--brand-gray-900);
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+@layer components {
+  /* Effekt für die aktuelle Skill-Aura (grau) */
+  .radar-glow-current {
+    filter: drop-shadow(0 0 8px rgba(156, 163, 175, 0.5));
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* Effekt für die Ziel-Rolle (Functional Lead) */
+  .radar-glow-target {
+    filter: drop-shadow(0 0 12px rgba(0, 0, 0, 0.2));
+    stroke-dasharray: 4;
+    animation: dash-flow 20s linear infinite;
+  }
+
+  @keyframes dash-flow {
+    to {
+      stroke-dashoffset: -100;
+    }
+  }
+
+  /* Bento-Box Hover Effekt */
+  .bento-card {
+    @apply bg-white border border-brand-gray-100 rounded-bento p-6
+           transition-all duration-300 hover:shadow-xl hover:shadow-brand-gray-100/50;
+  }
+
+  /* Glassmorphism Card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  }
+
+  .glass-card-dark {
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* AI Mentor Glassmorphism */
+  .mentor-glass {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(249, 250, 251, 0.8) 50%,
+      rgba(243, 244, 246, 0.9) 100%
+    );
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+      0 -20px 40px -20px rgba(59, 130, 246, 0.1) inset;
+  }
+
+  .mentor-glass-header {
+    background: linear-gradient(
+      135deg,
+      rgba(17, 24, 39, 0.95) 0%,
+      rgba(31, 41, 55, 0.9) 100%
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .mentor-message-glass {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Keyword Highlight für Skills */
+  .skill-highlight {
+    @apply text-brand-accent font-semibold;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.4);
+  }
+
+  .competence-highlight {
+    @apply text-purple-600 font-medium;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+  }
+
+  .level-highlight {
+    @apply font-mono font-bold;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    color: #059669;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

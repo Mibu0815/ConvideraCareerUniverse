@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// --- ENUMS ---
+
+enum RoleLevel {
+  JUNIOR
+  PROFESSIONAL
+  SENIOR
+  FUNCTIONAL_LEAD
+  HEAD_OF
+}
+
+// --- MODELS ---
+
+// Top-Level Kategorien (z.B. Software Engineering, Digital Marketing)
+model OccupationalField {
+  id    String @id @default(uuid())
+  title String @unique
+  slug  String @unique
+  roles Role[]
+}
+
+// Die Rollen-Definition inklusive Leadership-Logik
+model Role {
+  id          String    @id @default(uuid())
+  title       String // z.B. "Backend Development (m/f/d)"
+  slug        String    @unique
+  level       RoleLevel
+  description String?   @db.Text
+
+  // Metadaten aus dem Trax-System
+  team           String?  @default("Squad")
+  hasLeadership  Boolean  @default(false)
+  leadershipType String? // z.B. "Functional" oder "Disciplinary"
+  hasBudgetResp  Boolean  @default(false)
+  directReportTo String? // Titel der Rolle, an die berichtet wird
+  language       String?  @default("english")
+
+  // Relationen
+  occupationalField OccupationalField @relation(fields: [fieldId], references: [id])
+  fieldId           String
+
+  roleSkills       RoleSkill[]
+  softSkills       SoftSkill[]      @relation("RoleToSoftSkill")
+  responsibilities Responsibility[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fieldId])
+  @@index([level])
+}
+
+// Verantwortlichkeiten als Liste (Responsibilities)
+model Responsibility {
+  id       String  @id @default(uuid())
+  text     String  @db.Text
+  category String?
+  order    Int     @default(0)
+  role     Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId   String
+
+  @@index([roleId])
+}
+
+// Kompetenzbereiche (z.B. Backend Development, Analysis)
+model CompetenceField {
+  id     String  @id @default(uuid())
+  title  String  @unique
+  slug   String  @unique
+  color  String?
+  skills Skill[]
+}
+
+// Einzelne Hard Skills
+model Skill {
+  id          String  @id @default(uuid())
+  title       String
+  slug        String  @unique
+  description String? @db.Text
+
+  competenceField CompetenceField @relation(fields: [fieldId], references: [id])
+  fieldId         String
+
+  roles RoleSkill[]
+
+  @@unique([title, fieldId])
+  @@index([fieldId])
+}
+
+// Verknüpfungstabelle für Skill-Level pro Rolle (Soll-Zustand)
+model RoleSkill {
+  role     Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId   String
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId  String
+  minLevel Int // Level 1 bis 4 (Learner bis Master)
+
+  @@id([roleId, skillId])
+  @@index([skillId])
+}
+
+// Soft Skills Katalog (z.B. Analytical Thinking, Communication)
+model SoftSkill {
+  id       String  @id @default(uuid())
+  title    String  @unique
+  slug     String  @unique
+  category String?
+  roles    Role[]  @relation("RoleToSoftSkill")
+}
