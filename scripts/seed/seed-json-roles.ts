@@ -29,7 +29,7 @@ interface RoleLevelInput {
   levelOrder: number;
   traxId?: string;
   description: string;
-  leadership: boolean;
+  leadership: boolean | string; // Can be boolean or "functional"/"disciplinary"
   budgetResponsibility: boolean;
   team?: string;
   responsibilities: string[];
@@ -202,6 +202,13 @@ class JsonRoleSeeder {
     const roleSlug = level.slug || generateSlug(`${level.title}-${level.level}`);
     const roleLevel = mapLevel(level.level);
 
+    // Handle leadership field - can be boolean or string ("functional"/"disciplinary")
+    const hasLeadership = level.leadership === true ||
+      (typeof level.leadership === 'string' && level.leadership !== '');
+    const leadershipType = typeof level.leadership === 'string'
+      ? level.leadership.charAt(0).toUpperCase() + level.leadership.slice(1).toLowerCase()
+      : (level.leadership ? 'Functional' : null);
+
     // Role erstellen/aktualisieren
     const role = await prisma.role.upsert({
       where: { slug: roleSlug },
@@ -212,8 +219,8 @@ class JsonRoleSeeder {
         level: roleLevel,
         description: level.description,
         team: level.team || family.team,
-        hasLeadership: level.leadership,
-        leadershipType: level.leadership ? 'Functional' : null,
+        hasLeadership: hasLeadership,
+        leadershipType: hasLeadership ? leadershipType : null,
         hasBudgetResp: level.budgetResponsibility,
         directReportTo: family.directReportTo,
         language: family.languages[0] || 'english',
@@ -223,8 +230,8 @@ class JsonRoleSeeder {
         title: level.title,
         description: level.description,
         team: level.team || family.team,
-        hasLeadership: level.leadership,
-        leadershipType: level.leadership ? 'Functional' : null,
+        hasLeadership: hasLeadership,
+        leadershipType: hasLeadership ? leadershipType : null,
         hasBudgetResp: level.budgetResponsibility,
         directReportTo: family.directReportTo,
       },
