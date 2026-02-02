@@ -12,6 +12,7 @@ import {
   Loader2,
   ArrowUpRight,
   ChevronRight,
+  CheckCircle2,
 } from 'lucide-react';
 import type { RoleComparisonResult, SkillComparison, ResponsibilityDiff } from '@/lib/services';
 import { cn } from '@/lib/utils';
@@ -290,6 +291,7 @@ function AIMentorCard({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoadedGreeting, setHasLoadedGreeting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -322,6 +324,9 @@ function AIMentorCard({
         if (response.ok) {
           const data = await response.json();
           setMessages([{ role: 'assistant', content: data.content }]);
+          // Show success message
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
         }
       } catch (error) {
         console.error('Failed to load mentor advice:', error);
@@ -365,6 +370,9 @@ function AIMentorCard({
       if (response.ok) {
         const data = await response.json();
         setMessages((prev) => [...prev, { role: 'assistant', content: data.content }]);
+        // Show success message
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
       } else {
         setMessages((prev) => [
           ...prev,
@@ -410,6 +418,25 @@ function AIMentorCard({
           <span className="text-xs text-brand-gray-300">Online</span>
         </div>
       </div>
+
+      {/* Success Message */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            className="mx-4 mt-2 relative z-10"
+          >
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-bento bg-green-500/20 border border-green-500/30 backdrop-blur-sm">
+              <CheckCircle2 className="w-4 h-4 text-green-400" />
+              <span className="text-sm font-medium text-green-300">
+                AI-Empfehlung erfolgreich generiert
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <div className="flex-1 p-4 space-y-4 max-h-[300px] overflow-y-auto relative z-10">
