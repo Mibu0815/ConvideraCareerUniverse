@@ -1,5 +1,10 @@
 // src/lib/services/career-logic.ts
-import { prisma } from '@/lib/prisma';
+
+// Lazy import prisma to prevent initialization during build
+async function getPrisma() {
+  const { prisma } = await import('@/lib/prisma');
+  return prisma;
+}
 
 export interface SkillComparison {
   skillId: string;
@@ -80,6 +85,7 @@ export async function compareRoles(
   fromRoleId: string | null,
   toRoleId: string
 ): Promise<RoleComparisonResult> {
+  const prisma = await getPrisma();
   const toRole = await prisma.role.findUnique({
     where: { id: toRoleId },
     include: {

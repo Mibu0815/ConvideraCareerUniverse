@@ -1,7 +1,6 @@
 // src/app/actions/get-roles.ts
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
 
 export interface RoleOption {
@@ -18,10 +17,17 @@ export interface GroupedRoles {
   roles: RoleOption[];
 }
 
+// Lazy import prisma to prevent initialization during build
+async function getPrisma() {
+  const { prisma } = await import('@/lib/prisma');
+  return prisma;
+}
+
 // Cache the roles data for 5 minutes (300 seconds)
 // This dramatically improves page load time
 const getCachedRoles = unstable_cache(
   async (): Promise<GroupedRoles[]> => {
+    const prisma = await getPrisma();
     const roles = await prisma.role.findMany({
       select: {
         id: true,
@@ -83,6 +89,7 @@ export async function getRoles(): Promise<GroupedRoles[]> {
 // Cache individual role lookups for 5 minutes
 const getCachedRoleById = unstable_cache(
   async (roleId: string) => {
+    const prisma = await getPrisma();
     return prisma.role.findUnique({
       where: { id: roleId },
       include: {
