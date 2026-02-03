@@ -4,6 +4,7 @@
 //   npx tsx scripts/seed/seed-json-roles.ts                     # Seed all JSON files
 //   npx tsx scripts/seed/seed-json-roles.ts <file.json>         # Seed specific file
 //   npx tsx scripts/seed/seed-json-roles.ts data/roles/         # Seed all in directory
+//   npx tsx scripts/seed/seed-json-roles.ts --legacy            # Force legacy format (inline skill creation)
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,11 +16,21 @@ const prisma = new PrismaClient();
 // TYPES
 // ============================================================================
 
-interface RoleSkillInput {
+// Legacy format: { name, level, competenceField }
+interface LegacyRoleSkillInput {
   name: string;
   level: number;
   competenceField: string;
 }
+
+// New format: { skillId, level }
+interface NewRoleSkillInput {
+  skillId: string;
+  level: number;
+}
+
+// Union type for skill input
+type RoleSkillInput = LegacyRoleSkillInput | NewRoleSkillInput;
 
 interface RoleLevelInput {
   id: string;
@@ -29,7 +40,7 @@ interface RoleLevelInput {
   levelOrder: number;
   traxId?: string;
   description: string;
-  leadership: boolean | string; // Can be boolean or "functional"/"disciplinary"
+  leadership: boolean | string;
   budgetResponsibility: boolean;
   team?: string;
   responsibilities: string[];
@@ -76,20 +87,49 @@ function mapLevel(level: string): RoleLevel {
   return levelMap[level.toLowerCase()] || 'PROFESSIONAL';
 }
 
+function isLegacySkill(skill: RoleSkillInput): skill is LegacyRoleSkillInput {
+  return 'name' in skill && 'competenceField' in skill;
+}
+
+function isNewSkill(skill: RoleSkillInput): skill is NewRoleSkillInput {
+  return 'skillId' in skill;
+}
+
 // ============================================================================
 // SEEDER CLASS
 // ============================================================================
 
 class JsonRoleSeeder {
   private competenceFieldCache = new Map<string, string>();
-  private skillCache = new Map<string, string>();
-  private softSkillCache = new Map<string, string>();
+  private skillCache = new Map<string, string>(); // Maps skill name or skillId to DB id
+  private softSkillCache = new Map<string, string>(); // Maps soft skill name or id to DB id
+  private forceLegacy: boolean;
+  private warnings: string[] = [];
+
+  constructor(forceLegacy = false) {
+    this.forceLegacy = forceLegacy;
+  }
+
+  getWarnings(): string[] {
+    return this.warnings;
+  }
 
   async seedRoleFamily(data: RoleFamilyInput): Promise<void> {
     console.log(`\n${'='.repeat(60)}`);
     console.log(`Seeding Role Family: ${data.roleFamily}`);
     console.log(`Category: ${data.category}`);
     console.log(`${'='.repeat(60)}`);
+
+    // Detect format
+    const hasLegacySkills = data.levels.some(l => l.skills.some(isLegacySkill));
+    const hasNewSkills = data.levels.some(l => l.skills.some(isNewSkill));
+    const useLegacyMode = this.forceLegacy || (hasLegacySkills && !hasNewSkills);
+
+    if (useLegacyMode) {
+      console.log(`\n⚠️  Using LEGACY mode (inline skill creation)`);
+    } else {
+      console.log(`\n✓ Using MASTER REFERENCE mode`);
+    }
 
     // 1. Occupational Field (Category) erstellen/aktualisieren
     const fieldSlug = generateSlug(data.category);
@@ -103,75 +143,127 @@ class JsonRoleSeeder {
         title: data.category,
       },
     });
-    console.log(`\n✓ Occupational Field: ${occupationalField.title}`);
+    console.log(`✓ Occupational Field: ${occupationalField.title}`);
 
-    // 2. Alle CompetenceFields und Skills vorab erstellen
-    await this.ensureCompetenceFieldsAndSkills(data.levels);
+    if (useLegacyMode) {
+      // Legacy mode: Create CompetenceFields and Skills inline
+      await this.ensureCompetenceFieldsAndSkillsLegacy(data.levels);
+      await this.ensureSoftSkillsLegacy(data.levels);
+    } else {
+      // New mode: Load from master tables
+      await this.loadMasterSkills();
+      await this.loadMasterSoftSkills();
+    }
 
-    // 3. Alle SoftSkills vorab erstellen
-    await this.ensureSoftSkills(data.levels);
-
-    // 4. Jedes Level als Role erstellen
+    // Seed each role level
     for (const level of data.levels) {
-      await this.seedRole(level, occupationalField.id, data);
+      await this.seedRole(level, occupationalField.id, data, useLegacyMode);
     }
 
     console.log(`\n✓ Role Family "${data.roleFamily}" completed!`);
   }
 
-  private async ensureCompetenceFieldsAndSkills(levels: RoleLevelInput[]): Promise<void> {
-    // Sammle alle einzigartigen CompetenceFields und Skills
+  private async loadMasterSkills(): Promise<void> {
+    const skills = await prisma.skill.findMany({
+      select: { id: true, slug: true, title: true },
+    });
+    for (const skill of skills) {
+      this.skillCache.set(skill.slug, skill.id);
+      this.skillCache.set(skill.title, skill.id); // Also cache by title for flexibility
+    }
+    console.log(`✓ Loaded ${skills.length} Skills from master`);
+  }
+
+  private async loadMasterSoftSkills(): Promise<void> {
+    const softSkills = await prisma.softSkill.findMany({
+      select: { id: true, slug: true, title: true },
+    });
+    for (const ss of softSkills) {
+      this.softSkillCache.set(ss.slug, ss.id);
+      this.softSkillCache.set(ss.title, ss.id); // Also cache by title
+    }
+    console.log(`✓ Loaded ${softSkills.length} Soft Skills from master`);
+  }
+
+  private async ensureCompetenceFieldsAndSkillsLegacy(levels: RoleLevelInput[]): Promise<void> {
     const competenceFields = new Set<string>();
     const skillsByField = new Map<string, Set<string>>();
 
     for (const level of levels) {
       for (const skill of level.skills) {
-        competenceFields.add(skill.competenceField);
-        if (!skillsByField.has(skill.competenceField)) {
-          skillsByField.set(skill.competenceField, new Set());
+        if (isLegacySkill(skill)) {
+          competenceFields.add(skill.competenceField);
+          if (!skillsByField.has(skill.competenceField)) {
+            skillsByField.set(skill.competenceField, new Set());
+          }
+          skillsByField.get(skill.competenceField)!.add(skill.name);
         }
-        skillsByField.get(skill.competenceField)!.add(skill.name);
       }
     }
 
-    // CompetenceFields erstellen
+    let cfCreated = 0;
+    let cfExisting = 0;
     for (const cfTitle of competenceFields) {
       const cfSlug = generateSlug(cfTitle);
-      const cf = await prisma.competenceField.upsert({
+      // First try to find by slug
+      let cf = await prisma.competenceField.findUnique({
         where: { slug: cfSlug },
-        create: {
-          title: cfTitle,
-          slug: cfSlug,
-        },
-        update: {},
       });
+      // Also try by title
+      if (!cf) {
+        cf = await prisma.competenceField.findUnique({
+          where: { title: cfTitle },
+        });
+      }
+      if (cf) {
+        cfExisting++;
+      } else {
+        cf = await prisma.competenceField.create({
+          data: { title: cfTitle, slug: cfSlug },
+        });
+        cfCreated++;
+      }
       this.competenceFieldCache.set(cfTitle, cf.id);
     }
-    console.log(`✓ ${competenceFields.size} Competence Fields`);
+    console.log(`✓ ${cfCreated} Competence Fields erstellt, ${cfExisting} aus Master verwendet`);
 
-    // Skills erstellen
     let skillCount = 0;
+    let existingCount = 0;
     for (const [cfTitle, skills] of skillsByField) {
       const cfId = this.competenceFieldCache.get(cfTitle)!;
       for (const skillName of skills) {
         const skillSlug = generateSlug(skillName);
-        const skill = await prisma.skill.upsert({
+        // First check if skill already exists by slug (e.g., from master seeder)
+        let skill = await prisma.skill.findUnique({
           where: { slug: skillSlug },
-          create: {
-            title: skillName,
-            slug: skillSlug,
-            fieldId: cfId,
-          },
-          update: {},
         });
+        // Also try to find by title+fieldId combination
+        if (!skill) {
+          skill = await prisma.skill.findFirst({
+            where: { title: skillName, fieldId: cfId },
+          });
+        }
+        // Also try to find by title alone (may be in different competence field)
+        if (!skill) {
+          skill = await prisma.skill.findFirst({
+            where: { title: skillName },
+          });
+        }
+        if (skill) {
+          existingCount++;
+        } else {
+          skill = await prisma.skill.create({
+            data: { title: skillName, slug: skillSlug, fieldId: cfId },
+          });
+          skillCount++;
+        }
         this.skillCache.set(skillName, skill.id);
-        skillCount++;
       }
     }
-    console.log(`✓ ${skillCount} Skills`);
+    console.log(`✓ ${skillCount} Skills erstellt, ${existingCount} aus Master verwendet`);
   }
 
-  private async ensureSoftSkills(levels: RoleLevelInput[]): Promise<void> {
+  private async ensureSoftSkillsLegacy(levels: RoleLevelInput[]): Promise<void> {
     const softSkills = new Set<string>();
     for (const level of levels) {
       for (const ss of level.softSkills) {
@@ -183,10 +275,7 @@ class JsonRoleSeeder {
       const ssSlug = generateSlug(ssTitle);
       const ss = await prisma.softSkill.upsert({
         where: { slug: ssSlug },
-        create: {
-          title: ssTitle,
-          slug: ssSlug,
-        },
+        create: { title: ssTitle, slug: ssSlug },
         update: {},
       });
       this.softSkillCache.set(ssTitle, ss.id);
@@ -197,19 +286,18 @@ class JsonRoleSeeder {
   private async seedRole(
     level: RoleLevelInput,
     fieldId: string,
-    family: RoleFamilyInput
+    family: RoleFamilyInput,
+    useLegacyMode: boolean
   ): Promise<void> {
     const roleSlug = level.slug || generateSlug(`${level.title}-${level.level}`);
     const roleLevel = mapLevel(level.level);
 
-    // Handle leadership field - can be boolean or string ("functional"/"disciplinary")
     const hasLeadership = level.leadership === true ||
       (typeof level.leadership === 'string' && level.leadership !== '');
     const leadershipType = typeof level.leadership === 'string'
       ? level.leadership.charAt(0).toUpperCase() + level.leadership.slice(1).toLowerCase()
       : (level.leadership ? 'Functional' : null);
 
-    // Role erstellen/aktualisieren
     const role = await prisma.role.upsert({
       where: { slug: roleSlug },
       create: {
@@ -239,14 +327,27 @@ class JsonRoleSeeder {
 
     console.log(`\n  📋 Role: ${role.title} (${roleLevel})`);
 
-    // Alte RoleSkills löschen
-    await prisma.roleSkill.deleteMany({
-      where: { roleId: role.id },
-    });
+    // Delete existing RoleSkills
+    await prisma.roleSkill.deleteMany({ where: { roleId: role.id } });
 
-    // Neue RoleSkills erstellen
+    // Create new RoleSkills
+    let linkedSkills = 0;
+    let missingSkills: string[] = [];
+
     for (const skillInput of level.skills) {
-      const skillId = this.skillCache.get(skillInput.name);
+      let skillId: string | undefined;
+      let skillKey: string;
+
+      if (isNewSkill(skillInput)) {
+        skillKey = skillInput.skillId;
+        skillId = this.skillCache.get(skillInput.skillId);
+      } else if (isLegacySkill(skillInput)) {
+        skillKey = skillInput.name;
+        skillId = this.skillCache.get(skillInput.name);
+      } else {
+        continue;
+      }
+
       if (skillId) {
         await prisma.roleSkill.create({
           data: {
@@ -255,16 +356,25 @@ class JsonRoleSeeder {
             minLevel: skillInput.level,
           },
         });
+        linkedSkills++;
+      } else {
+        missingSkills.push(skillKey);
+        if (!useLegacyMode) {
+          this.warnings.push(`Role "${level.title}": Unknown skill "${skillKey}"`);
+        }
       }
     }
-    console.log(`     ✓ ${level.skills.length} Skills verknüpft`);
 
-    // Alte Responsibilities löschen
-    await prisma.responsibility.deleteMany({
-      where: { roleId: role.id },
-    });
+    const refMode = useLegacyMode ? '' : ' (via Master-Referenz)';
+    console.log(`     ✓ ${linkedSkills} Skills verknüpft${refMode}`);
+    if (missingSkills.length > 0 && !useLegacyMode) {
+      console.log(`     ⚠️  ${missingSkills.length} Skills nicht gefunden: ${missingSkills.slice(0, 3).join(', ')}${missingSkills.length > 3 ? '...' : ''}`);
+    }
 
-    // Neue Responsibilities erstellen
+    // Delete existing Responsibilities
+    await prisma.responsibility.deleteMany({ where: { roleId: role.id } });
+
+    // Create Responsibilities
     await prisma.responsibility.createMany({
       data: level.responsibilities.map((text, index) => ({
         text,
@@ -274,10 +384,24 @@ class JsonRoleSeeder {
     });
     console.log(`     ✓ ${level.responsibilities.length} Responsibilities`);
 
-    // SoftSkills verknüpfen
-    const softSkillIds = level.softSkills
-      .map(ss => this.softSkillCache.get(ss))
-      .filter((id): id is string => id !== undefined);
+    // Link SoftSkills
+    let linkedSoftSkills = 0;
+    let missingSoftSkills: string[] = [];
+    const softSkillIds: string[] = [];
+
+    for (const ssInput of level.softSkills) {
+      // Try to find by ID (slug) first, then by title
+      const ssId = this.softSkillCache.get(ssInput);
+      if (ssId) {
+        softSkillIds.push(ssId);
+        linkedSoftSkills++;
+      } else {
+        missingSoftSkills.push(ssInput);
+        if (!useLegacyMode) {
+          this.warnings.push(`Role "${level.title}": Unknown soft skill "${ssInput}"`);
+        }
+      }
+    }
 
     await prisma.role.update({
       where: { id: role.id },
@@ -287,7 +411,11 @@ class JsonRoleSeeder {
         },
       },
     });
-    console.log(`     ✓ ${softSkillIds.length} Soft Skills verknüpft`);
+
+    console.log(`     ✓ ${linkedSoftSkills} Soft Skills verknüpft${refMode}`);
+    if (missingSoftSkills.length > 0 && !useLegacyMode) {
+      console.log(`     ⚠️  ${missingSoftSkills.length} Soft Skills nicht gefunden: ${missingSoftSkills.slice(0, 3).join(', ')}${missingSoftSkills.length > 3 ? '...' : ''}`);
+    }
   }
 }
 
@@ -330,14 +458,16 @@ async function main() {
   console.log('║          CAREER UNIVERSE - JSON Role Seeder                 ║');
   console.log('╚══════════════════════════════════════════════════════════════╝\n');
 
-  const seeder = new JsonRoleSeeder();
   const args = process.argv.slice(2);
+  const forceLegacy = args.includes('--legacy');
+  const filteredArgs = args.filter(a => a !== '--legacy');
+
+  const seeder = new JsonRoleSeeder(forceLegacy);
 
   try {
     let filesToProcess: string[] = [];
 
-    if (args.length === 0) {
-      // Default: Alle JSON-Dateien im data/roles Verzeichnis
+    if (filteredArgs.length === 0) {
       const defaultDir = path.join(process.cwd(), 'data/roles');
       if (fs.existsSync(defaultDir)) {
         filesToProcess = getJsonFilesInDirectory(defaultDir);
@@ -345,13 +475,13 @@ async function main() {
 
       if (filesToProcess.length === 0) {
         console.log('Usage:');
-        console.log('  npx tsx scripts/seed/seed-json-roles.ts                     # Seed all JSON files in data/roles/');
+        console.log('  npx tsx scripts/seed/seed-json-roles.ts                     # Seed all JSON files');
         console.log('  npx tsx scripts/seed/seed-json-roles.ts <file.json>         # Seed specific file');
-        console.log('  npx tsx scripts/seed/seed-json-roles.ts data/roles/         # Seed all in directory');
+        console.log('  npx tsx scripts/seed/seed-json-roles.ts --legacy            # Force legacy mode');
         process.exit(0);
       }
     } else {
-      const target = args[0];
+      const target = filteredArgs[0];
       const targetPath = path.isAbsolute(target) ? target : path.join(process.cwd(), target);
 
       if (fs.statSync(targetPath).isDirectory()) {
@@ -361,7 +491,10 @@ async function main() {
       }
     }
 
-    console.log(`Found ${filesToProcess.length} JSON file(s) to process.\n`);
+    console.log(`Found ${filesToProcess.length} JSON file(s) to process.`);
+    if (forceLegacy) {
+      console.log(`\n⚠️  LEGACY MODE ENABLED - Skills will be created inline`);
+    }
 
     let totalRoles = 0;
     let totalFamilies = 0;
@@ -378,6 +511,16 @@ async function main() {
     console.log('✅ SEEDING COMPLETE!');
     console.log('='.repeat(60));
     console.log(`\nSeeded: ${totalFamilies} Role Familie(s), ${totalRoles} Role(s)`);
+
+    // Show warnings summary
+    const warnings = seeder.getWarnings();
+    if (warnings.length > 0) {
+      console.log(`\n⚠️  ${warnings.length} Warning(s):`);
+      warnings.slice(0, 10).forEach(w => console.log(`   - ${w}`));
+      if (warnings.length > 10) {
+        console.log(`   ... and ${warnings.length - 10} more`);
+      }
+    }
 
   } catch (error) {
     console.error('\n❌ Seeding failed:', error);

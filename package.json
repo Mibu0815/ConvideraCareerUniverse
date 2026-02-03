@@ -14,7 +14,13 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx scripts/seed/seed.ts",
     "db:parse": "tsx scripts/seed/parser.ts",
-    "db:seed-json": "tsx scripts/seed/seed-json-roles.ts"
+    "db:seed-json": "tsx scripts/seed/seed-json-roles.ts",
+    "seed:skills-master": "tsx scripts/seed/seed-skills-master.ts",
+    "seed:validate": "tsx scripts/seed/validate-role-json.ts",
+    "seed:roles": "tsx scripts/seed/seed-json-roles.ts",
+    "seed:roles-legacy": "tsx scripts/seed/seed-json-roles.ts --legacy",
+    "seed:all": "npm run seed:skills-master && npm run seed:validate && npm run seed:roles",
+    "seed:export-skills": "tsx scripts/seed/export-skills-to-master.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.1",

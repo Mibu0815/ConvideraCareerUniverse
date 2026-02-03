@@ -1,0 +1,253 @@
+{
+  "version": "1.2",
+  "lastUpdated": "2025-02-03",
+  "changelog": [
+    "1.0 - Initial creation from role JSON files",
+    "1.1 - Batch 1 TRAX exports: Added traxIds, new skills, Content Strategy field, corrected change-management placement",
+    "1.2 - Added missing Product Management skills, fixed typo in Sales (Angebotserstellung)"
+  ],
+  "competenceFields": [
+    {
+      "id": "product-design-ui",
+      "name": "Product Design UI",
+      "skills": [
+        { "id": "design-research", "name": "Design Research" },
+        { "id": "ui-systemization", "name": "UI Systemization" },
+        { "id": "ui-prototyping", "name": "UI Prototyping" },
+        { "id": "ui-animation", "name": "UI Animation" },
+        { "id": "screen-design", "name": "Screen Design" },
+        { "id": "responsive-design", "name": "Responsive Design" }
+      ]
+    },
+    {
+      "id": "product-design-ux",
+      "name": "Product Design UX",
+      "skills": [
+        { "id": "user-interviewing", "name": "User Interviewing" },
+        { "id": "unified-modeling-language", "name": "Unified Modeling Language" },
+        { "id": "information-architecture", "name": "Information Architecture" },
+        { "id": "workshop-visualization", "name": "Workshop Visualization" }
+      ]
+    },
+    {
+      "id": "projektmanagement",
+      "name": "Projektmanagement",
+      "traxId": "fc871f8d-3eab-4362-ab5a-f50c95c88117",
+      "skills": [
+        { "id": "projektplanung", "name": "Projektplanung" },
+        { "id": "projektstatus-dokumentation", "name": "Projektstatus Dokumentation" },
+        { "id": "anforderungs-aenderungsmanagement", "name": "Anforderungs- und Änderungsmanagement" },
+        { "id": "projektabschluss", "name": "Projektabschluss" },
+        { "id": "projektabrechnung", "name": "Projektabrechnung" },
+        { "id": "projektinitiierung", "name": "Projektinitiierung" }
+      ]
+    },
+    {
+      "id": "product-management",
+      "name": "Product Management",
+      "traxId": "bfd6029f-ce8e-4cdb-a4ca-31c4b75616d9",
+      "skills": [
+        { "id": "product-quality-assurance", "name": "Product Quality Assurance" },
+        { "id": "product-vision-formulation", "name": "Product Vision Formulation" },
+        { "id": "product-requirement", "name": "Product Requirement" },
+        { "id": "domain-modeling", "name": "Domain Modeling" },
+        { "id": "product-conceptualization", "name": "Product Conceptualization" },
+        { "id": "product-validation-quantitative", "name": "Product Validation (Quantitative)" },
+        { "id": "product-roadmapping", "name": "Product Roadmapping" },
+        { "id": "product-discovery-qualitative", "name": "Product Discovery (Qualitative)" },
+        { "id": "development-process-management", "name": "Development Process Management" },
+        { "id": "guiding-product-to-market-fit", "name": "Guiding a Product to Product/Market Fit" }
+      ]
+    },
+    {
+      "id": "innovation-management",
+      "name": "Innovation Management",
+      "traxId": "fe2f1c53-6caa-4831-9ede-f50f8f283ac8",
+      "skills": [
+        { "id": "workshop-facilitation", "name": "Workshop Facilitation" },
+        { "id": "prototyping", "name": "Prototyping" }
+      ]
+    },
+    {
+      "id": "backend-development",
+      "name": "Backend Development",
+      "skills": [
+        { "id": "programming-fundamentals", "name": "Programming Fundamentals", "traxId": "3c05dbc7-a001-4fe4-8968-ff19d55a06ac" },
+        { "id": "coding-php", "name": "Coding PHP", "traxId": "059cba1f-ad68-4466-ac91-865a98722ba5" },
+        { "id": "use-of-databases", "name": "Use of Databases", "traxId": "8be422ce-9214-400b-b070-2e3e308d8be2" },
+        { "id": "object-oriented-programming", "name": "Object oriented Programming", "traxId": "41dbd6fc-a144-45bf-90b4-f4a1fcc09565" },
+        { "id": "domain-driven-development", "name": "Domain Driven Development", "traxId": "0d74f86d-0ff7-46e3-860c-70f71447940b" },
+        { "id": "test-driven-development", "name": "Test Driven Development", "traxId": "7598e6ca-7b25-4bde-9ae9-dbe6b952d15c" },
+        { "id": "pull-requests-code-smells", "name": "Pull Requests & Code Smells", "traxId": "a3210393-d285-4796-bf5c-134298420c85" },
+        { "id": "refactoring-patterns", "name": "Refactoring & Patterns", "traxId": "b3db9914-b32e-489b-a333-7384dfe93d5d" },
+        { "id": "solid-principles-guidelines", "name": "SOLID Principles & Guidelines", "traxId": "feecb82d-2bfd-42c5-a31b-19f707a5f806" },
+        { "id": "system-software-architecture", "name": "System/Software Architecture", "traxId": "7c515bb5-c7cf-4eca-9200-8e6971105aff" }
+      ]
+    },
+    {
+      "id": "devops",
+      "name": "DevOps",
+      "traxId": "d95a062c-b94d-4879-a1f4-22e5be5cf187",
+      "skills": [
+        { "id": "linux-fundamentals", "name": "Linux Fundamentals" },
+        { "id": "web-server-infrastructure-configuration", "name": "Web-Server Infrastructure Configuration" },
+        { "id": "git-github", "name": "Git(Hub)" },
+        { "id": "app-containerisation", "name": "App Containerisation" },
+        { "id": "workflow-automation-scripting", "name": "Workflow Automation (Scripting)" },
+        { "id": "server-monitoring", "name": "Server Monitoring" },
+        { "id": "cluster-management", "name": "Cluster Management" },
+        { "id": "continuous-integration-delivery", "name": "Continuous Integration and Delivery" }
+      ]
+    },
+    {
+      "id": "frontend-development",
+      "name": "Frontend Development",
+      "traxId": "7e59e281-f371-4887-abfc-198303b19185",
+      "skills": [
+        { "id": "html-and-css", "name": "HTML and CSS" },
+        { "id": "javascript", "name": "JavaScript" },
+        { "id": "state-management-components", "name": "State Management and Components" },
+        { "id": "code-quality-refactoring", "name": "Code Quality and Refactoring" },
+        { "id": "networking-http-apis", "name": "Networking and HTTP APIs" },
+        { "id": "performance-debugging-optimization", "name": "Performance Debugging and Optimization" },
+        { "id": "web-accessibility", "name": "Web Accessibility" },
+        { "id": "web-security", "name": "Web Security" },
+        { "id": "packages-api-design", "name": "Packages and API Design" },
+        { "id": "animating", "name": "Animating" },
+        { "id": "testing", "name": "Testing" },
+        { "id": "multimedia-canvas", "name": "Multimedia and Canvas" }
+      ]
+    },
+    {
+      "id": "hr-management",
+      "name": "HR Management",
+      "skills": [
+        { "id": "recruiting", "name": "Recruiting" },
+        { "id": "coaching", "name": "Coaching" }
+      ]
+    },
+    {
+      "id": "creative-strategy",
+      "name": "Creative Strategy",
+      "traxId": "7597f753-c7ca-4526-b0f9-4f805117f704",
+      "skills": [
+        { "id": "ideation", "name": "Ideation" },
+        { "id": "kreativmethoden", "name": "Kreativmethoden" },
+        { "id": "kreativ-konzeption", "name": "Kreativ-Konzeption" },
+        { "id": "kreativ-briefing", "name": "Kreativ-Briefing" }
+      ]
+    },
+    {
+      "id": "producing-bild-ton",
+      "name": "Producing (Bild & Ton)",
+      "skills": [
+        { "id": "bild-videoauswahl", "name": "Bild- und Videoauswahl" },
+        { "id": "bild-medienverwaltung", "name": "Bild- und Medienverwaltung" },
+        { "id": "produktionssteuerung", "name": "Produktionssteuerung" },
+        { "id": "adaption-operationalisierung", "name": "Adaption / Operationalisierung von Bild- und Tonmaterial" },
+        { "id": "postproduktion", "name": "Postproduktion" },
+        { "id": "medienrecht", "name": "Medienrecht" }
+      ]
+    },
+    {
+      "id": "content-management",
+      "name": "Content Management",
+      "traxId": "a6cf2921-b1ed-4042-9730-0cff9b7bed2f",
+      "skills": [
+        { "id": "themenfindung-content-kuration", "name": "Themenfindung und Content-Kuration", "traxId": "3e0f7170-b84a-41dc-85a3-e0f8f86c7406" },
+        { "id": "texterstellung-writing", "name": "Texterstellung / Writing", "traxId": "c875d3c8-43f4-4f59-a822-2e548a22dd67" },
+        { "id": "copywriting", "name": "Copywriting", "traxId": "fda84df8-c089-4b54-b485-006177778d94" },
+        { "id": "redigieren", "name": "Redigieren", "traxId": "0b121348-fca1-4990-a98b-da5321293197" },
+        { "id": "redaktionsplanung", "name": "Redaktionsplanung", "traxId": "2b671a7d-2b4f-4e16-b09d-341b116730f6" },
+        { "id": "social-media-wordings", "name": "Social Media Wordings", "traxId": "a13d6fb3-0448-4610-8ef4-5dc35c57f3b1" },
+        { "id": "autorenmanagement", "name": "Autorenmanagement", "traxId": "1b2437d0-eff8-4d0f-87aa-ad7894016e56" },
+        { "id": "systemisches-content-management", "name": "Systemisches Content Management", "traxId": "6cfae025-ef78-46c5-bd02-5f3f5c126ef0" }
+      ]
+    },
+    {
+      "id": "content-strategy",
+      "name": "Content Strategy",
+      "traxId": "9123cbcd-e558-4452-b0fb-97eaaddd3f38",
+      "skills": [
+        { "id": "content-personas", "name": "Content Personas", "traxId": "9599bed5-5711-4c96-b838-fe09277bff6d" },
+        { "id": "themenraderstellung-funnelstufen", "name": "Themenraderstellung und Funnelstufen", "traxId": "1a5f9e30-c4f2-432c-b83c-3e90422c8175" },
+        { "id": "magazinstruktur", "name": "Magazinstruktur", "traxId": "02b531e5-a593-42fa-bf94-ca5d11ef3c81" },
+        { "id": "redaktionsstruktur", "name": "Redaktionsstruktur", "traxId": "f93539e2-dd70-4c53-a91e-9e9842bf121a" }
+      ]
+    },
+    {
+      "id": "analysis",
+      "name": "Analysis",
+      "traxId": "1c990996-2085-40f4-be97-ba6f957e4789",
+      "skills": [
+        { "id": "web-analytics", "name": "Web Analytics", "traxId": "367058cc-898f-472c-99ce-96500b109187" },
+        { "id": "excel", "name": "Excel", "traxId": "94efe152-bbed-40b6-89b6-3a6f9ab38d66" },
+        { "id": "listening", "name": "Listening", "traxId": "cc99f9b2-41ff-4c94-b6d3-c2caa30167a8" },
+        { "id": "reporting", "name": "Reporting", "traxId": "9165889d-8382-4098-bf3b-de33f3b147ec" },
+        { "id": "social-media-analytics", "name": "Social Media Analytics", "traxId": "6c76904d-da88-4f3c-b628-f39f6de3f52f" },
+        { "id": "market-research", "name": "Market Research", "traxId": "dfa27d2a-b783-4c55-a1c2-078458104849" },
+        { "id": "kpi-konzepterstellung-setup", "name": "KPI Konzepterstellung & Setup", "traxId": "bb265616-7100-45f7-a8ed-c3f40d35b644" },
+        { "id": "business-intelligence-tools", "name": "Business Intelligence Tools", "traxId": "f5472496-a26e-48bf-8944-d5fa403e6a25" }
+      ]
+    },
+    {
+      "id": "seo",
+      "name": "SEO",
+      "traxId": "e1e30f15-84d4-4ddc-ba87-30c96c65674f",
+      "skills": [
+        { "id": "suchmaschinenkompetenz", "name": "Suchmaschinenkompetenz" }
+      ]
+    },
+    {
+      "id": "paid-advertising",
+      "name": "Paid Advertising",
+      "traxId": "7be44bfc-c79e-4ba2-be2c-c6eaa968ea77",
+      "skills": [
+        { "id": "kampagnenplanung-werbestrategie", "name": "Kampagnenplanung / Werbestrategie" },
+        { "id": "anzeigenerstellung", "name": "Anzeigenerstellung" }
+      ]
+    },
+    {
+      "id": "sales",
+      "name": "Sales",
+      "traxId": "9c4e426d-b436-4ff4-b4b8-c043376b0fd7",
+      "skills": [
+        { "id": "sales-presentation-pitching", "name": "(Sales) Presentation / Pitching" },
+        { "id": "gespraechsfuehrung", "name": "Gesprächsführung" },
+        { "id": "angebotserstellung", "name": "Angebotserstellung" }
+      ]
+    },
+    {
+      "id": "account-management",
+      "name": "Account Management",
+      "traxId": "b0b99852-f2b0-4603-966f-2f7fb4b92ef0",
+      "skills": [
+        { "id": "stakeholder-management", "name": "Stakeholder Management", "traxId": "cdd6f592-1769-4420-b628-255f653e2119" },
+        { "id": "kundenbindung", "name": "Kundenbindung", "traxId": "ca166e2a-a2ef-47f3-aa24-0404d679f503" },
+        { "id": "beratung-weiterentwicklung", "name": "Beratung und Weiterentwicklung", "traxId": "370c4ef1-e55e-42e6-9e16-460be32f30bb" },
+        { "id": "change-management-kurz-mittelfristig", "name": "Change Management (kurz- & mittelfristig)", "traxId": "51eca8c1-db07-410b-aad0-b41ddd09d275" },
+        { "id": "nachverkaufen", "name": "Nachverkaufen", "traxId": "bceba845-781a-4f08-96ab-8ced0653ca49" }
+      ]
+    },
+    {
+      "id": "business-development",
+      "name": "Business Development",
+      "skills": [
+        { "id": "marktanalyse", "name": "Marktanalyse", "traxId": "c7ed8f3f-d58e-49d4-ae46-ed908ab560b3" },
+        { "id": "geschaeftsfeldanalyse", "name": "Geschäftsfeldanalyse", "traxId": "6d502dc7-d937-4692-ac02-eb85fb8074e0" },
+        { "id": "business-planning", "name": "Business Planning", "traxId": "13c77c58-c8d4-4470-902a-4361dfc2c80f" },
+        { "id": "geschaeftsmodellentwicklung", "name": "Geschäftsmodellentwicklung", "traxId": "cd033064-88a9-4d4f-acf9-674223d8365d" },
+        { "id": "aufbau-strategischer-partnerschaften", "name": "Aufbau strategischer Partnerschaften", "traxId": "14ab5b65-afbb-4306-abc7-52b1f01ad60a" },
+        { "id": "go-to-market-strategie", "name": "Go-to-Market Strategie", "traxId": "1dd078e4-7142-4e31-bb3f-1ec6bb547c2b" }
+      ]
+    },
+    {
+      "id": "digital-strategy",
+      "name": "Digital Strategy",
+      "traxId": "376ecb94-937d-400b-b2be-6b9fc500c65c",
+      "skills": [
+        { "id": "change-management-langfristig", "name": "Change Management (langfristig)" }
+      ]
+    }
+  ]
+}

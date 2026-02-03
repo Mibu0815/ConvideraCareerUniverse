@@ -1,0 +1,102 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-02-03",
+  "softSkills": [
+    {
+      "id": "analytical-thinking",
+      "name": "Analytical Thinking"
+    },
+    {
+      "id": "appearance",
+      "name": "Appearance"
+    },
+    {
+      "id": "collaboration",
+      "name": "Collaboration"
+    },
+    {
+      "id": "communication-skills",
+      "name": "Communication Skills"
+    },
+    {
+      "id": "creativity",
+      "name": "Creativity"
+    },
+    {
+      "id": "critical-thinking",
+      "name": "Critical Thinking"
+    },
+    {
+      "id": "decision-making-skills",
+      "name": "Decision-Making Skills"
+    },
+    {
+      "id": "diligence",
+      "name": "Diligence"
+    },
+    {
+      "id": "disruptive-thinking",
+      "name": "Disruptive Thinking"
+    },
+    {
+      "id": "entrepreneurial-thinking",
+      "name": "Entrepreneurial Thinking"
+    },
+    {
+      "id": "flexibility",
+      "name": "Flexibility"
+    },
+    {
+      "id": "persistence",
+      "name": "Persistence"
+    },
+    {
+      "id": "power-of-abstraction",
+      "name": "Power of Abstraction"
+    },
+    {
+      "id": "presentation-skills",
+      "name": "Presentation Skills"
+    },
+    {
+      "id": "proactivity",
+      "name": "Proactivity"
+    },
+    {
+      "id": "problem-solving-skills",
+      "name": "Problem Solving Skills"
+    },
+    {
+      "id": "pyramidal-communication",
+      "name": "Pyramidal Communication"
+    },
+    {
+      "id": "resilience",
+      "name": "Resilience"
+    },
+    {
+      "id": "self-reliance",
+      "name": "Self-Reliance"
+    },
+    {
+      "id": "service-orientation",
+      "name": "Service Orientation"
+    },
+    {
+      "id": "solution-orientation",
+      "name": "Solution Orientation"
+    },
+    {
+      "id": "strategic-thinking",
+      "name": "Strategic Thinking"
+    },
+    {
+      "id": "structuredness",
+      "name": "Structuredness"
+    },
+    {
+      "id": "time-management",
+      "name": "Time Management"
+    }
+  ]
+}

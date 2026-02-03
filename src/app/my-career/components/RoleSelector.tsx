@@ -107,13 +107,15 @@ export function RoleSelector({
 
         <div className="flex items-center gap-1">
           {selectedRole && (
-            <button
-              type="button"
+            <span
+              role="button"
+              tabIndex={0}
               onClick={handleClear}
-              className="p-1 rounded-md hover:bg-brand-gray-100 text-brand-gray-400 hover:text-brand-gray-600"
+              onKeyDown={(e) => e.key === 'Enter' && handleClear(e as unknown as React.MouseEvent)}
+              className="p-1 rounded-md hover:bg-brand-gray-100 text-brand-gray-400 hover:text-brand-gray-600 cursor-pointer"
             >
               <X className="w-4 h-4" />
-            </button>
+            </span>
           )}
           <ChevronDown
             className={cn(
