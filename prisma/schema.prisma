@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +8,595 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// --- ENUMS ---
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model AssessmentHistory {
+  id            String     @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String
+  skillId       String
+  previousLevel Int
+  newLevel      Int
+  changeType    ChangeType
+  createdAt     DateTime   @default(now()) @db.Timestamp(6)
+  Skill         Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User          User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([skillId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CareerGoal {
+  id              String            @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId          String
+  targetRoleId    String
+  timelineMonths  Int?
+  status          GoalStatus        @default(EXPLORING)
+  priority        Int               @default(1)
+  notes           String?
+  createdAt       DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamp(6)
+  Role            Role              @relation(fields: [targetRoleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User            User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  CoachingSession CoachingSession[]
+
+  @@index([status])
+  @@index([targetRoleId])
+  @@index([userId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CoachingMessage {
+  id              String          @id @default(dbgenerated("(gen_random_uuid())::text"))
+  sessionId       String
+  role            MessageRole
+  content         String
+  createdAt       DateTime        @default(now()) @db.Timestamp(6)
+  CoachingSession CoachingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([createdAt])
+  @@index([sessionId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CoachingSession {
+  id              String            @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId          String
+  type            CoachingType      @default(GENERAL)
+  title           String
+  contextRoleId   String?
+  contextSkills   Json?
+  contextGoalId   String?
+  createdAt       DateTime          @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime          @default(now()) @db.Timestamp(6)
+  CoachingMessage CoachingMessage[]
+  CareerGoal      CareerGoal?       @relation(fields: [contextGoalId], references: [id], onUpdate: NoAction)
+  Role            Role?             @relation(fields: [contextRoleId], references: [id], onUpdate: NoAction)
+  User            User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([type])
+  @@index([userId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model CompetenceField {
+  id                String             @id
+  title             String             @unique
+  slug              String             @unique
+  color             String?
+  ownerId           String?
+  description       String?
+  traxId            String?            @unique
+  createdAt         DateTime?          @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime?          @default(now()) @db.Timestamp(6)
+  isArchived        Boolean?           @default(false)
+  User              User?              @relation(fields: [ownerId], references: [id], onUpdate: NoAction)
+  LearningFocus     LearningFocus[]
+  LearningResource  LearningResource[]
+  Skill             Skill[]
+  CompetenceField_A CompetenceField[]  @relation("RelatedCompetenceFields")
+  CompetenceField_B CompetenceField[]  @relation("RelatedCompetenceFields")
+
+  @@index([ownerId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model EvidenceNote {
+  id                String             @id @default(dbgenerated("(gen_random_uuid())::text"))
+  learningFocusId   String
+  content           String
+  linkedResourceId  String?
+  isAssessmentReady Boolean            @default(false)
+  createdAt         DateTime           @default(now()) @db.Timestamp(6)
+  LearningFocus     LearningFocus      @relation(fields: [learningFocusId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  PracticalImpulse  PracticalImpulse[]
+
+  @@index([isAssessmentReady])
+  @@index([learningFocusId])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model LearningFocus {
+  id                String             @id @default(dbgenerated("(gen_random_uuid())::text"))
+  learningPlanId    String
+  skillId           String
+  currentLevel      Int
+  targetLevel       Int
+  priority          FocusPriority      @default(GROWTH)
+  deadline          DateTime?          @db.Timestamp(6)
+  status            FocusStatus        @default(NOT_STARTED)
+  createdAt         DateTime           @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime           @default(now()) @db.Timestamp(6)
+  gapSize           Int?
+  focusOrder        Int?
+  focusedAt         DateTime?          @db.Timestamp(6)
+  completedAt       DateTime?          @db.Timestamp(6)
+  competenceFieldId String?
+  EvidenceNote      EvidenceNote[]
+  CompetenceField   CompetenceField?   @relation(fields: [competenceFieldId], references: [id], onUpdate: NoAction)
+  LearningPlan      LearningPlan       @relation(fields: [learningPlanId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Skill             Skill              @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  PracticalImpulse  PracticalImpulse[]
+
+  @@index([competenceFieldId])
+  @@index([learningPlanId])
+  @@index([priority])
+  @@index([skillId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model LearningPlan {
+  id            String          @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId        String          @unique
+  createdAt     DateTime        @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime        @default(now()) @db.Timestamp(6)
+  LearningFocus LearningFocus[]
+  User          User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model LearningResource {
+  id                String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  title             String
+  url               String?
+  type              ResourceType
+  description       String?
+  createdById       String
+  competenceFieldId String?
+  createdAt         DateTime         @default(now()) @db.Timestamp(6)
+  CompetenceField   CompetenceField? @relation(fields: [competenceFieldId], references: [id], onUpdate: NoAction)
+  User              User             @relation(fields: [createdById], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Skill             Skill[]
+
+  @@index([competenceFieldId])
+  @@index([createdById])
+  @@index([type])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model NotificationPreference {
+  id              String              @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId          String              @unique
+  digestEnabled   Boolean             @default(true)
+  digestChannel   NotificationChannel @default(EMAIL)
+  digestDayOfWeek Int                 @default(1)
+  digestHour      Int                 @default(8)
+  slackWebhookUrl String?
+  slackUserId     String?
+  emailAddress    String?
+  createdAt       DateTime            @default(now()) @db.Timestamp(6)
+  updatedAt       DateTime            @default(now()) @db.Timestamp(6)
+  User            User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model OccupationalField {
+  id    String @id
+  title String @unique
+  slug  String @unique
+  Role  Role[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+/// Strukturierter Practical Impulse mit 4-Phasen Workflow (Check-In → Task → Reflexion → Evidence)
+model PracticalImpulse {
+  id               String        @id @default(dbgenerated("(gen_random_uuid())::text"))
+  learningFocusId  String
+  targetLevel      ImpulseLevel
+  prompt           String
+  context          String?
+  expectedOutcome  String?
+  estimatedMinutes Int?
+  isCompleted      Boolean       @default(false)
+  userReflection   String?
+  completedAt      DateTime?     @db.Timestamp(6)
+  generatedAt      DateTime      @default(now()) @db.Timestamp(6)
+
+  // Strukturierte Impulse-Felder (Convidera-Workflow)
+  checkInMessage     String?                                      /// "Ich sehe, du arbeitest an [Skill] für Level [X]"
+  taskDescription    String?                                      /// 30-60 Min Aufgabe für den Convidera-Alltag
+  reflectionQuestion String?       @default("Was war die größte Herausforderung dabei?")
+
+  // Evidence-Brücke zum Functional Lead
+  evidenceSaved      Boolean       @default(false)
+  evidenceNoteId     String?
+  functionalLeadId   String?
+  functionalLeadName String?
+
+  // Step-by-Step Tracking
+  currentStep        ImpulseStep   @default(CHECK_IN)
+  checkInViewedAt    DateTime?     @db.Timestamp(6)
+  taskStartedAt      DateTime?     @db.Timestamp(6)
+  reflectionStartedAt DateTime?    @db.Timestamp(6)
+  evidenceSavedAt    DateTime?     @db.Timestamp(6)
+
+  // Relations
+  LearningFocus    LearningFocus @relation(fields: [learningFocusId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  EvidenceNote     EvidenceNote? @relation(fields: [evidenceNoteId], references: [id], onUpdate: NoAction)
+
+  @@index([learningFocusId])
+  @@index([targetLevel])
+  @@index([evidenceNoteId])
+  @@index([currentStep])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Responsibility {
+  id       String  @id
+  text     String
+  category String?
+  order    Int     @default(0)
+  roleId   String
+  Role     Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([roleId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Role {
+  id                       String                     @id
+  title                    String
+  slug                     String                     @unique
+  level                    RoleLevel
+  description              String?
+  team                     String?                    @default("Squad")
+  hasLeadership            Boolean                    @default(false)
+  leadershipType           String?
+  hasBudgetResp            Boolean                    @default(false)
+  directReportTo           String?
+  language                 String?                    @default("english")
+  fieldId                  String
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime
+  roleFamilyId             String?
+  levelOrder               Int?                       @default(1)
+  leadership               String?
+  budgetResponsibility     String?
+  responsibilities         Json?
+  traxId                   String?                    @unique
+  CareerGoal               CareerGoal[]
+  CoachingSession          CoachingSession[]
+  Responsibility           Responsibility[]
+  OccupationalField        OccupationalField          @relation(fields: [fieldId], references: [id])
+  RoleFamily               RoleFamily?                @relation(fields: [roleFamilyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  RoleSkillRequirement     RoleSkillRequirement[]
+  RoleSoftSkillRequirement RoleSoftSkillRequirement[]
+  User                     User[]
+
+  @@index([fieldId])
+  @@index([level])
+  @@index([roleFamilyId, levelOrder])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RoleFamily {
+  id        String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  slug      String   @unique
+  name      String
+  category  String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+  Role      Role[]
+
+  @@index([category])
+  @@index([slug])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RoleSkillRequirement {
+  id            String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  roleId        String
+  skillId       String
+  requiredLevel Int
+  createdAt     DateTime @default(now()) @db.Timestamp(6)
+  Role          Role     @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Skill         Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([roleId, skillId])
+  @@index([roleId])
+  @@index([skillId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RoleSoftSkillRequirement {
+  id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  roleId      String
+  softSkillId String
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  Role        Role      @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  SoftSkill   SoftSkill @relation(fields: [softSkillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([roleId, softSkillId])
+  @@index([roleId])
+  @@index([softSkillId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Skill {
+  id                    String                  @id
+  title                 String
+  slug                  String                  @unique
+  description           String?
+  competenceFieldId     String
+  isArchived            Boolean?                @default(false)
+  sortOrder             Int?                    @default(0)
+  traxId                String?                 @unique
+  AssessmentHistory     AssessmentHistory[]
+  LearningFocus         LearningFocus[]
+  RoleSkillRequirement  RoleSkillRequirement[]
+  CompetenceField       CompetenceField         @relation(fields: [competenceFieldId], references: [id], map: "Skill_fieldId_fkey")
+  SkillAssessment       SkillAssessment[]
+  SkillLevelDescription SkillLevelDescription[]
+  SkillTrendData        SkillTrendData?
+  WeeklyDigest          WeeklyDigest[]
+  LearningResource      LearningResource[]
+
+  @@unique([title, competenceFieldId], map: "Skill_title_fieldId_key")
+  @@index([competenceFieldId, sortOrder])
+  @@index([competenceFieldId], map: "Skill_fieldId_idx")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SkillAssessment {
+  id                                       String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId                                   String
+  skillId                                  String
+  selfLevel                                Int
+  validatedLevel                           Int?
+  targetLevel                              Int?
+  validatedById                            String?
+  validatedAt                              DateTime? @db.Timestamp(6)
+  notes                                    String?
+  evidence                                 String?
+  createdAt                                DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt                                DateTime  @default(now()) @db.Timestamp(6)
+  Skill                                    Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User_SkillAssessment_userIdToUser        User      @relation("SkillAssessment_userIdToUser", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User_SkillAssessment_validatedByIdToUser User?     @relation("SkillAssessment_validatedByIdToUser", fields: [validatedById], references: [id], onUpdate: NoAction)
+
+  @@unique([userId, skillId])
+  @@index([skillId])
+  @@index([userId])
+  @@index([validatedById])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SkillLevelDescription {
+  id          String   @id @default(dbgenerated("(gen_random_uuid())::text"))
+  skillId     String
+  level       Int
+  label       String
+  description String
+  examples    String?
+  createdAt   DateTime @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @db.Timestamp(6)
+  Skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([skillId, level])
+  @@index([skillId])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SkillTrendData {
+  id                  String         @id @default(dbgenerated("(gen_random_uuid())::text"))
+  skillId             String         @unique
+  trendScore          Float          @db.Real
+  trendDirection      TrendDirection @default(stable)
+  trendLabel          String?
+  demandGrowthPercent Float?         @db.Real
+  dataSource          String?
+  lastUpdated         DateTime       @default(now()) @db.Timestamp(6)
+  Skill               Skill          @relation(fields: [skillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([trendDirection])
+  @@index([trendScore(sort: Desc)], map: "SkillTrendData_trendScore_desc_idx")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SoftSkill {
+  id                       String                     @id
+  title                    String                     @unique
+  slug                     String                     @unique
+  category                 String?
+  description              String?
+  isArchived               Boolean?                   @default(false)
+  sortOrder                Int?                       @default(0)
+  traxId                   String?                    @unique
+  RoleSoftSkillRequirement RoleSoftSkillRequirement[]
+  SoftSkillAssessment      SoftSkillAssessment[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SoftSkillAssessment {
+  id          String    @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId      String
+  softSkillId String
+  selfLevel   Int
+  peerLevel   Decimal?  @db.Decimal(3, 2)
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime  @default(now()) @db.Timestamp(6)
+  SoftSkill   SoftSkill @relation(fields: [softSkillId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, softSkillId])
+  @@index([softSkillId])
+  @@index([userId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model User {
+  id                                                  String                  @id @default(dbgenerated("(gen_random_uuid())::text"))
+  email                                               String                  @unique
+  name                                                String
+  avatarUrl                                           String?
+  platformRole                                        PlatformRole            @default(MEMBER)
+  isActive                                            Boolean                 @default(true)
+  currentRoleId                                       String?
+  createdAt                                           DateTime                @default(now()) @db.Timestamp(6)
+  updatedAt                                           DateTime                @default(now()) @db.Timestamp(6)
+  AssessmentHistory                                   AssessmentHistory[]
+  CareerGoal                                          CareerGoal[]
+  CoachingSession                                     CoachingSession[]
+  CompetenceField                                     CompetenceField[]
+  LearningPlan                                        LearningPlan?
+  LearningResource                                    LearningResource[]
+  NotificationPreference                              NotificationPreference?
+  SkillAssessment_SkillAssessment_userIdToUser        SkillAssessment[]       @relation("SkillAssessment_userIdToUser")
+  SkillAssessment_SkillAssessment_validatedByIdToUser SkillAssessment[]       @relation("SkillAssessment_validatedByIdToUser")
+  SoftSkillAssessment                                 SoftSkillAssessment[]
+  Role                                                Role?                   @relation(fields: [currentRoleId], references: [id], onUpdate: NoAction)
+  WeeklyDigest                                        WeeklyDigest[]
+
+  @@index([email])
+  @@index([platformRole])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model WeeklyDigest {
+  id                        String              @id @default(dbgenerated("(gen_random_uuid())::text"))
+  userId                    String
+  headline                  String
+  progressSummary           String
+  focusHighlight            String?
+  deepLinkUrl               String?
+  totalGaps                 Int
+  closedGapsSinceLastDigest Int                 @default(0)
+  overallProgressPercent    Float               @db.Real
+  topFocusSkillName         String?
+  topFocusSkillId           String?
+  newResourceCount          Int                 @default(0)
+  channel                   NotificationChannel
+  status                    DigestStatus        @default(PENDING)
+  sentAt                    DateTime?           @db.Timestamp(6)
+  error                     String?
+  slackChannelId            String?
+  slackMessageTs            String?
+  scheduledFor              DateTime            @db.Timestamp(6)
+  createdAt                 DateTime            @default(now()) @db.Timestamp(6)
+  Skill                     Skill?              @relation(fields: [topFocusSkillId], references: [id], onUpdate: NoAction)
+  User                      User                @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([status, scheduledFor])
+  @@index([userId, scheduledFor])
+  @@index([userId, status])
+}
+
+enum ChangeType {
+  SELF_ASSESSMENT
+  VALIDATION
+  ROLE_CHANGE
+}
+
+enum CoachingType {
+  GAP_ANALYSIS
+  LEARNING_PATH
+  CAREER_EXPLORATION
+  SKILL_DEVELOPMENT
+  ASSESSMENT_PREP
+  GENERAL
+}
+
+enum DigestStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum FocusPriority {
+  CRITICAL
+  GROWTH
+  STRETCH
+}
+
+enum FocusStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum GoalStatus {
+  EXPLORING
+  COMMITTED
+  ACHIEVED
+  PAUSED
+}
+
+enum ImpulseLevel {
+  L1_AWARENESS
+  L2_GUIDED
+  L3_INDEPENDENT
+  L4_EXPERT
+}
+
+enum ImpulseStep {
+  CHECK_IN    /// Begrüßung und Skill-Kontext
+  TASK        /// Aufgabe wird bearbeitet
+  REFLECTION  /// Reflexion über Herausforderungen
+  EVIDENCE    /// Beleg für Functional Lead gespeichert
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum NotificationChannel {
+  EMAIL
+  SLACK
+  IN_APP
+}
+
+enum PlatformRole {
+  ADMIN
+  FUNCTIONAL_LEAD
+  MEMBER
+}
+
+enum ResourceType {
+  BOOK
+  VIDEO
+  COURSE
+  ARTICLE
+  INTERNAL_SESSION
+  MENTOR
+  PROJECT
+  CERTIFICATION
+}
 
 enum RoleLevel {
   JUNIOR
@@ -21,102 +606,8 @@ enum RoleLevel {
   HEAD_OF
 }
 
-// --- MODELS ---
-
-// Top-Level Kategorien (z.B. Software Engineering, Digital Marketing)
-model OccupationalField {
-  id    String @id @default(uuid())
-  title String @unique
-  slug  String @unique
-  roles Role[]
-}
-
-// Die Rollen-Definition inklusive Leadership-Logik
-model Role {
-  id          String    @id @default(uuid())
-  title       String // z.B. "Backend Development (m/f/d)"
-  slug        String    @unique
-  level       RoleLevel
-  description String?   @db.Text
-
-  // Metadaten aus dem Trax-System
-  team           String?  @default("Squad")
-  hasLeadership  Boolean  @default(false)
-  leadershipType String? // z.B. "Functional" oder "Disciplinary"
-  hasBudgetResp  Boolean  @default(false)
-  directReportTo String? // Titel der Rolle, an die berichtet wird
-  language       String?  @default("english")
-
-  // Relationen
-  occupationalField OccupationalField @relation(fields: [fieldId], references: [id])
-  fieldId           String
-
-  roleSkills       RoleSkill[]
-  softSkills       SoftSkill[]      @relation("RoleToSoftSkill")
-  responsibilities Responsibility[]
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([fieldId])
-  @@index([level])
-}
-
-// Verantwortlichkeiten als Liste (Responsibilities)
-model Responsibility {
-  id       String  @id @default(uuid())
-  text     String  @db.Text
-  category String?
-  order    Int     @default(0)
-  role     Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId   String
-
-  @@index([roleId])
-}
-
-// Kompetenzbereiche (z.B. Backend Development, Analysis)
-model CompetenceField {
-  id     String  @id @default(uuid())
-  title  String  @unique
-  slug   String  @unique
-  color  String?
-  skills Skill[]
-}
-
-// Einzelne Hard Skills
-model Skill {
-  id          String  @id @default(uuid())
-  title       String
-  slug        String  @unique
-  description String? @db.Text
-
-  competenceField CompetenceField @relation(fields: [fieldId], references: [id])
-  fieldId         String
-
-  roles RoleSkill[]
-
-  @@unique([title, fieldId])
-  @@index([fieldId])
-}
-
-// Verknüpfungstabelle für Skill-Level pro Rolle (Soll-Zustand)
-model RoleSkill {
-  role     Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId   String
-  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  skillId  String
-  minLevel Int // Level 1 bis 4 (Learner bis Master)
-
-  @@id([roleId, skillId])
-  @@index([skillId])
-}
-
-// Soft Skills Katalog (z.B. Analytical Thinking, Communication)
-model SoftSkill {
-  id       String  @id @default(uuid())
-  title    String  @unique
-  slug     String  @unique
-  category String?
-  roles    Role[]  @relation("RoleToSoftSkill")
+enum TrendDirection {
+  rising
+  stable
+  declining
 }
