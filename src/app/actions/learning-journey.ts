@@ -522,33 +522,232 @@ export async function generateStructuredImpulse(
   const skillName = focus.Skill.title
   const competenceFieldName = focus.CompetenceField?.title ?? "Allgemein"
   const functionalLead = focus.CompetenceField?.Owner
-  const userRole = userCurrentRole?.title ?? "Mitarbeiter"
-  const previousPrompts = focus.PracticalImpulse.map(p => p.prompt)
 
-  // 5. Check-In Nachricht generieren (personalisiert)
-  const checkInMessage = `Ich sehe, du arbeitest an **${skillName}** für Level ${focus.targetLevel}. Das ist ein wichtiger Schritt auf deinem Entwicklungsweg bei Convidera – lass uns das gemeinsam angehen!`
+  // Detect if this is a soft skill
+  const isSoftSkill = /stakeholder|kommunikation|feedback|präsentation|moderation|coaching|leadership|team|konflikt|verhandlung|empathie|negotiation|facilitation/i.test(skillName)
 
-  // 6. Aufgabe generieren (basierend auf Level-Didaktik)
-  // In einer echten Implementierung würde hier die Claude AI aufgerufen werden
-  // Für jetzt: Template-basierte Generierung
-  const taskTemplates = {
-    L1_AWARENESS: `Recherchiere im aktuellen Projekt oder in der Convidera-Dokumentation ein konkretes Beispiel für ${skillName}. Dokumentiere, wie es umgesetzt wurde und warum diese Lösung gewählt wurde.`,
-    L2_GUIDED: `Erstelle einen ersten Entwurf für ${skillName} im Rahmen deiner aktuellen Aufgaben. Bitte danach ${functionalLead?.name ?? "deinen Functional Lead"} um Feedback zu deinem Ansatz.`,
-    L3_INDEPENDENT: `Übernimm eigenverantwortlich eine Aufgabe, die ${skillName} erfordert. Dokumentiere deine Entscheidungen und Begründungen in einem kurzen Architecture Decision Record (ADR).`,
-    L4_EXPERT: `Bereite eine kurze Wissenstransfer-Session (15-20 Min) über ${skillName} für dein Team vor. Fokussiere dich auf Best Practices und häufige Fallstricke.`
+  // 5. Generate impulse with Glashaus-Prinzip (three-step model)
+  let checkInMessage: string
+  let taskDescription: string
+  let vorbereitungText: string
+  let durchfuehrungText: string
+  let ergebnisCheckText: string
+  let expectedOutcome: string
+  let reflectionQuestion: string
+  let supportConcept: string
+  let supportExplanation: string
+  let supportTemplate: string
+
+  if (isSoftSkill) {
+    // Soft Skill: Social interaction framing (Coaching-Style)
+    checkInMessage = `Hey! Heute geht es um **${skillName}** – ein Skill, der in Zeiten von KI noch wichtiger wird. Warum? Während KI immer mehr technische Aufgaben übernimmt, bleibt die menschliche Verbindung dein Alleinstellungsmerkmal. Lass uns das gemeinsam üben!`
+
+    taskDescription = `Führe ein kurzes "Pulse-Check" Gespräch mit einem Stakeholder oder Teammitglied durch.`
+
+    vorbereitungText = `**Was ist ein Pulse-Check?** – Ein kurzes, informelles Gespräch (5-10 Min), um frühzeitig Stimmungen und Bedenken wahrzunehmen.
+
+1. Wähle eine Person aus deinem aktuellen Projekt, mit der du diese Woche noch nicht gesprochen hast
+2. Überlege dir einen konkreten Anknüpfungspunkt (z.B. ein Modul, ein Meeting, eine Deadline)`
+
+    durchfuehrungText = `1. Sprich die Person kurz an (persönlich, Teams oder Slack)
+2. Nutze einen lockeren Einstieg: "Hey, kurze Frage zu [Thema]..."
+3. Stelle eine offene Frage: "Wo siehst du aktuell die größte Hürde für uns?"
+4. Höre aktiv zu – keine Lösungen anbieten, nur verstehen
+5. Bedanke dich für die Offenheit`
+
+    ergebnisCheckText = `✓ Du hast mindestens eine neue Information erhalten
+✓ Die Person fühlte sich gehört (nicht "abgefertigt")
+✓ Du hast keine Versprechungen gemacht, die du nicht halten kannst`
+
+    expectedOutcome = `Ein kurzes Gespräch mit einer dokumentierten Erkenntnis`
+
+    reflectionQuestion = `Was hat dich überrascht? Gab es etwas, das du ohne dieses Gespräch nicht erfahren hättest?`
+
+    supportConcept = `Pulse-Check`
+    supportExplanation = `Ein Pulse-Check ist ein kurzes, informelles Gespräch, um frühzeitig Stimmungen, Bedenken oder Blocker wahrzunehmen – bevor sie zu echten Problemen werden.`
+    supportTemplate = `## Gesprächsleitfaden: Pulse-Check
+
+**Einstieg:**
+"Hey [Name], hast du kurz 5 Minuten? Ich wollte mal kurz zu [Thema/Projekt] nachhaken."
+
+**Kernfrage:**
+"Wie läuft es aus deiner Sicht? Wo siehst du aktuell die größte Hürde?"
+
+**Follow-up:**
+"Gibt es etwas, das ich tun kann, um dir zu helfen?"
+
+**Abschluss:**
+"Danke für deine Offenheit! Ich melde mich, wenn ich etwas herausfinde."
+
+---
+📝 **Notizen:**
+- Person:
+- Thema:
+- Wichtigste Erkenntnis:
+- Mögliche Aktion:`
+  } else {
+    // Technical Skill: Step-by-step with term explanations
+    checkInMessage = `Hey! Heute arbeiten wir an **${skillName}** für Level ${focus.targetLevel}. Ich habe eine praktische Übung vorbereitet, die du mit KI-Unterstützung in 15-20 Minuten umsetzen kannst. Kein Vorwissen nötig – ich erkläre alles!`
+
+    const techTaskTemplates: Record<ImpulseLevel, { task: string; vorbereitung: string; durchfuehrung: string; check: string; outcome: string; concept: string; explanation: string; template: string }> = {
+      L1_AWARENESS: {
+        task: `Recherchiere ein konkretes Beispiel für "${skillName}" mit KI-Unterstützung.`,
+        vorbereitung: `**Was brauchst du?**
+- Zugang zu Claude, ChatGPT oder einem ähnlichen KI-Tool
+- Optional: Ein aktuelles Projekt als Kontext
+
+**Begriffserklärung:**
+- **Prompt** – Die Anweisung/Frage, die du der KI gibst
+- **Best Practice** – Eine bewährte Vorgehensweise, die sich in der Praxis etabliert hat`,
+        durchfuehrung: `1. Öffne dein KI-Tool (Claude, ChatGPT, etc.)
+2. Frage: "Erkläre mir ${skillName} anhand eines einfachen Beispiels aus der Beratung"
+3. Bitte um ein zweites Beispiel zur Vertiefung
+4. Notiere die wichtigsten Erkenntnisse`,
+        check: `✓ Du kannst ${skillName} in einem Satz erklären
+✓ Du hast mindestens ein konkretes Beispiel verstanden
+✓ Du könntest einem Kollegen davon erzählen`,
+        outcome: "Dokumentierte Recherche mit 2-3 Kernerkenntnissen",
+        concept: "KI-gestützte Recherche",
+        explanation: "KI-Tools wie Claude können komplexe Themen anhand von Beispielen erklären. Der Trick ist, konkrete Fragen zu stellen und bei Unklarheiten nachzuhaken.",
+        template: `## Meine Recherche zu ${skillName}
+
+**Frage 1:**
+[Was habe ich gefragt?]
+
+**Antwort (Zusammenfassung):**
+[Wichtigste Punkte]
+
+**Beispiel aus der Praxis:**
+[Konkretes Beispiel]
+
+**Mein Fazit:**
+[Was nehme ich mit?]`
+      },
+      L2_GUIDED: {
+        task: `Erstelle einen ersten Entwurf für "${skillName}" und hole dir Feedback.`,
+        vorbereitung: `**Was ist ${skillName}?** – ${skillName} ist ein wichtiger Bestandteil professioneller Arbeit bei Convidera.
+
+**Wen fragen?**
+- ${functionalLead?.name ?? "Deinen Functional Lead"} oder einen erfahrenen Kollegen
+
+**Begriffserklärung:**
+- **Entwurf** – Eine erste Version, die nicht perfekt sein muss
+- **Feedback** – Konstruktive Rückmeldung zur Verbesserung`,
+        durchfuehrung: `1. Erstelle einen ersten, einfachen Entwurf (15-20 Min)
+2. Schreibe 2-3 konkrete Fragen auf, zu denen du Feedback möchtest
+3. Bitte um einen kurzen Termin (10 Min) für Feedback
+4. Notiere die wichtigsten Verbesserungsvorschläge`,
+        check: `✓ Du hast einen Entwurf erstellt (auch wenn unvollständig)
+✓ Du hast mindestens 2 konkrete Feedback-Punkte erhalten
+✓ Du weißt, was du als nächstes verbessern würdest`,
+        outcome: "Entwurf mit dokumentiertem Feedback",
+        concept: "Feedback-Schleife",
+        explanation: "Eine Feedback-Schleife bedeutet: Erst machen, dann Rückmeldung holen, dann verbessern. Es ist völlig normal (und erwünscht!), dass der erste Entwurf noch nicht perfekt ist.",
+        template: `## Mein Entwurf für ${skillName}
+
+**Was ich gemacht habe:**
+[Kurze Beschreibung]
+
+**Meine Fragen fürs Feedback:**
+1. [Frage 1]
+2. [Frage 2]
+3. [Frage 3]
+
+**Erhaltenes Feedback:**
+- [Punkt 1]
+- [Punkt 2]
+
+**Nächste Schritte:**
+[Was verbessere ich?]`
+      },
+      L3_INDEPENDENT: {
+        task: `Übernimm eigenverantwortlich eine Aufgabe zu "${skillName}" und dokumentiere deine Entscheidungen.`,
+        vorbereitung: `**Was ist ein ADR?** – Ein **Architecture Decision Record** ist eine kurze Notiz, die erklärt WARUM du eine bestimmte Entscheidung getroffen hast. Nicht perfekt formuliert, aber nachvollziehbar.
+
+**Begriffserklärung:**
+- **Trade-off** – Wenn du dich FÜR etwas entscheidest, verzichtest du auf etwas anderes
+- **Kontext** – Die Umstände, unter denen die Entscheidung getroffen wurde`,
+        durchfuehrung: `1. Identifiziere eine anstehende Aufgabe, die ${skillName} erfordert
+2. Führe sie eigenständig durch
+3. Erstelle einen kurzen ADR: Was? Warum? Welche Alternativen gab es?
+4. Optional: Teile den ADR mit deinem Team`,
+        check: `✓ Die Aufgabe ist abgeschlossen
+✓ Der ADR ist verständlich (auch für jemanden, der nicht dabei war)
+✓ Du hast mindestens eine Alternative dokumentiert`,
+        outcome: "Abgeschlossene Aufgabe + ADR-Dokumentation",
+        concept: "ADR (Architecture Decision Record)",
+        explanation: "Ein ADR ist ein kurzes Dokument, das erklärt: 1) Was wurde entschieden? 2) Warum? 3) Welche Alternativen gab es? Es hilft dem Team (und dir selbst), später nachzuvollziehen, warum etwas so gemacht wurde.",
+        template: `## ADR: [Entscheidungstitel]
+
+**Datum:** [Heute]
+**Status:** Akzeptiert
+
+### Kontext
+[Was ist die Ausgangssituation?]
+
+### Entscheidung
+[Was habe ich entschieden?]
+
+### Begründung
+[Warum diese Lösung?]
+
+### Alternativen
+1. [Alternative A] – nicht gewählt weil...
+2. [Alternative B] – nicht gewählt weil...
+
+### Konsequenzen
+[Was bedeutet diese Entscheidung für die Zukunft?]`
+      },
+      L4_EXPERT: {
+        task: `Bereite eine kurze Wissenstransfer-Session (15-20 Min) über "${skillName}" vor.`,
+        vorbereitung: `**Was ist Wissenstransfer?** – Das gezielte Teilen von Know-how mit Kollegen, damit sie von deiner Erfahrung profitieren.
+
+**Begriffserklärung:**
+- **Best Practice** – Bewährte Vorgehensweisen aus der Praxis
+- **Anti-Pattern** – Häufige Fehler, die man vermeiden sollte`,
+        durchfuehrung: `1. Wähle 3-5 Kernpunkte aus, die du vermitteln möchtest
+2. Bereite mindestens ein konkretes Beispiel vor
+3. Überlege dir 1-2 häufige Fehler (Anti-Patterns)
+4. Halte die Session oder erstelle eine kurze Guideline`,
+        check: `✓ Die Inhalte sind praxisnah (nicht nur Theorie)
+✓ Mindestens ein konkretes Beispiel ist enthalten
+✓ Ein Kollege hat etwas Neues gelernt`,
+        outcome: "Durchgeführte Session oder dokumentierte Guideline",
+        concept: "Wissenstransfer",
+        explanation: "Wissenstransfer bedeutet, dein Know-how so aufzubereiten, dass andere davon profitieren. Der Schlüssel: Konkrete Beispiele und typische Fallstricke teilen – nicht nur abstrakte Theorie.",
+        template: `## Wissenstransfer: ${skillName}
+
+### Die 3 wichtigsten Punkte
+1. [Kernpunkt 1]
+2. [Kernpunkt 2]
+3. [Kernpunkt 3]
+
+### Praxisbeispiel
+[Konkretes Beispiel aus einem Projekt]
+
+### Häufige Fehler (Anti-Patterns)
+1. ❌ [Fehler] → ✅ [Besser so]
+2. ❌ [Fehler] → ✅ [Besser so]
+
+### Weiterführende Ressourcen
+- [Link/Ressource 1]
+- [Link/Ressource 2]`
+      }
+    }
+
+    const template = techTaskTemplates[impulseLevel]
+    taskDescription = template.task
+    vorbereitungText = template.vorbereitung
+    durchfuehrungText = template.durchfuehrung
+    ergebnisCheckText = template.check
+    expectedOutcome = template.outcome
+    reflectionQuestion = "Was war überraschend oder schwieriger als gedacht?"
+    supportConcept = template.concept
+    supportExplanation = template.explanation
+    supportTemplate = template.template
   }
 
-  const taskDescription = taskTemplates[impulseLevel]
-
-  // 7. Expected Outcome basierend auf Level
-  const outcomeTemplates = {
-    L1_AWARENESS: "Dokumentierte Beobachtung / Erkenntnis",
-    L2_GUIDED: "Entwurf + Feedback-Dokumentation",
-    L3_INDEPENDENT: "Implementierung + ADR",
-    L4_EXPERT: "Präsentation / Guideline für das Team"
-  }
-
-  // 8. Impulse in DB speichern
+  // 6. Impulse in DB speichern
   // Estimate minutes based on level (L1: 15min, L2: 20min, L3: 30min, L4: 45min)
   const estimatedMinutes = impulseLevel === "L1_AWARENESS" ? 15
     : impulseLevel === "L2_GUIDED" ? 20
@@ -562,9 +761,17 @@ export async function generateStructuredImpulse(
       prompt: taskDescription, // Legacy-Feld
       taskDescription,
       checkInMessage,
-      expectedOutcome: outcomeTemplates[impulseLevel],
+      expectedOutcome,
       estimatedMinutes,
-      reflectionQuestion: "Was war die größte Herausforderung dabei?",
+      reflectionQuestion,
+      // Three-step model (Glashaus-Prinzip)
+      vorbereitungText,
+      durchfuehrungText,
+      ergebnisCheckText,
+      // Interactive Scaffolding
+      supportConcept,
+      supportExplanation,
+      supportTemplate,
       currentStep: "CHECK_IN",
       functionalLeadId: functionalLead?.id ?? null,
       functionalLeadName: functionalLead?.name ?? null,
@@ -579,23 +786,25 @@ export async function generateStructuredImpulse(
     targetLevel: impulse.targetLevel,
     currentStep: impulse.currentStep,
     checkInMessage: impulse.checkInMessage,
-    checkInViewedAt: impulse.checkInViewedAt,
+    taskPrompt: impulse.prompt,
     taskDescription: impulse.taskDescription,
-    prompt: impulse.prompt,
     expectedOutcome: impulse.expectedOutcome,
     estimatedMinutes: impulse.estimatedMinutes,
-    taskStartedAt: impulse.taskStartedAt,
+    reflectionPrompt: impulse.reflectionQuestion,
     reflectionQuestion: impulse.reflectionQuestion,
     userReflection: impulse.userReflection,
-    reflectionStartedAt: impulse.reflectionStartedAt,
-    evidenceSaved: impulse.evidenceSaved,
-    evidenceNoteId: impulse.evidenceNoteId,
-    evidenceSavedAt: impulse.evidenceSavedAt,
-    functionalLeadId: impulse.functionalLeadId,
-    functionalLeadName: impulse.functionalLeadName,
     isCompleted: impulse.isCompleted,
     completedAt: impulse.completedAt,
-    generatedAt: impulse.generatedAt
+    generatedAt: impulse.generatedAt,
+    evidenceSaved: impulse.evidenceSaved,
+    // Three-step model
+    vorbereitungText: impulse.vorbereitungText,
+    durchfuehrungText: impulse.durchfuehrungText,
+    ergebnisCheckText: impulse.ergebnisCheckText,
+    // Scaffolding
+    supportConcept: impulse.supportConcept,
+    supportExplanation: impulse.supportExplanation,
+    supportTemplate: impulse.supportTemplate,
   }
 }
 
@@ -751,23 +960,25 @@ export async function getStructuredImpulse(
     targetLevel: impulse.targetLevel,
     currentStep: impulse.currentStep,
     checkInMessage: impulse.checkInMessage,
-    checkInViewedAt: impulse.checkInViewedAt,
+    taskPrompt: impulse.prompt,
     taskDescription: impulse.taskDescription,
-    prompt: impulse.prompt,
     expectedOutcome: impulse.expectedOutcome,
     estimatedMinutes: impulse.estimatedMinutes,
-    taskStartedAt: impulse.taskStartedAt,
+    reflectionPrompt: impulse.reflectionQuestion,
     reflectionQuestion: impulse.reflectionQuestion,
     userReflection: impulse.userReflection,
-    reflectionStartedAt: impulse.reflectionStartedAt,
-    evidenceSaved: impulse.evidenceSaved,
-    evidenceNoteId: impulse.evidenceNoteId,
-    evidenceSavedAt: impulse.evidenceSavedAt,
-    functionalLeadId: impulse.functionalLeadId,
-    functionalLeadName: impulse.functionalLeadName,
     isCompleted: impulse.isCompleted,
     completedAt: impulse.completedAt,
-    generatedAt: impulse.generatedAt
+    generatedAt: impulse.generatedAt,
+    evidenceSaved: impulse.evidenceSaved,
+    // Three-step model
+    vorbereitungText: impulse.vorbereitungText,
+    durchfuehrungText: impulse.durchfuehrungText,
+    ergebnisCheckText: impulse.ergebnisCheckText,
+    // Scaffolding
+    supportConcept: impulse.supportConcept,
+    supportExplanation: impulse.supportExplanation,
+    supportTemplate: impulse.supportTemplate,
   }
 }
 
@@ -916,23 +1127,25 @@ export async function getDashboardLearningData(
         targetLevel: activeImpulseRaw.targetLevel,
         currentStep: activeImpulseRaw.currentStep,
         checkInMessage: activeImpulseRaw.checkInMessage,
-        checkInViewedAt: activeImpulseRaw.checkInViewedAt,
+        taskPrompt: activeImpulseRaw.prompt,
         taskDescription: activeImpulseRaw.taskDescription,
-        prompt: activeImpulseRaw.prompt,
         expectedOutcome: activeImpulseRaw.expectedOutcome,
         estimatedMinutes: activeImpulseRaw.estimatedMinutes,
-        taskStartedAt: activeImpulseRaw.taskStartedAt,
+        reflectionPrompt: activeImpulseRaw.reflectionQuestion,
         reflectionQuestion: activeImpulseRaw.reflectionQuestion,
         userReflection: activeImpulseRaw.userReflection,
-        reflectionStartedAt: activeImpulseRaw.reflectionStartedAt,
-        evidenceSaved: activeImpulseRaw.evidenceSaved,
-        evidenceNoteId: activeImpulseRaw.evidenceNoteId,
-        evidenceSavedAt: activeImpulseRaw.evidenceSavedAt,
-        functionalLeadId: activeImpulseRaw.functionalLeadId,
-        functionalLeadName: activeImpulseRaw.functionalLeadName,
         isCompleted: activeImpulseRaw.isCompleted,
         completedAt: activeImpulseRaw.completedAt,
         generatedAt: activeImpulseRaw.generatedAt,
+        evidenceSaved: activeImpulseRaw.evidenceSaved,
+        // Three-step model
+        vorbereitungText: activeImpulseRaw.vorbereitungText,
+        durchfuehrungText: activeImpulseRaw.durchfuehrungText,
+        ergebnisCheckText: activeImpulseRaw.ergebnisCheckText,
+        // Scaffolding
+        supportConcept: activeImpulseRaw.supportConcept,
+        supportExplanation: activeImpulseRaw.supportExplanation,
+        supportTemplate: activeImpulseRaw.supportTemplate,
       }
     : null
 

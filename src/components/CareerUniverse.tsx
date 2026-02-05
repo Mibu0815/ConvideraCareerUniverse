@@ -6,8 +6,10 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
 } from "recharts";
 import {
-  Sparkles, Brain, Target, TrendingUp, X, ArrowRight, Zap,
+  Sparkles, Brain, Target, TrendingUp, X, ArrowRight, Zap, ChevronRight,
 } from "lucide-react";
+import { CurrentFocusWidget } from "@/components/dashboard/CurrentFocusWidget";
+import type { StructuredImpulse } from "@/types/practical-impulse";
 
 /* ── Convidera Design Tokens ── */
 const C = {
@@ -99,7 +101,7 @@ interface InProgressSkill {
 
 interface LearningData {
   inProgressSkills: InProgressSkill[];
-  activeImpulse: unknown | null;
+  activeImpulse: StructuredImpulse | null;
   completedImpulsesCount: number;
   recentCompletedImpulses: Array<{
     id: string;
@@ -108,6 +110,12 @@ interface LearningData {
     userReflection: string | null;
   }>;
   planId: string | null;
+}
+
+interface ProgressData {
+  totalGaps: number;
+  completedSkillsCount: number;
+  progressPercent: number;
 }
 
 interface UserData {
@@ -119,6 +127,7 @@ interface UserData {
   currentRole: { id: string; title: string; level: string; hasLeadership: boolean; leadershipType: string | null } | null;
   targetRole: { id: string; title: string; level: string; hasLeadership: boolean; leadershipType: string | null } | null;
   learningData?: LearningData | null;
+  progressData?: ProgressData | null;
 }
 
 interface Props {
@@ -127,9 +136,8 @@ interface Props {
 
 export default function CareerUniverse({ userData }: Props) {
   const router = useRouter();
-  const [fromRole, setFromRole] = useState(userData?.currentRole?.title || "");
-  const [toRole, setToRole] = useState(userData?.targetRole?.title || "");
-  const [mentorOpen, setMentorOpen] = useState(true);
+  const fromRole = userData?.currentRole?.title || "";
+  const toRole = userData?.targetRole?.title || "";
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -230,40 +238,87 @@ export default function CareerUniverse({ userData }: Props) {
             }}>c</div>
             <span style={{ fontSize: "17px", fontWeight: 600, color: C.dark, letterSpacing: "-.3px" }}>convidera</span>
           </div>
-          <nav style={{ display: "flex", gap: "32px" }}>
-            {navItems.map((n, i) => {
-              const routes: Record<string, string> = {
-                'Dashboard': '/',
-                'Karriereziele': '/my-career',
-                'Lernpfad': '/learning-journey',
-                'Insights': '/my-career',
-                'Einstellungen': '/my-career',
-              };
-              return (
-                <span
-                  key={n}
-                  className="nav-link"
-                  onClick={() => router.push(routes[n] || '/')}
-                  style={{
-                    fontSize: "14px", fontWeight: i === 0 ? 600 : 450,
-                    color: i === 0 ? C.dark : C.textFaint, letterSpacing: ".3px",
-                    cursor: "pointer",
-                  }}
-                >{n}</span>
-              );
-            })}
-          </nav>
-          <div
-            onClick={() => router.push('/my-career')}
-            suppressHydrationWarning
-            style={{
-              width: "38px", height: "38px", borderRadius: "50%", cursor: "pointer",
-              background: `linear-gradient(135deg,${C.blue},#3366FF)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#fff", fontSize: "15px", fontWeight: 600,
-              boxShadow: `0 2px 12px ${C.blueGlow}`,
-            }}
-          >{userData?.name?.[0]?.toUpperCase() || "?"}</div>
+
+          {/* Center: Role Progress Indicator */}
+          {userData?.targetRole && (
+            <div
+              onClick={() => router.push('/my-career/compare')}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "6px 14px",
+                borderRadius: "12px",
+                background: "rgba(0,85,255,0.04)",
+                border: "1px solid rgba(0,85,255,0.1)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              className="progress-header"
+            >
+              <Target size={14} color={C.blue} />
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 500, color: C.textMuted }}>
+                  {userData.currentRole?.title || "Start"}
+                </span>
+                <ChevronRight size={12} color={C.textFaint} />
+                <span style={{ fontSize: "12px", fontWeight: 600, color: C.dark }}>
+                  {userData.targetRole.title}
+                </span>
+              </div>
+              <div style={{
+                width: "80px", height: "6px",
+                background: "rgba(0,85,255,0.1)",
+                borderRadius: "3px", overflow: "hidden",
+              }}>
+                <div style={{
+                  width: `${userData.progressData?.progressPercent || 0}%`,
+                  height: "100%",
+                  background: `linear-gradient(90deg, ${C.blue}, #3388FF)`,
+                  borderRadius: "3px",
+                  transition: "width 0.5s ease",
+                }} />
+              </div>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: C.blue }}>
+                {userData.progressData?.progressPercent || 0}%
+              </span>
+            </div>
+          )}
+
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+            <nav style={{ display: "flex", gap: "24px" }}>
+              {["Dashboard", "Lernpfad", "Karriereziele"].map((n, i) => {
+                const routes: Record<string, string> = {
+                  'Dashboard': '/',
+                  'Karriereziele': '/my-career',
+                  'Lernpfad': '/learning-journey',
+                };
+                return (
+                  <span
+                    key={n}
+                    className="nav-link"
+                    onClick={() => router.push(routes[n] || '/')}
+                    style={{
+                      fontSize: "13px", fontWeight: i === 0 ? 600 : 450,
+                      color: i === 0 ? C.dark : C.textFaint, letterSpacing: ".3px",
+                      cursor: "pointer",
+                    }}
+                  >{n}</span>
+                );
+              })}
+            </nav>
+            <div
+              onClick={() => router.push('/my-career')}
+              suppressHydrationWarning
+              style={{
+                width: "36px", height: "36px", borderRadius: "50%", cursor: "pointer",
+                background: `linear-gradient(135deg,${C.blue},#3366FF)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#fff", fontSize: "14px", fontWeight: 600,
+                boxShadow: `0 2px 12px ${C.blueGlow}`,
+              }}
+            >{userData?.name?.[0]?.toUpperCase() || "?"}</div>
+          </div>
         </header>
 
         {/* ── Main ── */}
@@ -381,60 +436,13 @@ export default function CareerUniverse({ userData }: Props) {
             {/* 2×2 Grid */}
             <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: "20px" }}>
 
-              {/* KPI Card - Clickable */}
-              <div
-                className="gc"
-                onClick={() => router.push('/my-career/compare')}
-                style={{ ...glass, ...anim(3), padding: "28px", position: "relative", overflow: "hidden", cursor: "pointer" }}
-              >
-                <span style={{
-                  position: "absolute", top: "18px", right: "18px",
-                  background: C.blue, color: "#fff", fontSize: "9.5px", fontWeight: 700,
-                  padding: "3.5px 10px", borderRadius: "7px", letterSpacing: ".9px",
-                }}>KLICK</span>
-                <h3 style={{ fontSize: "18px", fontWeight: 700, color: C.dark, lineHeight: 1.3, marginBottom: "6px", paddingRight: "54px" }}>
-                  {userData?.currentRole && userData?.targetRole
-                    ? `${userData.currentRole.title} → ${userData.targetRole.title}`
-                    : "Dein Weg zur nächsten Karrierestufe"}
-                </h3>
-                <p style={{ fontSize: "12.5px", color: C.textFaint, marginBottom: "22px", letterSpacing: ".15px" }}>
-                  Klicke hier für den detaillierten Skill-Vergleich.
-                </p>
-                <div style={{ display: "flex", gap: "22px", marginBottom: "22px" }}>
-                  {[{ c: C.blue, l: "Aktuell" }, { c: C.dark, l: "Ziel" }].map(d => (
-                    <div key={d.l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: d.c }}/>
-                      <span style={{ fontSize: "12px", color: C.textMuted, fontWeight: 500 }}>{d.l}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: "30px" }}>
-                  <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, color: C.blue, letterSpacing: ".8px", textTransform: "uppercase", marginBottom: "5px" }}>Fokus-Skills</div>
-                    <div style={{ fontSize: "48px", fontWeight: 800, color: C.dark, lineHeight: 1, letterSpacing: "-3px" }}>
-                      {userData?.learningData?.inProgressSkills?.length ?? 0}
-                    </div>
-                    <div style={{ fontSize: "11.5px", color: C.textFaint, marginTop: "4px" }}>von 3 aktiv</div>
-                  </div>
-                  <div style={{ width: "1px", background: C.border, alignSelf: "stretch", margin: "4px 0" }}/>
-                  <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, color: "#10B981", letterSpacing: ".8px", textTransform: "uppercase", marginBottom: "5px" }}>Impulse</div>
-                    <div style={{ fontSize: "48px", fontWeight: 800, color: C.dark, lineHeight: 1, letterSpacing: "-3px" }}>
-                      {userData?.learningData?.completedImpulsesCount ?? 0}
-                    </div>
-                    <div style={{ fontSize: "11.5px", color: C.textFaint, marginTop: "4px" }}>abgeschlossen</div>
-                  </div>
-                </div>
-                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "4px", background: "#EFF2F5" }}>
-                  <div style={{
-                    width: `${((userData?.learningData?.inProgressSkills?.length ?? 0) / 3) * 100}%`,
-                    height: "100%",
-                    background: `linear-gradient(90deg,${C.blue},#3388FF)`,
-                    borderRadius: "0 3px 3px 0",
-                    transition: "width 0.5s ease"
-                  }}/>
-                </div>
-              </div>
+              {/* Current Focus Widget - Dynamic */}
+              <CurrentFocusWidget
+                inProgressSkills={userData?.learningData?.inProgressSkills ?? []}
+                activeImpulse={userData?.learningData?.activeImpulse ?? null}
+                completedImpulsesCount={userData?.learningData?.completedImpulsesCount ?? 0}
+                animStyle={anim(3)}
+              />
 
               {/* Radar Chart - Clickable */}
               <div
@@ -509,125 +517,54 @@ export default function CareerUniverse({ userData }: Props) {
                 </div>
               </div>
 
-              {/* AI Mentor (Dark) */}
-              {mentorOpen && (
-                <div className="gc" style={{
-                  ...anim(6), background: C.darkCard,
-                  backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
-                  border: "1px solid rgba(255,255,255,0.06)", borderRadius: "22px",
-                  padding: "26px", position: "relative", color: "#fff",
-                  boxShadow: "0 8px 40px rgba(0,0,0,.24), 0 2px 8px rgba(0,0,0,.12)",
-                }}>
-                  <button className="close-btn" onClick={() => setMentorOpen(false)} style={{
-                    position: "absolute", top: "16px", right: "16px",
-                    background: C.white08, border: "none", borderRadius: "8px",
-                    width: "28px", height: "28px", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "rgba(255,255,255,.4)",
-                  }}>
-                    <X size={14}/>
-                  </button>
-                  <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Zap size={16} color="#60A5FA"/>AI Mentor
+              {/* AI Mentor Tip Card (Simplified) */}
+              <div className="gc" style={{
+                ...anim(6), background: C.darkCard,
+                backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)",
+                border: "1px solid rgba(255,255,255,0.06)", borderRadius: "22px",
+                padding: "24px", position: "relative", color: "#fff",
+                boxShadow: "0 8px 40px rgba(0,0,0,.24), 0 2px 8px rgba(0,0,0,.12)",
+                display: "flex", flexDirection: "column", justifyContent: "space-between",
+                minHeight: "180px",
+              }}>
+                <div>
+                  <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Zap size={16} color="#60A5FA"/>AI Mentor Tipp
                   </h3>
-                  <p style={{ fontSize: "12px", color: "rgba(255,255,255,.42)", marginBottom: "16px", lineHeight: 1.6 }}>
-                    Dein persönlicher Karriere-Coach, powered by Claude AI.
-                  </p>
-
-                  {/* Dynamic skill focus display */}
-                  {userData?.learningData?.inProgressSkills && userData.learningData.inProgressSkills.length > 0 ? (
-                    <>
-                      <div style={{
-                        background: "rgba(0,85,255,0.1)", border: "1px solid rgba(0,85,255,0.18)",
-                        borderRadius: "14px", padding: "13px 16px", marginBottom: "16px",
-                      }}>
-                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", lineHeight: 1.7 }}>
-                          Du arbeitest gerade an{" "}
-                          <strong style={{ color: "#60A5FA" }}>
-                            {userData.learningData.inProgressSkills[0].skillName}
-                          </strong>
-                          {" "}(Level {userData.learningData.inProgressSkills[0].currentLevel} → {userData.learningData.inProgressSkills[0].targetLevel})
-                        </p>
-                      </div>
-
-                      {/* Show additional focused skills */}
-                      {userData.learningData.inProgressSkills.length > 1 && (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
-                          {userData.learningData.inProgressSkills.slice(1).map((skill, i) => (
-                            <div key={i} style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", paddingLeft: "15px", position: "relative" }}>
-                              <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>
-                              {skill.skillName} (L{skill.currentLevel} → L{skill.targetLevel})
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Progress info */}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "22px" }}>
-                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", lineHeight: 1.6, paddingLeft: "15px", position: "relative" }}>
-                          <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>
-                          {userData.learningData.completedImpulsesCount} Impulse abgeschlossen
-                        </div>
-                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", lineHeight: 1.6, paddingLeft: "15px", position: "relative" }}>
-                          <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>
-                          {userData.learningData.inProgressSkills.length} / 3 Fokus-Skills aktiv
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{
-                      background: "rgba(255,255,255,0.05)",
-                      borderRadius: "14px",
-                      padding: "16px",
-                      marginBottom: "16px",
-                      textAlign: "center"
-                    }}>
-                      <p style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", marginBottom: "8px" }}>
-                        Noch keine Lernziele aktiv.
-                      </p>
-                      <p style={{ fontSize: "11px", color: "rgba(255,255,255,.38)" }}>
-                        Starte mit einem Skill-Vergleich, um deine Fokus-Skills festzulegen.
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    className="mentor-btn"
-                    onClick={() => {
-                      if (userData?.learningData?.inProgressSkills && userData.learningData.inProgressSkills.length > 0) {
-                        router.push('/learning-journey');
-                      } else {
-                        router.push('/my-career/compare');
-                      }
-                    }}
-                    style={{
-                      background: `linear-gradient(135deg,${C.blue},#0044DD)`,
-                      color: "#fff", border: "none", padding: "13px 24px", borderRadius: "13px",
-                      fontSize: "13px", fontWeight: 600, cursor: "pointer", width: "100%",
-                      fontFamily: "'Outfit',sans-serif", letterSpacing: ".2px",
-                      boxShadow: `0 4px 18px ${C.blueGlow}`,
-                    }}
-                  >
+                  <p style={{ fontSize: "12px", color: "rgba(255,255,255,.65)", lineHeight: 1.7 }}>
                     {userData?.learningData?.inProgressSkills && userData.learningData.inProgressSkills.length > 0
-                      ? "Smarten Impuls starten →"
-                      : "Lernziele festlegen →"}
-                  </button>
+                      ? `Fokussiere dich auf "${userData.learningData.inProgressSkills[0].skillName}" - kleine, regelmäßige Übungen führen schneller zum Ziel als seltene, lange Sessions.`
+                      : "Wähle bis zu 3 Skills aus, um deinen Lernpfad zu starten. Der AI Mentor erstellt dann personalisierte Übungen für dich."}
+                  </p>
                 </div>
-              )}
 
-              {!mentorOpen && (
-                <div className="gc" style={{
-                  ...glass, ...anim(6), padding: "26px",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", minHeight: "180px",
-                }} onClick={() => setMentorOpen(true)}>
-                  <div style={{ textAlign: "center" }}>
-                    <Zap size={26} color={C.blue} style={{ marginBottom: "10px" }}/>
-                    <p style={{ fontSize: "13.5px", fontWeight: 600, color: C.blue }}>AI Mentor öffnen</p>
-                    <p style={{ fontSize: "11px", color: C.textFaint, marginTop: "5px" }}>Dein persönlicher Karriere-Coach</p>
+                {userData?.progressData && userData.progressData.totalGaps > 0 && (
+                  <div style={{ marginTop: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,.45)" }}>
+                        Fortschritt zur Zielrolle
+                      </span>
+                      <span style={{ fontSize: "11px", fontWeight: 600, color: "#60A5FA" }}>
+                        {userData.progressData.completedSkillsCount} / {userData.progressData.totalGaps} Skills
+                      </span>
+                    </div>
+                    <div style={{
+                      height: "6px",
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "3px",
+                      overflow: "hidden",
+                    }}>
+                      <div style={{
+                        width: `${userData.progressData.progressPercent}%`,
+                        height: "100%",
+                        background: "linear-gradient(90deg, #60A5FA, #3B82F6)",
+                        borderRadius: "3px",
+                        transition: "width 0.5s ease",
+                      }} />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </main>

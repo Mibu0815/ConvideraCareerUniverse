@@ -15,8 +15,12 @@ import {
   Clock,
   Target,
   User,
+  ListChecks,
+  Play,
+  CheckCircle2,
 } from "lucide-react"
 import { ImpulseLevelIndicator } from "./ImpulseLevelIndicator"
+import { SupportTemplateBox } from "./SupportTemplateBox"
 import {
   STEP_CONFIG,
   IMPULSE_STEPS,
@@ -27,6 +31,12 @@ import {
 } from "@/types/practical-impulse"
 import { ImpulseStep } from "@prisma/client"
 import { QuickFeedback } from "@/components/feedback/QuickFeedback"
+
+// Helper to detect soft skills
+function isSoftSkill(skillName: string): boolean {
+  const softSkillPatterns = /stakeholder|kommunikation|feedback|präsentation|moderation|coaching|leadership|team|konflikt|verhandlung|empathie|negotiation|facilitation/i
+  return softSkillPatterns.test(skillName)
+}
 
 // Icon mapping
 const STEP_ICONS = {
@@ -268,7 +278,7 @@ export function StructuredImpulseCard({
             </motion.div>
           )}
 
-          {/* TASK Phase */}
+          {/* TASK Phase - Three-Step Model */}
           {activeStep === "TASK" && (
             <motion.div
               key="task"
@@ -277,6 +287,7 @@ export function StructuredImpulseCard({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
+              {/* Task Overview */}
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 shrink-0">
                   <ClipboardList className="h-5 w-5 text-amber-600" />
@@ -284,10 +295,76 @@ export function StructuredImpulseCard({
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Deine Aufgabe</h4>
                   <p className="text-sm leading-relaxed text-foreground/90">
-                    {impulse.taskDescription || impulse.prompt}
+                    {impulse.taskDescription || impulse.taskPrompt}
                   </p>
                 </div>
               </div>
+
+              {/* Three-Step Structure */}
+              {(impulse.vorbereitungText || impulse.durchfuehrungText || impulse.ergebnisCheckText) && (
+                <div className="space-y-3 pt-2">
+                  {/* Step 1: Vorbereitung */}
+                  {impulse.vorbereitungText && (
+                    <div className="rounded-lg border border-sky-200/50 dark:border-sky-700/30 bg-sky-50/50 dark:bg-sky-900/10 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1 rounded bg-sky-100 dark:bg-sky-800/30">
+                          <ListChecks className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+                        </div>
+                        <span className="text-xs font-semibold text-sky-700 dark:text-sky-300 uppercase tracking-wide">
+                          Schritt 1: Vorbereitung
+                        </span>
+                      </div>
+                      <p className="text-sm text-foreground/80 whitespace-pre-line leading-relaxed">
+                        {impulse.vorbereitungText}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Step 2: Durchführung */}
+                  {impulse.durchfuehrungText && (
+                    <div className="rounded-lg border border-amber-200/50 dark:border-amber-700/30 bg-amber-50/50 dark:bg-amber-900/10 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1 rounded bg-amber-100 dark:bg-amber-800/30">
+                          <Play className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                          Schritt 2: Durchführung
+                        </span>
+                      </div>
+                      <p className="text-sm text-foreground/80 whitespace-pre-line leading-relaxed">
+                        {impulse.durchfuehrungText}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Step 3: Ergebnis-Check */}
+                  {impulse.ergebnisCheckText && (
+                    <div className="rounded-lg border border-emerald-200/50 dark:border-emerald-700/30 bg-emerald-50/50 dark:bg-emerald-900/10 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1 rounded bg-emerald-100 dark:bg-emerald-800/30">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
+                          Schritt 3: Ergebnis-Check
+                        </span>
+                      </div>
+                      <p className="text-sm text-foreground/80 whitespace-pre-line leading-relaxed">
+                        {impulse.ergebnisCheckText}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Support Template Box */}
+              {impulse.supportConcept && impulse.supportExplanation && impulse.supportTemplate && (
+                <SupportTemplateBox
+                  concept={impulse.supportConcept}
+                  explanation={impulse.supportExplanation}
+                  template={impulse.supportTemplate}
+                  skillType={isSoftSkill(skillName) ? "soft" : "hard"}
+                />
+              )}
 
               {impulse.expectedOutcome && (
                 <div className="bg-muted/50 rounded-lg p-3">

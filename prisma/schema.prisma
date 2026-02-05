@@ -358,12 +358,22 @@ model PracticalImpulse {
   checkInMessage     String?
   checkInViewedAt    DateTime?
 
-  // Task Phase
+  // Task Phase - Three-Step Model (Glashaus-Prinzip)
   prompt             String         // Legacy field
   taskDescription    String?
   expectedOutcome    String?
   estimatedMinutes   Int?
   taskStartedAt      DateTime?
+
+  // Three-Step Structure
+  vorbereitungText   String?        // Step 1: Preparation
+  durchfuehrungText  String?        // Step 2: Execution
+  ergebnisCheckText  String?        // Step 3: Result verification
+
+  // Interactive Scaffolding Support
+  supportConcept     String?        // The term/concept being explained
+  supportExplanation String?        // Plain-language explanation
+  supportTemplate    String?        // Markdown template for "Hilf mir"
 
   // Reflection Phase
   reflectionQuestion String?

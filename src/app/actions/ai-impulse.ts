@@ -106,6 +106,12 @@ export async function generateSmartImpulse(userId: string): Promise<SmartImpulse
     let checkInMessage: string
     let expectedOutcome: string
     let reflectionQuestion: string
+    let vorbereitungText: string | null = null
+    let durchfuehrungText: string | null = null
+    let ergebnisCheckText: string | null = null
+    let supportConcept: string | null = null
+    let supportExplanation: string | null = null
+    let supportTemplate: string | null = null
 
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY
 
@@ -113,33 +119,53 @@ export async function generateSmartImpulse(userId: string): Promise<SmartImpulse
       try {
         const anthropic = new Anthropic({ apiKey: anthropicApiKey })
 
-        const systemPrompt = `Du bist ein Karriere-Mentor bei Convidera, einer Digital-Beratung.
-Generiere praktische, kurze Lernaufgaben (15-20 Minuten) für Mitarbeiter.
+        const systemPrompt = `Du bist ein supportiver Lern-Coach bei Convidera (Digital-Beratung).
 
-Wichtige Prinzipien:
-- Aufgaben MÜSSEN mindestens ein KI-Tool einbeziehen (Claude Code, GitHub Copilot, Cursor, etc.)
-- Aufgaben SOLLTEN moderne Cloud-Technologien nutzen (Supabase, Vercel, Edge Functions, etc.)
-- Aufgaben müssen im Convidera Consulting-Kontext relevant sein
-- Fokus auf praktisches Tun, nicht nur Lesen
+## GLASHAUS-PRINZIP (WICHTIG!)
+Jeder Fachbegriff (ADR, Stakeholder-Map, User Story, etc.) muss beim ersten Auftreten erklärt werden.
+Format: "**Begriff** – kurze Erklärung in einfacher Sprache"
+
+## DREI-SCHRITTE-MODELL
+Jede Aufgabe besteht aus:
+1. **Vorbereitung**: Was sammeln/klären bevor man startet (max 5 Min)
+2. **Durchführung**: Die eigentliche Aufgabe Schritt für Schritt
+3. **Ergebnis-Check**: Wie prüft man, ob es gelungen ist
+
+## TONALITÄT
+- Supportiv und ermutigend, NICHT bewertend
+- "Du könntest..." statt "Du musst..."
+- "Das ist ein guter erster Schritt" statt "Richtig/Falsch"
+- Normalisiere Unsicherheit: "Es ist völlig okay, wenn..."
+
+## SCAFFOLDING
+Generiere eine Vorlage/Template, die den Einstieg erleichtert.
 
 Antworte NUR im folgenden JSON-Format:
 {
-  "taskDescription": "Die konkrete Aufgabe...",
-  "checkInMessage": "Motivierende Begrüßung...",
-  "expectedOutcome": "Was am Ende entstehen soll...",
-  "reflectionQuestion": "Eine Frage zur Reflexion..."
+  "checkInMessage": "Persönliche, ermutigende Begrüßung mit Kontext zum Skill",
+  "taskDescription": "Überblick der Aufgabe (1-2 Sätze)",
+  "vorbereitung": "Schritt 1: Was vorbereiten (mit erklärten Begriffen)",
+  "durchfuehrung": "Schritt 2: Die Durchführung als nummerierte Liste",
+  "ergebnisCheck": "Schritt 3: Wie man das Ergebnis prüft",
+  "expectedOutcome": "Was am Ende entstehen soll",
+  "reflectionQuestion": "Offene Reflexionsfrage (nicht bewertend)",
+  "supportConcept": "Der wichtigste erklärte Begriff",
+  "supportExplanation": "Die Erklärung dazu in 1-2 Sätzen",
+  "supportTemplate": "Markdown-Template als Starthilfe (z.B. Checkliste, Gliederung)"
 }`
 
-        const userPrompt = `Generiere eine 15-20 Minuten Lernaufgabe für:
+        const userPrompt = `Generiere eine praktische Lernaufgabe für:
 - Skill: ${focusedSkill.skillName}
 - Kompetenzfeld: ${focusedSkill.competenceFieldName || "Allgemein"}
-- Aktuelles Level: ${focusedSkill.currentLevel}
+- Aktuelles Level: ${focusedSkill.currentLevel} (von 4)
 - Ziel-Level: ${focusedSkill.targetLevel}
 
-Die Aufgabe soll:
-1. Ein KI-Tool (Claude Code, Copilot, etc.) aktiv nutzen
-2. Eine moderne Cloud-Technologie einbeziehen wenn möglich
-3. Sofort umsetzbar sein (Daily Spark)`
+Wichtig:
+- Erkläre JEDEN Fachbegriff beim ersten Auftreten (Glashaus-Prinzip)
+- Nutze supportive Sprache ("Du könntest...", "Ein guter Ansatz wäre...")
+- Erstelle ein hilfreiches Template für den Einstieg
+- Die Aufgabe soll in 15-30 Minuten machbar sein
+- Wenn möglich, integriere ein KI-Tool (Claude, Copilot) als Unterstützung`
 
         const response = await anthropic.messages.create({
           model: "claude-sonnet-4-20250514",
@@ -158,32 +184,68 @@ Die Aufgabe soll:
             checkInMessage = parsed.checkInMessage || generateFallbackCheckIn(focusedSkill)
             expectedOutcome = parsed.expectedOutcome || "Dokumentierte Umsetzung"
             reflectionQuestion = parsed.reflectionQuestion || "Was hast du dabei gelernt?"
+            // New three-step model fields
+            vorbereitungText = parsed.vorbereitung || null
+            durchfuehrungText = parsed.durchfuehrung || null
+            ergebnisCheckText = parsed.ergebnisCheck || null
+            // Scaffolding support fields
+            supportConcept = parsed.supportConcept || null
+            supportExplanation = parsed.supportExplanation || null
+            supportTemplate = parsed.supportTemplate || null
           } catch {
             // JSON parsing failed, use fallback
-            taskDescription = generateFallbackTask(focusedSkill)
-            checkInMessage = generateFallbackCheckIn(focusedSkill)
-            expectedOutcome = "Dokumentierte Umsetzung"
-            reflectionQuestion = "Was war die größte Herausforderung?"
+            const fallback = generateFallbackWithStructure(focusedSkill)
+            taskDescription = fallback.taskDescription
+            checkInMessage = fallback.checkInMessage
+            expectedOutcome = fallback.expectedOutcome
+            reflectionQuestion = fallback.reflectionQuestion
+            vorbereitungText = fallback.vorbereitungText
+            durchfuehrungText = fallback.durchfuehrungText
+            ergebnisCheckText = fallback.ergebnisCheckText
+            supportConcept = fallback.supportConcept
+            supportExplanation = fallback.supportExplanation
+            supportTemplate = fallback.supportTemplate
           }
         } else {
-          taskDescription = generateFallbackTask(focusedSkill)
-          checkInMessage = generateFallbackCheckIn(focusedSkill)
-          expectedOutcome = "Dokumentierte Umsetzung"
-          reflectionQuestion = "Was war die größte Herausforderung?"
+          const fallback = generateFallbackWithStructure(focusedSkill)
+          taskDescription = fallback.taskDescription
+          checkInMessage = fallback.checkInMessage
+          expectedOutcome = fallback.expectedOutcome
+          reflectionQuestion = fallback.reflectionQuestion
+          vorbereitungText = fallback.vorbereitungText
+          durchfuehrungText = fallback.durchfuehrungText
+          ergebnisCheckText = fallback.ergebnisCheckText
+          supportConcept = fallback.supportConcept
+          supportExplanation = fallback.supportExplanation
+          supportTemplate = fallback.supportTemplate
         }
       } catch (apiError) {
         console.error("Claude API error:", apiError)
-        taskDescription = generateFallbackTask(focusedSkill)
-        checkInMessage = generateFallbackCheckIn(focusedSkill)
-        expectedOutcome = "Dokumentierte Umsetzung"
-        reflectionQuestion = "Was war die größte Herausforderung?"
+        const fallback = generateFallbackWithStructure(focusedSkill)
+        taskDescription = fallback.taskDescription
+        checkInMessage = fallback.checkInMessage
+        expectedOutcome = fallback.expectedOutcome
+        reflectionQuestion = fallback.reflectionQuestion
+        vorbereitungText = fallback.vorbereitungText
+        durchfuehrungText = fallback.durchfuehrungText
+        ergebnisCheckText = fallback.ergebnisCheckText
+        supportConcept = fallback.supportConcept
+        supportExplanation = fallback.supportExplanation
+        supportTemplate = fallback.supportTemplate
       }
     } else {
       // No API key, use template-based generation
-      taskDescription = generateFallbackTask(focusedSkill)
-      checkInMessage = generateFallbackCheckIn(focusedSkill)
-      expectedOutcome = "Dokumentierte Umsetzung"
-      reflectionQuestion = "Was war die größte Herausforderung?"
+      const fallback = generateFallbackWithStructure(focusedSkill)
+      taskDescription = fallback.taskDescription
+      checkInMessage = fallback.checkInMessage
+      expectedOutcome = fallback.expectedOutcome
+      reflectionQuestion = fallback.reflectionQuestion
+      vorbereitungText = fallback.vorbereitungText
+      durchfuehrungText = fallback.durchfuehrungText
+      ergebnisCheckText = fallback.ergebnisCheckText
+      supportConcept = fallback.supportConcept
+      supportExplanation = fallback.supportExplanation
+      supportTemplate = fallback.supportTemplate
     }
 
     // 5. Create the impulse in database
@@ -203,6 +265,14 @@ Die Aufgabe soll:
         expectedOutcome,
         estimatedMinutes,
         reflectionQuestion,
+        // Three-step model
+        vorbereitungText,
+        durchfuehrungText,
+        ergebnisCheckText,
+        // Scaffolding support
+        supportConcept,
+        supportExplanation,
+        supportTemplate,
         currentStep: "CHECK_IN" as ImpulseStep,
         functionalLeadId: focusedSkill.functionalLeadId,
         functionalLeadName: focusedSkill.functionalLeadName,
@@ -244,21 +314,143 @@ Die Aufgabe soll:
   }
 }
 
-// ─── Fallback Task Generation ────────────────────────────
+// ─── Fallback Task Generation with Three-Step Model ────────
+
+interface FallbackImpulse {
+  taskDescription: string
+  checkInMessage: string
+  expectedOutcome: string
+  reflectionQuestion: string
+  vorbereitungText: string
+  durchfuehrungText: string
+  ergebnisCheckText: string
+  supportConcept: string
+  supportExplanation: string
+  supportTemplate: string
+}
+
+function generateFallbackWithStructure(skill: FocusedSkillInfo): FallbackImpulse {
+  // Detect if this is a soft skill based on common patterns
+  const isSoftSkill = /stakeholder|kommunikation|feedback|präsentation|moderation|coaching|leadership|team|konflikt|verhandlung/i.test(skill.skillName)
+
+  if (isSoftSkill) {
+    return generateSoftSkillFallback(skill)
+  }
+  return generateTechnicalSkillFallback(skill)
+}
+
+function generateSoftSkillFallback(skill: FocusedSkillInfo): FallbackImpulse {
+  return {
+    checkInMessage: `Hey! Heute geht es um **${skill.skillName}** – ein Skill, der in Zeiten von KI noch wichtiger wird. Warum? Während KI immer mehr technische Aufgaben übernimmt, bleibt die menschliche Verbindung dein Alleinstellungsmerkmal. Lass uns das gemeinsam üben!`,
+
+    taskDescription: `Führe ein kurzes "Pulse-Check" Gespräch mit einem Stakeholder oder Teammitglied durch.`,
+
+    vorbereitungText: `**Was ist ein Pulse-Check?** – Ein kurzes, informelles Gespräch (5-10 Min), um frühzeitig Stimmungen und Bedenken wahrzunehmen.
+
+1. Wähle eine Person aus deinem aktuellen Projekt, mit der du diese Woche noch nicht gesprochen hast
+2. Überlege dir einen konkreten Anknüpfungspunkt (z.B. ein Modul, ein Meeting, eine Deadline)`,
+
+    durchfuehrungText: `1. Sprich die Person kurz an (persönlich, Teams oder Slack)
+2. Nutze einen lockeren Einstieg: "Hey, kurze Frage zu [Thema]..."
+3. Stelle eine offene Frage: "Wo siehst du aktuell die größte Hürde für uns?"
+4. Höre aktiv zu – keine Lösungen anbieten, nur verstehen
+5. Bedanke dich für die Offenheit`,
+
+    ergebnisCheckText: `✓ Du hast mindestens eine neue Information erhalten
+✓ Die Person fühlte sich gehört (nicht "abgefertigt")
+✓ Du hast keine Versprechungen gemacht, die du nicht halten kannst`,
+
+    expectedOutcome: `Ein kurzes Gespräch mit einer dokumentierten Erkenntnis`,
+
+    reflectionQuestion: `Was hat dich überrascht? Gab es etwas, das du ohne dieses Gespräch nicht erfahren hättest?`,
+
+    supportConcept: `Pulse-Check`,
+
+    supportExplanation: `Ein Pulse-Check ist ein kurzes, informelles Gespräch, um frühzeitig Stimmungen, Bedenken oder Blocker wahrzunehmen – bevor sie zu echten Problemen werden.`,
+
+    supportTemplate: `## Gesprächsleitfaden: Pulse-Check
+
+**Einstieg:**
+"Hey [Name], hast du kurz 5 Minuten? Ich wollte mal kurz zu [Thema/Projekt] nachhaken."
+
+**Kernfrage:**
+"Wie läuft es aus deiner Sicht? Wo siehst du aktuell die größte Hürde?"
+
+**Follow-up:**
+"Gibt es etwas, das ich tun kann, um dir zu helfen?"
+
+**Abschluss:**
+"Danke für deine Offenheit! Ich melde mich, wenn ich etwas herausfinde."
+
+---
+📝 **Notizen:**
+- Person:
+- Thema:
+- Wichtigste Erkenntnis:
+- Mögliche Aktion:`
+  }
+}
+
+function generateTechnicalSkillFallback(skill: FocusedSkillInfo): FallbackImpulse {
+  return {
+    checkInMessage: `Hey! Heute arbeiten wir an **${skill.skillName}** für Level ${skill.targetLevel}. Ich habe eine praktische Übung vorbereitet, die du mit KI-Unterstützung in 15-20 Minuten umsetzen kannst. Kein Vorwissen nötig – ich erkläre alles!`,
+
+    taskDescription: `Erstelle ein kleines Beispiel für "${skill.skillName}" mit KI-Unterstützung.`,
+
+    vorbereitungText: `**Was brauchst du?**
+- Zugang zu Claude, ChatGPT oder GitHub Copilot
+- Optional: Ein aktuelles Projekt als Kontext
+
+**Begriffserklärung:**
+- **Prompt** – Die Anweisung, die du der KI gibst
+- **Iteration** – Das schrittweise Verbessern des Ergebnisses durch Nachfragen`,
+
+    durchfuehrungText: `1. Öffne dein KI-Tool (Claude, Copilot, etc.)
+2. Beschreibe dein Ziel in einfachen Worten: "Ich möchte [Skill] für [Kontext] anwenden"
+3. Lass dir ein erstes Beispiel generieren
+4. Stelle Nachfragen zur Verbesserung: "Kannst du das vereinfachen?" oder "Erkläre mir den ersten Schritt genauer"
+5. Dokumentiere deinen besten Prompt für später`,
+
+    ergebnisCheckText: `✓ Du hast ein konkretes Beispiel erstellt
+✓ Du verstehst, was der Code/die Lösung macht
+✓ Du könntest einem Kollegen erklären, wie du vorgegangen bist`,
+
+    expectedOutcome: `Ein dokumentiertes Beispiel mit den verwendeten Prompts`,
+
+    reflectionQuestion: `Welcher Prompt hat am besten funktioniert? Was würdest du beim nächsten Mal anders machen?`,
+
+    supportConcept: `Prompt Engineering`,
+
+    supportExplanation: `Prompt Engineering ist die Kunst, KI-Systeme durch klare Anweisungen zu steuern. Je präziser dein Prompt, desto besser das Ergebnis.`,
+
+    supportTemplate: `## Mein ${skill.skillName} Experiment
+
+**Ziel:**
+[Was möchte ich erreichen?]
+
+**Mein bester Prompt:**
+\`\`\`
+[Hier den Prompt einfügen]
+\`\`\`
+
+**Ergebnis:**
+[Was kam heraus?]
+
+**Gelernt:**
+- [Erkenntnis 1]
+- [Erkenntnis 2]
+
+**Nächster Schritt:**
+[Was möchte ich als nächstes ausprobieren?]`
+  }
+}
 
 function generateFallbackTask(skill: FocusedSkillInfo): string {
-  const tasks = [
-    `Nutze Claude Code, um ein kleines Beispiel für "${skill.skillName}" zu erstellen. Dokumentiere dabei, welche Prompts du verwendet hast und wie du das Ergebnis verfeinert hast.`,
-    `Recherchiere mit Hilfe von Claude, wie "${skill.skillName}" in einem aktuellen Convidera-Projekt angewendet werden könnte. Erstelle eine kurze Zusammenfassung (max. 5 Bullet Points).`,
-    `Implementiere eine Micro-Übung zu "${skill.skillName}" mit GitHub Copilot. Notiere, wie die KI-Unterstützung deinen Workflow beschleunigt hat.`,
-    `Erstelle mit Claude Code einen kurzen Guide (3-5 Schritte) zu "${skill.skillName}" für neue Team-Mitglieder.`,
-  ]
-
-  return tasks[Math.floor(Math.random() * tasks.length)]
+  return generateFallbackWithStructure(skill).taskDescription
 }
 
 function generateFallbackCheckIn(skill: FocusedSkillInfo): string {
-  return `Hey! Heute fokussieren wir uns auf **${skill.skillName}** – ein wichtiger Skill für Level ${skill.targetLevel}. Ich habe eine praktische Aufgabe für dich vorbereitet, die du in etwa 15-20 Minuten umsetzen kannst. Los geht's!`
+  return generateFallbackWithStructure(skill).checkInMessage
 }
 
 // ─── Get Active Impulse ──────────────────────────────────

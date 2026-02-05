@@ -8,7 +8,7 @@ import { ImpulseLevelIndicator, getLevelLabel } from "./ImpulseLevelIndicator"
 import { StructuredImpulseCard } from "./StructuredImpulseCard"
 import { QuickFeedback } from "@/components/feedback/QuickFeedback"
 import type { StructuredImpulse } from "@/types/practical-impulse"
-import type { ImpulseStep } from "@prisma/client"
+import type { ImpulseStep, ImpulseLevel } from "@prisma/client"
 
 interface LearningFocusItem {
   id: string
@@ -266,26 +266,28 @@ export function SkillTimelineItem({
                       existingImpulse={hasActiveImpulse ? {
                         id: latestImpulse.id,
                         learningFocusId: item.id,
-                        targetLevel: latestImpulse.targetLevel as any,
+                        targetLevel: latestImpulse.targetLevel as ImpulseLevel,
                         currentStep: (latestImpulse.currentStep as ImpulseStep) ?? "CHECK_IN",
                         checkInMessage: latestImpulse.checkInMessage ?? null,
-                        checkInViewedAt: latestImpulse.checkInViewedAt ?? null,
+                        taskPrompt: latestImpulse.prompt,
                         taskDescription: latestImpulse.taskDescription ?? null,
-                        prompt: latestImpulse.prompt,
                         expectedOutcome: latestImpulse.expectedOutcome ?? null,
                         estimatedMinutes: latestImpulse.estimatedMinutes ?? null,
-                        taskStartedAt: latestImpulse.taskStartedAt ?? null,
+                        reflectionPrompt: latestImpulse.reflectionQuestion ?? null,
                         reflectionQuestion: latestImpulse.reflectionQuestion ?? null,
                         userReflection: latestImpulse.userReflection ?? null,
-                        reflectionStartedAt: latestImpulse.reflectionStartedAt ?? null,
                         evidenceSaved: latestImpulse.evidenceSaved ?? false,
-                        evidenceNoteId: latestImpulse.evidenceNoteId ?? null,
-                        evidenceSavedAt: latestImpulse.evidenceSavedAt ?? null,
-                        functionalLeadId: latestImpulse.functionalLeadId ?? null,
-                        functionalLeadName: latestImpulse.functionalLeadName ?? null,
                         isCompleted: latestImpulse.isCompleted,
                         completedAt: latestImpulse.completedAt ?? null,
-                        generatedAt: latestImpulse.generatedAt ?? new Date()
+                        generatedAt: latestImpulse.generatedAt ?? new Date(),
+                        // Three-step model (use type assertion for new fields that may not be in old DB records)
+                        vorbereitungText: (latestImpulse as { vorbereitungText?: string | null }).vorbereitungText ?? null,
+                        durchfuehrungText: (latestImpulse as { durchfuehrungText?: string | null }).durchfuehrungText ?? null,
+                        ergebnisCheckText: (latestImpulse as { ergebnisCheckText?: string | null }).ergebnisCheckText ?? null,
+                        // Scaffolding
+                        supportConcept: (latestImpulse as { supportConcept?: string | null }).supportConcept ?? null,
+                        supportExplanation: (latestImpulse as { supportExplanation?: string | null }).supportExplanation ?? null,
+                        supportTemplate: (latestImpulse as { supportTemplate?: string | null }).supportTemplate ?? null,
                       } : null}
                       skillName={item.Skill.title}
                       currentLevel={item.currentLevel}

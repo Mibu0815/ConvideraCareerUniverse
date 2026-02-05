@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
-import { getDashboardLearningData, type DashboardLearningData } from '@/app/actions/learning-journey';
+import { getDashboardLearningData, getLearningRoadmap, type DashboardLearningData } from '@/app/actions/learning-journey';
 import CareerUniverse from '@/components/CareerUniverse';
 
 // Ensure fresh data on each request (no caching)
@@ -28,8 +28,8 @@ async function getUserWithRolesAndLearning() {
 
   if (!user) return null;
 
-  // Fetch role details and learning data in parallel
-  const [currentRole, targetRole, learningData] = await Promise.all([
+  // Fetch role details, learning data, and roadmap in parallel
+  const [currentRole, targetRole, learningData, roadmap] = await Promise.all([
     user.currentRoleId
       ? prisma.role.findUnique({
           where: { id: user.currentRoleId },
@@ -43,13 +43,33 @@ async function getUserWithRolesAndLearning() {
         })
       : null,
     getDashboardLearningData(user.id),
+    getLearningRoadmap(user.id),
   ]);
+
+  // Calculate progress toward target role
+  const totalGaps = roadmap.meta.totalGaps;
+  const completedSkillsCount = await prisma.learningFocus.count({
+    where: {
+      LearningPlan: { userId: user.id },
+      status: "COMPLETED",
+    },
+  });
+
+  // Progress is based on completed skills vs total gaps
+  const progressPercent = totalGaps > 0
+    ? Math.round((completedSkillsCount / totalGaps) * 100)
+    : 0;
 
   return {
     ...user,
     currentRole,
     targetRole,
     learningData,
+    progressData: {
+      totalGaps,
+      completedSkillsCount,
+      progressPercent,
+    },
   };
 }
 
