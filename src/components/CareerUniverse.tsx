@@ -92,11 +92,21 @@ interface UserData {
   primarySkillIsSoft?: boolean;
 }
 
-interface Props {
-  userData?: UserData | null;
+interface UserStateInfo {
+  state: 'onboarding' | 'setup' | 'active' | 'ready';
+  redirectPath: string;
+  hasCurrentRole: boolean;
+  hasTargetRole: boolean;
+  hasFocusSkills: boolean;
+  focusSkillsCount: number;
 }
 
-export default function CareerUniverse({ userData }: Props) {
+interface Props {
+  userData?: UserData | null;
+  userState?: UserStateInfo | null;
+}
+
+export default function CareerUniverse({ userData, userState }: Props) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -111,18 +121,31 @@ export default function CareerUniverse({ userData }: Props) {
     transition: `all 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.08 + 0.05}s`,
   });
 
-  const hasFocusSkills = (userData?.learningData?.inProgressSkills?.length ?? 0) > 0;
+  const hasFocusSkills = userState?.hasFocusSkills ?? (userData?.learningData?.inProgressSkills?.length ?? 0) > 0;
   const primarySkill = userData?.primaryFocusSkill;
   const isSoftSkill = userData?.primarySkillIsSoft ?? false;
   const activeImpulse = userData?.learningData?.activeImpulse;
+
+  // Get user's first name for personalized greeting
+  const firstName = userData?.name?.split(' ')[0] || null;
 
   // Color scheme based on skill type
   const accentColor = isSoftSkill ? C.sage : C.blue;
   const accentMuted = isSoftSkill ? C.sageMuted : C.blueMuted;
   const accentGlow = isSoftSkill ? C.sageGlow : C.blueGlow;
 
-  // Dynamic headline based on active goal
+  // Dynamic headline based on user state and active goal
   const getHeadline = () => {
+    // Personalized greeting with name
+    if (firstName && userData?.activeGoal) {
+      return `Hey ${firstName}, dein Weg zum ${userData.activeGoal.roleTitle}`;
+    }
+    if (firstName && userData?.targetRole) {
+      return `Hey ${firstName}, dein Weg zum ${userData.targetRole.title}`;
+    }
+    if (firstName) {
+      return `Hey ${firstName}, starte deine Karriere-Reise`;
+    }
     if (userData?.activeGoal) {
       return `Dein Weg zum ${userData.activeGoal.roleTitle}`;
     }
@@ -130,6 +153,23 @@ export default function CareerUniverse({ userData }: Props) {
       return `Dein Weg zum ${userData.targetRole.title}`;
     }
     return "Deine Karriere-Reise beginnt";
+  };
+
+  // Get subheadline based on focus skill
+  const getSubheadline = () => {
+    if (primarySkill && hasFocusSkills) {
+      return (
+        <>
+          Aktueller Fokus: <strong style={{ color: accentColor }}>{primarySkill.skillName}</strong>
+          {" • "}
+          {userData?.learningData?.inProgressSkills?.length ?? 0} Skills in Arbeit
+        </>
+      );
+    }
+    if (userState?.state === 'setup') {
+      return "W\u00e4hle Skills aus, um mit praktischen \u00dcbungen zu starten";
+    }
+    return "W\u00e4hle deine Zielrolle und starte mit praktischen \u00dcbungen";
   };
 
   // Smart navigation handler
@@ -331,12 +371,28 @@ export default function CareerUniverse({ userData }: Props) {
             </h1>
             <p style={{
               fontSize: "17px", fontWeight: 400, color: C.textMuted,
-              maxWidth: "500px",
+              maxWidth: "600px",
             }}>
-              {hasFocusSkills
-                ? `${userData?.learningData?.inProgressSkills?.length} Skills in Arbeit • ${userData?.learningData?.completedImpulsesCount ?? 0} Impulse abgeschlossen`
-                : "Wähle deine Zielrolle und starte mit praktischen Übungen"}
+              {getSubheadline()}
             </p>
+            {/* Stats below headline when user has progress */}
+            {hasFocusSkills && (userData?.learningData?.completedImpulsesCount ?? 0) > 0 && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: "16px",
+                marginTop: "16px",
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  padding: "6px 12px", borderRadius: "20px",
+                  background: "rgba(16,185,129,0.1)",
+                }}>
+                  <CheckCircle2 size={14} color="#10B981" />
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#10B981" }}>
+                    {userData?.learningData?.completedImpulsesCount} Impulse erledigt
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ═══ Main Grid ═══ */}

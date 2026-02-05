@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { getDashboardLearningData, getLearningRoadmap, type DashboardLearningData } from '@/app/actions/learning-journey';
+import { getUserState } from '@/lib/userStateGuard';
 import CareerUniverse from '@/components/CareerUniverse';
 
 // Ensure fresh data on each request (no caching)
@@ -154,10 +155,24 @@ async function getUserWithRolesAndLearning() {
 export default async function Home() {
   const userData = await getUserWithRolesAndLearning();
 
-  // Redirect users without currentRole to onboarding/my-career
-  if (userData && !userData.currentRole) {
+  // Not logged in - show landing page
+  if (!userData) {
+    return <CareerUniverse userData={null} />;
+  }
+
+  // Use UserStateGuard for smart routing
+  const userState = await getUserState(userData.id);
+
+  // Redirect based on user state
+  // 'onboarding' → /my-career (no roles set)
+  // 'setup' → /my-career/compare (roles set, no focus skills)
+  // 'active' → show dashboard with personalized content
+  if (userState.state === 'onboarding') {
     redirect('/my-career');
   }
 
-  return <CareerUniverse userData={userData} />;
+  // For 'setup' state: Show dashboard but with clear CTA to select skills
+  // For 'active' state: Show full personalized dashboard
+
+  return <CareerUniverse userData={userData} userState={userState} />;
 }
