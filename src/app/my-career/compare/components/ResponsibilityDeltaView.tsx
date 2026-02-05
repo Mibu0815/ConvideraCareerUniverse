@@ -295,8 +295,7 @@ function ResponsibilityItem({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.03 }}
       className={cn(
-        'flex items-start gap-3 p-3 rounded-bento border transition-all',
-        'hover:shadow-bento-hover',
+        'flex items-start gap-3 p-3 rounded-bento border hover-lift responsibility-card',
         config.bgColor,
         config.borderColor
       )}

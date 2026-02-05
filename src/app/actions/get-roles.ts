@@ -35,7 +35,7 @@ const getCachedRoles = unstable_cache(
         level: true,
         hasLeadership: true,
         leadershipType: true,
-        occupationalField: {
+        OccupationalField: {
           select: {
             id: true,
             title: true,
@@ -43,7 +43,7 @@ const getCachedRoles = unstable_cache(
         },
       },
       orderBy: [
-        { occupationalField: { title: 'asc' } },
+        { OccupationalField: { title: 'asc' } },
         { level: 'asc' },
         { title: 'asc' },
       ],
@@ -53,8 +53,8 @@ const getCachedRoles = unstable_cache(
     const groupedMap = new Map<string, GroupedRoles>();
 
     for (const role of roles) {
-      const fieldId = role.occupationalField.id;
-      const fieldName = role.occupationalField.title;
+      const fieldId = role.OccupationalField.id;
+      const fieldName = role.OccupationalField.title;
 
       if (!groupedMap.has(fieldId)) {
         groupedMap.set(fieldId, {
@@ -93,18 +93,18 @@ const getCachedRoleById = unstable_cache(
     return prisma.role.findUnique({
       where: { id: roleId },
       include: {
-        occupationalField: true,
-        roleSkills: {
+        OccupationalField: true,
+        RoleSkill: {
           include: {
-            skill: {
+            Skill: {
               include: {
-                competenceField: true,
+                CompetenceField: true,
               },
             },
           },
         },
-        softSkills: true,
-        responsibilities: {
+        SoftSkill: true,
+        Responsibility: {
           orderBy: { order: 'asc' },
         },
       },

@@ -140,3 +140,198 @@ body {
     text-wrap: balance;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UNIFIED BETA EXPERIENCE - Global Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Grid Background Pattern */
+.bg-grid {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239CA3AF' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.bg-grid-dark {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Animated Gradient Blobs */
+.blob-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  animation: blob-float 20s infinite ease-in-out;
+}
+
+.blob-blue {
+  background: linear-gradient(135deg, #0055FF 0%, #3B82F6 100%);
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  right: -100px;
+}
+
+.blob-purple {
+  background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+  width: 350px;
+  height: 350px;
+  bottom: -50px;
+  left: -100px;
+  animation-delay: -7s;
+}
+
+.blob-cyan {
+  background: linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%);
+  width: 300px;
+  height: 300px;
+  top: 40%;
+  left: 30%;
+  animation-delay: -14s;
+}
+
+@keyframes blob-float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+  75% {
+    transform: translate(-30px, -20px) scale(1.02);
+  }
+}
+
+/* Micro-Interactions - Hover Effects */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+}
+
+.hover-glow {
+  transition: all 0.2s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(0, 85, 255, 0.2);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Skill Cards with unified hover */
+.skill-card {
+  @apply rounded-xl border border-brand-gray-200 bg-white p-4;
+  transition: all 0.2s ease;
+}
+
+.skill-card:hover {
+  @apply border-convidera-blue/30 shadow-lg;
+  transform: translateY(-2px);
+}
+
+/* Responsibility Cards with unified hover */
+.responsibility-card {
+  @apply rounded-xl border border-white/20 bg-white/50 backdrop-blur-sm p-4;
+  transition: all 0.2s ease;
+}
+
+.responsibility-card:hover {
+  @apply border-convidera-blue/30 shadow-md;
+}
+
+/* Mobile-First Responsive Grid */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile Navigation Adjustments */
+@media (max-width: 640px) {
+  .mobile-stack {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-full-width {
+    width: 100%;
+  }
+
+  .mobile-text-center {
+    text-align: center;
+  }
+
+  .mobile-hide {
+    display: none;
+  }
+}
+
+/* Page Layout with Grid Background */
+.page-container {
+  @apply min-h-screen bg-brand-gray-50 bg-grid relative;
+}
+
+/* Navigation Link Styles */
+.nav-link {
+  @apply px-4 py-2 rounded-lg text-brand-gray-600 font-medium;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  @apply bg-brand-gray-100 text-brand-gray-900;
+}
+
+.nav-link-active {
+  @apply bg-convidera-blue/10 text-convidera-blue;
+}
+
+/* Convidera Blue Accent Animations */
+@keyframes pulse-blue {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 85, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 85, 255, 0);
+  }
+}
+
+.pulse-blue {
+  animation: pulse-blue 2s infinite;
+}
+
+/* Focus Ring for Accessibility */
+.focus-ring:focus-visible {
+  @apply outline-none ring-2 ring-convidera-blue ring-offset-2;
+}

@@ -1,7 +1,9 @@
 // src/app/learning-journey/page.tsx
 
 import { Suspense } from "react"
-import { prisma } from "@/lib/prisma"
+import { redirect } from "next/navigation"
+import { BlobBackground, Navigation } from "@/components/shared"
+import { getCurrentUser } from "@/app/actions/user-sync"
 import {
   getLearningRoadmap,
   generateOrRefreshLearningPlan,
@@ -76,62 +78,56 @@ async function LearningJourneyContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 pb-24 sm:pb-8">
-      <header className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Deine Learning Journey
-        </h1>
-        {roadmap.meta.currentRoleName && (
-          <p className="mt-2 text-muted-foreground">
-            {roadmap.meta.currentRoleName}
-            {roadmap.meta.targetRoleName && roadmap.meta.targetRoleName !== roadmap.meta.currentRoleName && (
-              <> → <span className="text-primary font-medium">{roadmap.meta.targetRoleName}</span></>
-            )}
+    <div className="min-h-screen bg-brand-gray-50 bg-grid">
+      <BlobBackground />
+      <Navigation />
+      <div className="container mx-auto max-w-4xl pt-24 pb-24 sm:pb-8 px-4">
+        <header className="mb-10">
+          <h1 className="text-3xl font-bold tracking-tight text-convidera-dark">
+            Deine Learning Journey
+          </h1>
+          {roadmap.meta.currentRoleName && (
+            <p className="mt-2 text-brand-gray-500">
+              {roadmap.meta.currentRoleName}
+              {roadmap.meta.targetRoleName && roadmap.meta.targetRoleName !== roadmap.meta.currentRoleName && (
+                <> → <span className="text-convidera-blue font-medium">{roadmap.meta.targetRoleName}</span></>
+              )}
+            </p>
+          )}
+          <p className="mt-1 text-sm text-brand-gray-400">
+            {roadmap.meta.totalGaps} Skill{roadmap.meta.totalGaps !== 1 ? "s" : ""} mit Entwicklungspotenzial
           </p>
-        )}
-        <p className="mt-1 text-sm text-muted-foreground">
-          {roadmap.meta.totalGaps} Skill{roadmap.meta.totalGaps !== 1 ? "s" : ""} mit Entwicklungspotenzial
-        </p>
-      </header>
+        </header>
 
-      <LearningRoadmap
-        plan={plan}
-        roadmap={roadmap}
-        onSetFocus={handleSetFocus}
-        onRemoveFocus={handleRemoveFocus}
-        onGenerateImpulse={handleGenerateImpulse}
-        onUpdateStep={handleUpdateStep}
-        onSaveEvidence={handleSaveEvidence}
-      />
+        <LearningRoadmap
+          plan={plan}
+          roadmap={roadmap}
+          onSetFocus={handleSetFocus}
+          onRemoveFocus={handleRemoveFocus}
+          onGenerateImpulse={handleGenerateImpulse}
+          onUpdateStep={handleUpdateStep}
+          onSaveEvidence={handleSaveEvidence}
+        />
+      </div>
     </div>
   )
 }
 
 export default async function LearningJourneyPage() {
-  // For demo: get the first user with a currentRoleId
-  // In production, this would use auth to get the current user
-  const demoUser = await prisma.user.findFirst({
-    where: {
-      currentRoleId: { not: null },
-      isActive: true
-    },
-    orderBy: { createdAt: "asc" }
-  })
+  // Get the authenticated user
+  const user = await getCurrentUser()
 
-  if (!demoUser) {
-    return (
-      <div className="container mx-auto max-w-4xl py-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-4">Learning Journey</h1>
-        <p className="text-muted-foreground">
-          Kein User mit zugewiesener Rolle gefunden. Bitte erstelle zuerst einen User mit einer aktuellen Rolle.
-        </p>
-      </div>
-    )
+  if (!user) {
+    redirect('/auth/login')
+  }
+
+  if (!user.currentRoleId) {
+    redirect('/onboarding')
   }
 
   return (
     <Suspense fallback={<LoadingSkeleton />}>
-      <LearningJourneyContent userId={demoUser.id} />
+      <LearningJourneyContent userId={user.id} />
     </Suspense>
   )
 }

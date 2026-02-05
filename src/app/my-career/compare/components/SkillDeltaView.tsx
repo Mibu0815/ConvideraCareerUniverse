@@ -215,8 +215,7 @@ function SkillListItem({ skill, index }: { skill: SkillComparison; index: number
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.02 }}
       className={cn(
-        'group flex items-center gap-4 p-4 rounded-bento border transition-all',
-        'hover:shadow-bento-hover',
+        'group flex items-center gap-4 p-4 rounded-bento border hover-lift skill-card',
         skill.isNew
           ? 'bg-green-50/50 border-green-200'
           : skill.isRemoved
@@ -323,7 +322,7 @@ function SkillGridItem({ skill, index }: { skill: SkillComparison; index: number
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.02 }}
       className={cn(
-        'relative p-4 rounded-bento border transition-all hover:shadow-bento-hover',
+        'relative p-4 rounded-bento border hover-lift skill-card',
         skill.isNew
           ? 'bg-green-50 border-green-200'
           : skill.isRemoved

@@ -89,18 +89,18 @@ export async function compareRoles(
   const toRole = await prisma.role.findUnique({
     where: { id: toRoleId },
     include: {
-      occupationalField: true,
-      roleSkills: {
+      OccupationalField: true,
+      RoleSkill: {
         include: {
-          skill: {
+          Skill: {
             include: {
-              competenceField: true,
+              CompetenceField: true,
             },
           },
         },
       },
-      softSkills: true,
-      responsibilities: {
+      SoftSkill: true,
+      Responsibility: {
         orderBy: { order: 'asc' },
       },
     },
@@ -119,31 +119,31 @@ export async function compareRoles(
     fromRole = await prisma.role.findUnique({
       where: { id: fromRoleId },
       include: {
-        occupationalField: true,
-        roleSkills: {
+        OccupationalField: true,
+        RoleSkill: {
           include: {
-            skill: {
+            Skill: {
               include: {
-                competenceField: true,
+                CompetenceField: true,
               },
             },
           },
         },
-        softSkills: true,
-        responsibilities: {
+        SoftSkill: true,
+        Responsibility: {
           orderBy: { order: 'asc' },
         },
       },
     });
 
     if (fromRole) {
-      fromRole.roleSkills.forEach((rs) => {
+      fromRole.RoleSkill.forEach((rs) => {
         fromRoleSkillsMap.set(rs.skillId, { level: rs.minLevel, skillId: rs.skillId });
       });
-      fromRole.responsibilities.forEach((r) => {
+      fromRole.Responsibility.forEach((r) => {
         fromResponsibilities.push({ id: r.id, text: r.text, category: r.category ?? null });
       });
-      fromRole.softSkills.forEach((ss) => {
+      fromRole.SoftSkill.forEach((ss) => {
         fromSoftSkills.add(ss.id);
       });
     }
@@ -164,9 +164,9 @@ export async function compareRoles(
 
   const processedSkillIds = new Set<string>();
 
-  for (const toRoleSkill of toRole.roleSkills) {
-    const skill = toRoleSkill.skill;
-    const cf = skill.competenceField;
+  for (const toRoleSkill of toRole.RoleSkill) {
+    const skill = toRoleSkill.Skill;
+    const cf = skill.CompetenceField;
     processedSkillIds.add(skill.id);
 
     const fromLevel = fromRoleSkillsMap.get(skill.id)?.level ?? 0;
@@ -203,10 +203,10 @@ export async function compareRoles(
   }
 
   if (fromRole) {
-    for (const fromRoleSkill of fromRole.roleSkills) {
+    for (const fromRoleSkill of fromRole.RoleSkill) {
       if (!processedSkillIds.has(fromRoleSkill.skillId)) {
-        const skill = fromRoleSkill.skill;
-        const cf = skill.competenceField;
+        const skill = fromRoleSkill.Skill;
+        const cf = skill.CompetenceField;
 
         skillComparisons.push({
           skillId: skill.id,
@@ -239,13 +239,13 @@ export async function compareRoles(
 
   const responsibilityDiff = calculateResponsibilityDiff(
     fromResponsibilities,
-    toRole.responsibilities.map((r) => ({ id: r.id, text: r.text, category: r.category ?? null }))
+    toRole.Responsibility.map((r) => ({ id: r.id, text: r.text, category: r.category ?? null }))
   );
 
   const softSkillComparisons: SoftSkillComparison[] = [];
   const processedSoftSkillIds = new Set<string>();
 
-  for (const ss of toRole.softSkills) {
+  for (const ss of toRole.SoftSkill) {
     processedSoftSkillIds.add(ss.id);
 
     softSkillComparisons.push({
@@ -257,7 +257,7 @@ export async function compareRoles(
   }
 
   if (fromRole) {
-    for (const ss of fromRole.softSkills) {
+    for (const ss of fromRole.SoftSkill) {
       if (!processedSoftSkillIds.has(ss.id)) {
         softSkillComparisons.push({
           id: ss.id,

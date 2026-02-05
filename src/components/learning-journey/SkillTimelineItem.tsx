@@ -21,7 +21,7 @@ interface LearningFocusItem {
   CompetenceField: {
     id: string
     title: string
-    User: { id: string; name: string; avatarUrl: string | null } | null
+    Owner: { id: string; name: string; avatarUrl: string | null } | null
   } | null
   PracticalImpulse: Array<{
     id: string
@@ -147,7 +147,7 @@ export function SkillTimelineItem({
           </div>
           <p className="text-xs text-muted-foreground truncate mt-0.5">
             {item.CompetenceField?.title}
-            {item.CompetenceField?.User && ` · Mentor: ${item.CompetenceField.User.name}`}
+            {item.CompetenceField?.Owner && ` · Mentor: ${item.CompetenceField.Owner.name}`}
           </p>
         </div>
 
@@ -197,11 +197,11 @@ export function SkillTimelineItem({
               )}
 
               {/* Mentor Info */}
-              {item.CompetenceField?.User && (
+              {item.CompetenceField?.Owner && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 rounded-lg bg-secondary/50">
                   <User2 className="h-4 w-4 text-primary/60 shrink-0" />
                   <span>
-                    Functional Lead: <span className="font-medium text-foreground">{item.CompetenceField.User.name}</span>
+                    Functional Lead: <span className="font-medium text-foreground">{item.CompetenceField.Owner.name}</span>
                   </span>
                 </div>
               )}
@@ -237,7 +237,7 @@ export function SkillTimelineItem({
                   skillName={item.Skill.title}
                   currentLevel={item.currentLevel}
                   targetLevel={item.targetLevel}
-                  functionalLeadName={item.CompetenceField?.User?.name}
+                  functionalLeadName={item.CompetenceField?.Owner?.name}
                   onGenerateImpulse={onGenerateImpulse}
                   onUpdateStep={onUpdateStep}
                   onSaveEvidence={onSaveEvidence}

@@ -1,8 +1,33 @@
 import { getRoles, type GroupedRoles } from '@/app/actions/get-roles';
+import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
 import { CompareView } from './components/CompareView';
 
 // Force dynamic rendering (requires database connection)
 export const dynamic = 'force-dynamic';
+
+async function getUserRoles() {
+  try {
+    const supabase = await createClient();
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+
+    if (!supabaseUser?.email) {
+      return null;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: supabaseUser.email },
+      select: {
+        currentRoleId: true,
+        targetRoleId: true,
+      },
+    });
+
+    return user;
+  } catch {
+    return null;
+  }
+}
 
 export const metadata = {
   title: 'Role Comparison | Career Universe',
@@ -55,12 +80,30 @@ export default async function ComparePage() {
   let error: string | null = null;
 
   try {
-    groupedRoles = await getRoles();
+    // Fetch roles and user data in parallel
+    const [roles, userRoles] = await Promise.all([
+      getRoles(),
+      getUserRoles(),
+    ]);
+
+    groupedRoles = roles;
 
     // Check if database is empty
     if (!groupedRoles || groupedRoles.length === 0) {
       error = 'Die Datenbank enthält noch keine Rollen. Bitte führen Sie das Seed-Script aus.';
     }
+
+    if (error) {
+      return <DatabaseError message={error} />;
+    }
+
+    return (
+      <CompareView
+        groupedRoles={groupedRoles}
+        initialFromRoleId={userRoles?.currentRoleId || null}
+        initialToRoleId={userRoles?.targetRoleId || null}
+      />
+    );
   } catch (e) {
     console.error('Database error:', e);
     error = e instanceof Error

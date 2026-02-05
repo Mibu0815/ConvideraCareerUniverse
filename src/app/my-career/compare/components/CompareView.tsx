@@ -20,21 +20,26 @@ import { ActionCards } from './ActionCards';
 import { CareerRadarChart } from './CareerRadarChart';
 import { SkillDeltaView } from './SkillDeltaView';
 import { ResponsibilityDeltaView } from './ResponsibilityDeltaView';
+import { SoftSkillsView } from './SoftSkillsView';
 import { cn } from '@/lib/utils';
+import { BlobBackground, Navigation } from '@/components/shared';
 
 interface CompareViewProps {
   groupedRoles: GroupedRoles[];
+  initialFromRoleId?: string | null;
+  initialToRoleId?: string | null;
 }
 
-type TabType = 'skills' | 'responsibilities';
+type TabType = 'hardSkills' | 'softSkills' | 'responsibilities';
 
-export function CompareView({ groupedRoles }: CompareViewProps) {
-  const [fromRoleId, setFromRoleId] = useState<string | null>(null);
-  const [toRoleId, setToRoleId] = useState<string | null>(null);
+export function CompareView({ groupedRoles, initialFromRoleId, initialToRoleId }: CompareViewProps) {
+  const [fromRoleId, setFromRoleId] = useState<string | null>(initialFromRoleId || null);
+  const [toRoleId, setToRoleId] = useState<string | null>(initialToRoleId || null);
   const [comparison, setComparison] = useState<RoleComparisonResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState<TabType>('skills');
+  const [activeTab, setActiveTab] = useState<TabType>('hardSkills');
+  const [mentorMessage, setMentorMessage] = useState<string | null>(null);
 
   const animationKey = `${fromRoleId}-${toRoleId}`;
 
@@ -78,8 +83,10 @@ export function CompareView({ groupedRoles }: CompareViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-brand-gray-50">
-      <header className="border-b border-brand-gray-200 bg-brand-white/80 backdrop-blur-sm sticky top-0 z-30">
+    <div className="min-h-screen bg-brand-gray-50 bg-grid">
+      <BlobBackground />
+      <Navigation />
+      <header className="border-b border-brand-gray-200 bg-brand-white/80 backdrop-blur-sm sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -180,21 +187,88 @@ export function CompareView({ groupedRoles }: CompareViewProps) {
                   />
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="lg:col-span-3 bg-brand-white rounded-bento border border-brand-gray-200 shadow-bento overflow-hidden">
-                  <div className="flex border-b border-brand-gray-200">
-                    <TabButton active={activeTab === 'skills'} onClick={() => setActiveTab('skills')} icon={TrendingUp} label="Skills" count={comparison.skillComparisons.filter((s) => s.delta !== 0 || s.isNew).length} />
-                    <TabButton active={activeTab === 'responsibilities'} onClick={() => setActiveTab('responsibilities')} icon={FileText} label="Responsibilities" count={comparison.responsibilityDiff.filter((r) => r.status !== 'unchanged').length} />
+                {/* Glassmorphism Tab Card */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="lg:col-span-3 relative overflow-hidden rounded-bento"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+                  }}
+                >
+                  {/* Decorative gradient orbs */}
+                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  {/* Tab Navigation */}
+                  <div className="flex border-b border-white/30 relative z-10">
+                    <TabButton
+                      active={activeTab === 'hardSkills'}
+                      onClick={() => setActiveTab('hardSkills')}
+                      icon={TrendingUp}
+                      label="Hard Skills"
+                      count={comparison.skillComparisons.filter((s) => s.delta !== 0 || s.isNew).length}
+                    />
+                    <TabButton
+                      active={activeTab === 'softSkills'}
+                      onClick={() => setActiveTab('softSkills')}
+                      icon={Users}
+                      label="Soft Skills"
+                      count={comparison.softSkillComparisons.filter((s) => s.status === 'added').length}
+                    />
+                    <TabButton
+                      active={activeTab === 'responsibilities'}
+                      onClick={() => setActiveTab('responsibilities')}
+                      icon={FileText}
+                      label="Verantwortlichkeiten"
+                      count={comparison.responsibilityDiff.filter((r) => r.status === 'added').length}
+                    />
                   </div>
 
-                  <div className="p-6 max-h-[600px] overflow-y-auto">
+                  {/* Tab Content */}
+                  <div className="p-6 max-h-[600px] overflow-y-auto relative z-10">
                     <AnimatePresence mode="wait">
-                      {activeTab === 'skills' ? (
-                        <motion.div key="skills" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
+                      {activeTab === 'hardSkills' && (
+                        <motion.div key="hardSkills" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
                           <SkillDeltaView skills={comparison.skillComparisons} animationKey={animationKey} />
                         </motion.div>
-                      ) : (
+                      )}
+                      {activeTab === 'softSkills' && (
+                        <motion.div key="softSkills" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                          <SoftSkillsView
+                            softSkills={comparison.softSkillComparisons}
+                            animationKey={animationKey}
+                            onAskMentor={(msg) => setMentorMessage(msg)}
+                          />
+                        </motion.div>
+                      )}
+                      {activeTab === 'responsibilities' && (
                         <motion.div key="responsibilities" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
                           <ResponsibilityDeltaView responsibilities={comparison.responsibilityDiff} animationKey={animationKey} />
+                          {/* In Lernpfad integrieren Button */}
+                          {comparison.responsibilityDiff.filter(r => r.status === 'added').length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.3 }}
+                              className="mt-6 pt-4 border-t border-white/30"
+                            >
+                              <button
+                                onClick={() => setMentorMessage(
+                                  `Gib mir konkrete Tipps, wie ich die neuen Verantwortlichkeiten in meinen Arbeitsalltag integrieren kann: ${comparison.responsibilityDiff.filter(r => r.status === 'added').map(r => r.text).slice(0, 3).join('; ')}`
+                                )}
+                                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-accent to-blue-600 text-white font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                                In Lernpfad integrieren
+                              </button>
+                            </motion.div>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -202,36 +276,13 @@ export function CompareView({ groupedRoles }: CompareViewProps) {
                 </motion.div>
               </div>
 
-              {comparison.softSkillComparisons.some((s) => s.status !== 'unchanged') && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-brand-white rounded-bento border border-brand-gray-200 p-6 shadow-bento">
-                  <h3 className="text-lg font-semibold text-brand-gray-900 mb-4 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-brand-gray-800" />
-                    Soft Skills Changes
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {comparison.softSkillComparisons.filter((s) => s.status !== 'unchanged').map((skill) => (
-                      <motion.span
-                        key={skill.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className={cn(
-                          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium',
-                          skill.status === 'added' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700'
-                        )}
-                      >
-                        {skill.status === 'added' ? <Sparkles className="w-3.5 h-3.5" /> : <span className="w-3.5 h-3.5 flex items-center justify-center">−</span>}
-                        {skill.name}
-                      </motion.span>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
               {/* Action Cards - Bento Grid with AI Mentor */}
               <ActionCards
                 comparison={comparison}
                 fromRoleId={fromRoleId}
                 toRoleId={toRoleId!}
+                initialMentorMessage={mentorMessage}
+                onMentorMessageConsumed={() => setMentorMessage(null)}
               />
             </motion.div>
           )}

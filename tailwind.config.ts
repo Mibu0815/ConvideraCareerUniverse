@@ -27,6 +27,12 @@ const config: Config = {
           },
           accent: "#3B82F6", // Dezent für Fortschrittsbalken/Pfeile
         },
+        // Convidera Design Tokens (Aliases)
+        convidera: {
+          blue: "#0055FF",
+          dark: "#0A0A0B",
+          light: "#F9FAFB",
+        },
         // Skill Level Colors (Convidera System)
         level: {
           1: { bg: "#DBEAFE", text: "#1E40AF", border: "#93C5FD" }, // Learner - Blue
