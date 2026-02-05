@@ -26,6 +26,7 @@ import {
   calculateProgress,
 } from "@/types/practical-impulse"
 import { ImpulseStep } from "@prisma/client"
+import { QuickFeedback } from "@/components/feedback/QuickFeedback"
 
 // Icon mapping
 const STEP_ICONS = {
@@ -42,6 +43,7 @@ interface Props {
   targetLevel: number
   currentLevel: number
   functionalLeadName?: string
+  userId: string
   onGenerateImpulse: (focusId: string) => Promise<StructuredImpulse>
   onUpdateStep: (
     impulseId: string,
@@ -62,6 +64,7 @@ export function StructuredImpulseCard({
   targetLevel,
   currentLevel,
   functionalLeadName = "deinen Functional Lead",
+  userId,
   onGenerateImpulse,
   onUpdateStep,
   onSaveEvidence,
@@ -77,6 +80,7 @@ export function StructuredImpulseCard({
   const [activeStep, setActiveStep] = useState<ImpulseStepType>(
     (existingImpulse?.currentStep as ImpulseStepType) ?? "CHECK_IN"
   )
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const handleGenerate = () => {
     startTransition(async () => {
@@ -101,6 +105,8 @@ export function StructuredImpulseCard({
     startTransition(async () => {
       await onSaveEvidence(impulse.id, reflection)
       onRefresh()
+      // Trigger feedback after impulse completion
+      setShowFeedback(true)
     })
   }
 
@@ -417,6 +423,16 @@ export function StructuredImpulseCard({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Feedback Component - Triggered after impulse completion */}
+      {showFeedback && (
+        <QuickFeedback
+          userId={userId}
+          contextSkill={skillName}
+          contextType="impulse_completed"
+          onClose={() => setShowFeedback(false)}
+        />
+      )}
     </div>
   )
 }

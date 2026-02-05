@@ -93,7 +93,7 @@ export async function generateSmartImpulse(userId: string): Promise<SmartImpulse
         success: true,
         impulseId: existingImpulse.id,
         skillName: focusedSkill.skillName,
-        taskDescription: existingImpulse.taskDescription,
+        taskDescription: existingImpulse.taskDescription ?? undefined,
       }
     }
 
@@ -187,6 +187,12 @@ Die Aufgabe soll:
     }
 
     // 5. Create the impulse in database
+    // Estimate minutes based on level (L1: 15min, L2: 20min, L3: 30min, L4: 45min)
+    const estimatedMinutes = impulseLevel === "L1_AWARENESS" ? 15
+      : impulseLevel === "L2_GUIDED" ? 20
+      : impulseLevel === "L3_INDEPENDENT" ? 30
+      : 45
+
     const impulse = await prisma.practicalImpulse.create({
       data: {
         learningFocusId: focusedSkill.learningFocusId,
@@ -195,7 +201,7 @@ Die Aufgabe soll:
         taskDescription,
         checkInMessage,
         expectedOutcome,
-        estimatedMinutes: levelConfig.maxMinutes,
+        estimatedMinutes,
         reflectionQuestion,
         currentStep: "CHECK_IN" as ImpulseStep,
         functionalLeadId: focusedSkill.functionalLeadId,
@@ -227,7 +233,7 @@ Die Aufgabe soll:
       success: true,
       impulseId: impulse.id,
       skillName: focusedSkill.skillName,
-      taskDescription: impulse.taskDescription,
+      taskDescription: impulse.taskDescription ?? undefined,
     }
   } catch (error) {
     console.error("Failed to generate smart impulse:", error)

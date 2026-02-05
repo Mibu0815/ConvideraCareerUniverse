@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { BlobBackground, Navigation } from '@/components/shared';
 import { setSkillFocus, generateOrRefreshLearningPlan } from '@/app/actions/learning-journey';
 import { LernHistorie } from './LernHistorie';
+import { QuickFeedback } from '@/components/feedback/QuickFeedback';
 
 interface CompletedImpulse {
   id: string;
@@ -66,6 +67,8 @@ export function CompareView({
   const [focusedSkillIds, setFocusedSkillIds] = useState<Set<string>>(new Set(initialFocusedSkillIds));
   const [focusingSkillId, setFocusingSkillId] = useState<string | null>(null);
   const [planId, setPlanId] = useState<string | null>(initialPlanId || null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSkillName, setFeedbackSkillName] = useState<string | null>(null);
 
   const animationKey = `${fromRoleId}-${toRoleId}`;
 
@@ -91,6 +94,13 @@ export function CompareView({
 
       if (result.success) {
         setFocusedSkillIds(prev => new Set([...prev, skillId]));
+
+        // Trigger feedback popup
+        const skill = comparison?.skillComparisons.find(s => s.skillId === skillId);
+        if (skill) {
+          setFeedbackSkillName(skill.skillName);
+          setShowFeedback(true);
+        }
       }
 
       return result;
@@ -100,7 +110,7 @@ export function CompareView({
     } finally {
       setFocusingSkillId(null);
     }
-  }, [userId, planId]);
+  }, [userId, planId, comparison]);
 
   const fetchComparison = useCallback(async () => {
     if (!toRoleId) return;
@@ -366,6 +376,16 @@ export function CompareView({
           </motion.div>
         )}
       </main>
+
+      {/* Feedback popup after skill focus */}
+      {showFeedback && userId && (
+        <QuickFeedback
+          userId={userId}
+          contextSkill={feedbackSkillName || undefined}
+          contextType="skill_started"
+          onClose={() => setShowFeedback(false)}
+        />
+      )}
     </div>
   );
 }

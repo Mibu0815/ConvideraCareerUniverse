@@ -19,6 +19,10 @@ import {
   Flame,
   Cloud,
   Shield,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Quote,
 } from 'lucide-react';
 import {
   BarChart,
@@ -39,19 +43,29 @@ import {
 } from 'recharts';
 import type { LeadDashboardData } from '@/lib/services/personalized-pathways';
 import type { AdminAnalytics } from '@/app/actions/admin-analytics';
+import type { FeedbackSummary } from '@/app/actions/feedback';
 import { BlobBackground, Navigation } from '@/components/shared';
 import { cn } from '@/lib/utils';
+
+interface FeedbackStats {
+  totalFeedback: number;
+  positivePercentage: number;
+  thisWeekCount: number;
+  topSkillMentions: { skill: string; count: number }[];
+}
 
 interface AdminDashboardViewProps {
   dashboardData: LeadDashboardData;
   adminAnalytics: AdminAnalytics;
+  feedbackData: FeedbackSummary;
+  feedbackStats: FeedbackStats;
   userName: string;
   userRole: string;
 }
 
-type TabType = 'overview' | 'mitarbeiter' | 'techradar' | 'analytics';
+type TabType = 'overview' | 'mitarbeiter' | 'techradar' | 'analytics' | 'feedback';
 
-export function AdminDashboardView({ dashboardData, adminAnalytics, userName, userRole }: AdminDashboardViewProps) {
+export function AdminDashboardView({ dashboardData, adminAnalytics, feedbackData, feedbackStats, userName, userRole }: AdminDashboardViewProps) {
   const [activeTab, setActiveTab] = useState<TabType>('analytics');
 
   return (
@@ -120,6 +134,13 @@ export function AdminDashboardView({ dashboardData, adminAnalytics, userName, us
               label="Tech-Radar"
               dark
             />
+            <TabButton
+              active={activeTab === 'feedback'}
+              onClick={() => setActiveTab('feedback')}
+              icon={MessageSquare}
+              label="Stimme des Teams"
+              dark
+            />
           </div>
         </div>
       </div>
@@ -164,6 +185,16 @@ export function AdminDashboardView({ dashboardData, adminAnalytics, userName, us
               exit={{ opacity: 0, y: -20 }}
             >
               <TechRadarTab data={dashboardData} />
+            </motion.div>
+          )}
+          {activeTab === 'feedback' && (
+            <motion.div
+              key="feedback"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <FeedbackTab feedbackData={feedbackData} feedbackStats={feedbackStats} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -990,6 +1021,254 @@ function TechRadarTab({ data }: { data: LeadDashboardData }) {
             <h4 className="font-medium text-white mb-2">Prototyping</h4>
             <p className="text-sm text-gray-400">
               v0 und Bolt.new für schnelle UI-Prototypen in der Discovery-Phase.
+            </p>
+          </div>
+        </div>
+      </GlassmorphicCard>
+    </div>
+  );
+}
+
+// ============================================================================
+// FEEDBACK TAB - "Stimme des Teams"
+// ============================================================================
+
+function FeedbackTab({
+  feedbackData,
+  feedbackStats,
+}: {
+  feedbackData: FeedbackSummary;
+  feedbackStats: FeedbackStats;
+}) {
+  const satisfactionRate = feedbackStats.positivePercentage;
+  const satisfactionColor =
+    satisfactionRate >= 80
+      ? 'from-green-500 to-emerald-600'
+      : satisfactionRate >= 60
+      ? 'from-yellow-500 to-orange-600'
+      : 'from-red-500 to-rose-600';
+
+  return (
+    <div className="space-y-6">
+      {/* KPI Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Total Feedback */}
+        <GlassmorphicCard delay={0.1} className="p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs text-gray-500 uppercase tracking-wider">Gesamt</span>
+          </div>
+          <div className="text-3xl font-bold text-white">{feedbackStats.totalFeedback}</div>
+          <p className="text-sm text-gray-400 mt-1">Feedback-Einträge</p>
+        </GlassmorphicCard>
+
+        {/* Satisfaction Rate */}
+        <GlassmorphicCard delay={0.2} className="p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${satisfactionColor} flex items-center justify-center`}>
+              <ThumbsUp className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs text-gray-500 uppercase tracking-wider">Zufriedenheit</span>
+          </div>
+          <div className="text-3xl font-bold text-white">{satisfactionRate}%</div>
+          <p className="text-sm text-gray-400 mt-1">Positives Feedback</p>
+        </GlassmorphicCard>
+
+        {/* This Week */}
+        <GlassmorphicCard delay={0.3} className="p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs text-gray-500 uppercase tracking-wider">Diese Woche</span>
+          </div>
+          <div className="text-3xl font-bold text-white">{feedbackStats.thisWeekCount}</div>
+          <p className="text-sm text-gray-400 mt-1">Neue Einträge</p>
+        </GlassmorphicCard>
+
+        {/* Top Skill */}
+        <GlassmorphicCard delay={0.4} className="p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <Target className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs text-gray-500 uppercase tracking-wider">Top Skill</span>
+          </div>
+          <div className="text-lg font-bold text-white truncate">
+            {feedbackStats.topSkillMentions[0]?.skill || '—'}
+          </div>
+          <p className="text-sm text-gray-400 mt-1">
+            {feedbackStats.topSkillMentions[0]?.count || 0} Erwähnungen
+          </p>
+        </GlassmorphicCard>
+      </div>
+
+      {/* Satisfaction Breakdown & Recent Comments */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Satisfaction Breakdown */}
+        <GlassmorphicCard delay={0.5} className="p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-blue-400" />
+            Feedback-Verteilung
+          </h3>
+          <div className="space-y-4">
+            {/* Positive Bar */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400 flex items-center gap-2">
+                  <ThumbsUp className="w-4 h-4 text-green-400" />
+                  Positiv
+                </span>
+                <span className="text-sm font-medium text-white">{feedbackData.positiveCount}</span>
+              </div>
+              <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${feedbackData.totalCount > 0 ? (feedbackData.positiveCount / feedbackData.totalCount) * 100 : 0}%` }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
+                  className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                />
+              </div>
+            </div>
+            {/* Negative Bar */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400 flex items-center gap-2">
+                  <ThumbsDown className="w-4 h-4 text-orange-400" />
+                  Verbesserungspotenzial
+                </span>
+                <span className="text-sm font-medium text-white">{feedbackData.negativeCount}</span>
+              </div>
+              <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${feedbackData.totalCount > 0 ? (feedbackData.negativeCount / feedbackData.totalCount) * 100 : 0}%` }}
+                  transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                  className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Top Skills Mentioned */}
+          {feedbackStats.topSkillMentions.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <h4 className="text-sm font-medium text-gray-400 mb-3">Meistgenannte Skills</h4>
+              <div className="space-y-2">
+                {feedbackStats.topSkillMentions.slice(0, 3).map((item, idx) => (
+                  <div key={item.skill} className="flex items-center justify-between">
+                    <span className="text-sm text-white">{item.skill}</span>
+                    <span className="text-xs text-gray-500 bg-white/10 px-2 py-1 rounded-full">
+                      {item.count}x
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </GlassmorphicCard>
+
+        {/* Recent Comments */}
+        <GlassmorphicCard delay={0.6} className="p-6 lg:col-span-2">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Quote className="w-5 h-5 text-purple-400" />
+            Stimme des Teams
+            <span className="text-xs text-gray-500 ml-auto">Anonymisiert</span>
+          </h3>
+
+          {feedbackData.recentComments.length > 0 ? (
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+              {feedbackData.recentComments.map((feedback, idx) => (
+                <motion.div
+                  key={feedback.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="p-4 bg-white/5 rounded-xl border border-white/10"
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        feedback.rating === 'positive'
+                          ? 'bg-green-500/20'
+                          : 'bg-orange-500/20'
+                      }`}
+                    >
+                      {feedback.rating === 'positive' ? (
+                        <ThumbsUp className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <ThumbsDown className="w-4 h-4 text-orange-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-300">{feedback.comment}</p>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                        {feedback.contextSkill && (
+                          <span className="flex items-center gap-1">
+                            <Target className="w-3 h-3" />
+                            {feedback.contextSkill}
+                          </span>
+                        )}
+                        <span>
+                          {feedback.contextType === 'impulse_completed' ? 'Nach Impuls' : 'Skill gestartet'}
+                        </span>
+                        <span>
+                          {new Date(feedback.createdAt).toLocaleDateString('de-DE', {
+                            day: '2-digit',
+                            month: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <MessageSquare className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500">Noch kein Feedback vorhanden</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Feedback wird gesammelt, wenn Nutzer Skills starten oder Impulse abschließen.
+              </p>
+            </div>
+          )}
+        </GlassmorphicCard>
+      </div>
+
+      {/* Insights Card */}
+      <GlassmorphicCard delay={0.7} className="p-6 bg-gradient-to-br from-indigo-500/10 to-purple-500/10">
+        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-indigo-400" />
+          Feedback-Insights
+        </h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+            <h4 className="font-medium text-white mb-2">Engagement</h4>
+            <p className="text-sm text-gray-400">
+              {feedbackStats.thisWeekCount > 5
+                ? 'Hohes Engagement diese Woche - das Team nutzt die Plattform aktiv.'
+                : 'Moderates Engagement - Impulse-Erinnerungen könnten helfen.'}
+            </p>
+          </div>
+          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+            <h4 className="font-medium text-white mb-2">Zufriedenheit</h4>
+            <p className="text-sm text-gray-400">
+              {satisfactionRate >= 80
+                ? 'Exzellente Zufriedenheit - die Impulse treffen den Nerv.'
+                : satisfactionRate >= 60
+                ? 'Gute Basis - einige Impulse könnten praxisnäher sein.'
+                : 'Verbesserungspotenzial - mehr reale Projektbezüge einbauen.'}
+            </p>
+          </div>
+          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+            <h4 className="font-medium text-white mb-2">Fokus-Empfehlung</h4>
+            <p className="text-sm text-gray-400">
+              {feedbackStats.topSkillMentions[0]
+                ? `"${feedbackStats.topSkillMentions[0].skill}" erhält viel Aufmerksamkeit - hier lohnt sich vertiefender Content.`
+                : 'Noch keine klaren Trends - mehr Daten sammeln.'}
             </p>
           </div>
         </div>

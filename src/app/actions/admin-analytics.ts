@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -252,7 +253,7 @@ export async function logActivity(
   activityType: 'IMPULSE_STARTED' | 'IMPULSE_COMPLETED' | 'SKILL_FOCUSED' | 'PLAN_CREATED' | 'EVIDENCE_SAVED',
   entityId?: string,
   entityName?: string,
-  metadata?: Record<string, unknown>
+  metadata?: Prisma.InputJsonValue
 ) {
   return prisma.activityLog.create({
     data: {
@@ -260,7 +261,7 @@ export async function logActivity(
       activityType,
       entityId,
       entityName,
-      metadata: metadata ? JSON.stringify(metadata) : null,
+      metadata: metadata ?? Prisma.JsonNull,
     },
   })
 }

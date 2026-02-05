@@ -549,6 +549,12 @@ export async function generateStructuredImpulse(
   }
 
   // 8. Impulse in DB speichern
+  // Estimate minutes based on level (L1: 15min, L2: 20min, L3: 30min, L4: 45min)
+  const estimatedMinutes = impulseLevel === "L1_AWARENESS" ? 15
+    : impulseLevel === "L2_GUIDED" ? 20
+    : impulseLevel === "L3_INDEPENDENT" ? 30
+    : 45
+
   const impulse = await prisma.practicalImpulse.create({
     data: {
       learningFocusId,
@@ -557,7 +563,7 @@ export async function generateStructuredImpulse(
       taskDescription,
       checkInMessage,
       expectedOutcome: outcomeTemplates[impulseLevel],
-      estimatedMinutes: levelConfig.maxMinutes,
+      estimatedMinutes,
       reflectionQuestion: "Was war die größte Herausforderung dabei?",
       currentStep: "CHECK_IN",
       functionalLeadId: functionalLead?.id ?? null,
