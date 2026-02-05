@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { getLeadDashboardData } from '@/lib/services/personalized-pathways';
 import { getAdminAnalytics } from '@/app/actions/admin-analytics';
+import { getRecentFeedback, getFeedbackStats, type FeedbackSummary } from '@/app/actions/feedback';
 import { AdminDashboardView } from './AdminDashboardView';
 
 export const dynamic = 'force-dynamic';
@@ -40,16 +41,20 @@ export default async function AdminDashboardPage() {
     redirect('/?error=unauthorized');
   }
 
-  // Fetch both data sources in parallel
-  const [dashboardData, adminAnalytics] = await Promise.all([
+  // Fetch all data sources in parallel
+  const [dashboardData, adminAnalytics, feedbackData, feedbackStats] = await Promise.all([
     getLeadDashboardData(user.id),
     getAdminAnalytics(),
+    getRecentFeedback(10),
+    getFeedbackStats(),
   ]);
 
   return (
     <AdminDashboardView
       dashboardData={dashboardData}
       adminAnalytics={adminAnalytics}
+      feedbackData={feedbackData}
+      feedbackStats={feedbackStats}
       userName={user.name || user.email}
       userRole={user.platformRole}
     />

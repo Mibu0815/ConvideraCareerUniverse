@@ -102,6 +102,7 @@ async function LearningJourneyContent({ userId }: { userId: string }) {
         <LearningRoadmap
           plan={plan}
           roadmap={roadmap}
+          userId={userId}
           onSetFocus={handleSetFocus}
           onRemoveFocus={handleRemoveFocus}
           onGenerateImpulse={handleGenerateImpulse}

@@ -20,6 +20,7 @@ interface Props {
   config: HorizonConfig
   items: any[] // LearningFocus with relations
   planId: string
+  userId: string
   focusedCount: number
   onSetFocus: (planId: string, skillId: string) => Promise<{ success: boolean; error?: string }>
   onRemoveFocus: (planId: string, skillId: string) => Promise<{ success: boolean }>
@@ -33,6 +34,7 @@ export function HorizonSection({
   config,
   items,
   planId,
+  userId,
   focusedCount,
   onSetFocus,
   onRemoveFocus,
@@ -79,6 +81,7 @@ export function HorizonSection({
             <SkillTimelineItem
               item={item}
               planId={planId}
+              userId={userId}
               canFocus={focusedCount < 3 || item.status === "IN_PROGRESS"}
               priorityColor={config.color}
               onSetFocus={onSetFocus}

@@ -12,6 +12,7 @@ import type { ImpulseStep } from "@prisma/client"
 interface Props {
   plan: any // LearningPlan with LearningFocus relations
   roadmap: RoadmapType
+  userId: string
   onSetFocus: (planId: string, skillId: string) => Promise<{ success: boolean; error?: string }>
   onRemoveFocus: (planId: string, skillId: string) => Promise<{ success: boolean }>
   onGenerateImpulse: (focusId: string) => Promise<StructuredImpulse>
@@ -52,6 +53,7 @@ const horizonConfig = {
 export function LearningRoadmap({
   plan,
   roadmap,
+  userId,
   onSetFocus,
   onRemoveFocus,
   onGenerateImpulse,
@@ -106,6 +108,7 @@ export function LearningRoadmap({
                   config={horizonConfig[priority]}
                   items={items}
                   planId={plan.id}
+                  userId={userId}
                   focusedCount={focusedItems.length}
                   onSetFocus={onSetFocus}
                   onRemoveFocus={onRemoveFocus}

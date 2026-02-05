@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, Target, Pause, User2 } from "lucide-react"
 import { ImpulseLevelIndicator } from "./ImpulseLevelIndicator"
 import { StructuredImpulseCard } from "./StructuredImpulseCard"
+import { QuickFeedback } from "@/components/feedback/QuickFeedback"
 import type { StructuredImpulse } from "@/types/practical-impulse"
 import type { ImpulseStep } from "@prisma/client"
 
@@ -58,6 +59,7 @@ interface LearningFocusItem {
 interface Props {
   item: LearningFocusItem
   planId: string
+  userId: string
   canFocus: boolean
   priorityColor: string
   onSetFocus: (planId: string, skillId: string) => Promise<{ success: boolean; error?: string }>
@@ -71,6 +73,7 @@ interface Props {
 export function SkillTimelineItem({
   item,
   planId,
+  userId,
   canFocus,
   priorityColor,
   onSetFocus,
@@ -83,6 +86,7 @@ export function SkillTimelineItem({
   const [isExpanded, setIsExpanded] = useState(item.status === "IN_PROGRESS")
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const isFocused = item.status === "IN_PROGRESS"
   const isCompleted = item.status === "COMPLETED"
@@ -97,6 +101,9 @@ export function SkillTimelineItem({
         const result = await onSetFocus(planId, item.skillId)
         if (!result.success && result.error) {
           setError(result.error)
+        } else if (result.success) {
+          // Trigger feedback when skill is set as focus
+          setShowFeedback(true)
         }
       }
       onRefresh()
@@ -238,6 +245,7 @@ export function SkillTimelineItem({
                   currentLevel={item.currentLevel}
                   targetLevel={item.targetLevel}
                   functionalLeadName={item.CompetenceField?.Owner?.name}
+                  userId={userId}
                   onGenerateImpulse={onGenerateImpulse}
                   onUpdateStep={onUpdateStep}
                   onSaveEvidence={onSaveEvidence}
@@ -273,6 +281,16 @@ export function SkillTimelineItem({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Feedback Component - Triggered when skill is set as focus */}
+      {showFeedback && (
+        <QuickFeedback
+          userId={userId}
+          contextSkill={item.Skill.title}
+          contextType="skill_started"
+          onClose={() => setShowFeedback(false)}
+        />
+      )}
     </div>
   )
 }
