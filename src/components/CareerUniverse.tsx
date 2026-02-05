@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { StructuredImpulse } from "@/types/practical-impulse";
 import { updateImpulseStep } from "@/app/actions/learning-journey";
+import { useFocusSkill } from "@/context";
 
 /* ── Design Tokens ── */
 const C = {
@@ -115,10 +116,24 @@ export default function CareerUniverse({ userData, userState }: Props) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [completedStep, setCompletedStep] = useState<string | null>(null);
 
+  // Initialize global FocusSkill context with server data
+  const { initializeFromServerData } = useFocusSkill();
+
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  // Sync server data to global context
+  useEffect(() => {
+    if (userData?.learningData) {
+      initializeFromServerData({
+        inProgressSkills: userData.learningData.inProgressSkills,
+        activeImpulse: userData.learningData.activeImpulse,
+        completedImpulsesCount: userData.learningData.completedImpulsesCount,
+      });
+    }
+  }, [userData?.learningData, initializeFromServerData]);
 
   // Handle completing the current step from homepage
   const handleCompleteStep = () => {

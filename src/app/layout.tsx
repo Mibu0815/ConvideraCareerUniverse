@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import { TargetRoleProvider } from "@/context";
+import { TargetRoleProvider, FocusSkillProvider } from "@/context";
+import { FloatingFocusBar } from "@/components/FloatingFocusBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,10 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           <TargetRoleProvider>
-            {children}
+            <FocusSkillProvider>
+              {children}
+              <FloatingFocusBar />
+            </FocusSkillProvider>
           </TargetRoleProvider>
         </AuthProvider>
       </body>

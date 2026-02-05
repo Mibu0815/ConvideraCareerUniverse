@@ -1,11 +1,13 @@
 // src/components/learning-journey/LearningJourneyView.tsx
 "use client"
 
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Sparkles, Target, ChevronDown, Check } from "lucide-react"
 import { Navigation } from "@/components/shared"
 import { SkillTimelineItem } from "./SkillTimelineItem"
+import { useFocusSkill } from "@/context"
 import type { LearningRoadmap as RoadmapType } from "@/app/actions/learning-journey"
 import type { StructuredImpulse } from "@/types/practical-impulse"
 import type { ImpulseStep } from "@prisma/client"
@@ -34,11 +36,48 @@ export function LearningJourneyView({
   onSaveEvidence
 }: Props) {
   const router = useRouter()
+  const { initializeFromServerData } = useFocusSkill()
 
   // Get focused skills (IN_PROGRESS)
   const focusedSkills = plan.LearningFocus.filter(
     (item: any) => item.status === "IN_PROGRESS"
   )
+
+  // Sync to global context
+  useEffect(() => {
+    // Map focused skills to context format
+    const inProgressSkills = focusedSkills.map((item: any) => ({
+      skillId: item.skillId,
+      skillName: item.Skill?.title || 'Skill',
+      competenceFieldName: item.CompetenceField?.name || null,
+      currentLevel: item.currentLevel,
+      targetLevel: item.targetLevel,
+      learningFocusId: item.id,
+    }))
+
+    // Find active impulse from focused skills
+    let activeImpulse = null
+    for (const item of focusedSkills) {
+      const impulses = item.PracticalImpulse || []
+      const active = impulses.find((i: any) => i.currentStep !== 'EVIDENCE' || !i.evidenceSaved)
+      if (active) {
+        activeImpulse = active
+        break
+      }
+    }
+
+    // Count completed impulses
+    const completedCount = focusedSkills.reduce((acc: number, item: any) => {
+      const impulses = item.PracticalImpulse || []
+      return acc + impulses.filter((i: any) => i.evidenceSaved).length
+    }, 0)
+
+    initializeFromServerData({
+      inProgressSkills,
+      activeImpulse,
+      completedImpulsesCount: completedCount,
+    })
+  }, [focusedSkills, initializeFromServerData])
 
   // Get other skills (not focused, not completed)
   const backlogSkills = plan.LearningFocus.filter(
