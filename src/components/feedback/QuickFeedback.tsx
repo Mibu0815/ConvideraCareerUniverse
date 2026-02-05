@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, ThumbsUp, ThumbsDown, Send, X, Sparkles } from 'lucide-react';
 import { submitFeedback } from '@/app/actions/feedback';
@@ -16,12 +17,19 @@ export function QuickFeedback({
   userId,
   contextSkill,
   contextType,
+  onClose,
 }: QuickFeedbackProps) {
   const [rating, setRating] = useState<'positive' | 'negative' | null>(null);
   const [comment, setComment] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we're on client side for portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = () => {
     if (!rating) return;
@@ -39,19 +47,25 @@ export function QuickFeedback({
       // Auto-close after showing thank you message
       setTimeout(() => {
         setIsVisible(false);
+        onClose();
       }, 2500);
     });
   };
 
   const handleClose = () => {
     setIsVisible(false);
+    onClose();
   };
 
   const contextLabel = contextType === 'impulse_completed'
     ? 'KI-Impuls'
     : 'Skill-Fokus';
 
-  return (
+  // Don't render on server or before mount
+  if (!mounted) return null;
+
+  // Use portal to render outside component tree (fixes fixed positioning issues)
+  return createPortal(
     <AnimatePresence>
       {isVisible && (
         <motion.div
@@ -185,6 +199,7 @@ export function QuickFeedback({
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }

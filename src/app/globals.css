@@ -26,6 +26,28 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improved Typography Hierarchy */
+h1 {
+  @apply text-3xl font-bold tracking-tight text-gray-900;
+}
+
+h2 {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+h3 {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+/* Better Focus States for Accessibility */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  @apply outline-none ring-2 ring-convidera-blue ring-offset-2;
 }
 
 @layer components {

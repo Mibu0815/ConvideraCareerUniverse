@@ -101,50 +101,51 @@ export function StructuredImpulseCard({
   }
 
   const handleSaveEvidence = () => {
-    if (!impulse || !reflection.trim()) return
+    if (!impulse || !reflection.trim() || impulse.evidenceSaved) return
     startTransition(async () => {
       await onSaveEvidence(impulse.id, reflection)
-      onRefresh()
-      // Trigger feedback after impulse completion
+      // Trigger feedback - NO refresh yet, refresh happens when feedback closes
       setShowFeedback(true)
     })
   }
 
+  const handleFeedbackClose = () => {
+    setShowFeedback(false)
+    // Refresh after feedback is closed
+    onRefresh()
+  }
+
   const progress = impulse ? calculateProgress(impulse) : 0
 
-  // Wenn kein Impulse existiert: Generieren-Button
+  // Wenn kein Impulse existiert: Prominenter Generieren-Button
   if (!impulse) {
     return (
-      <div className="rounded-xl border border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-6">
-        <div className="flex flex-col items-center text-center gap-4">
-          <div className="p-3 rounded-full bg-primary/10">
-            <Sparkles className="h-6 w-6 text-primary" />
+      <button
+        onClick={handleGenerate}
+        disabled={isPending}
+        className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-convidera-blue to-blue-600 p-6 text-white hover:shadow-xl hover:shadow-convidera-blue/25 transition-all disabled:opacity-70"
+      >
+        {/* Animated background effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
+        <div className="relative flex items-center justify-center gap-4">
+          <div className="p-3 rounded-full bg-white/20">
+            {isPending ? (
+              <RefreshCw className="h-6 w-6 animate-spin" />
+            ) : (
+              <Sparkles className="h-6 w-6" />
+            )}
           </div>
-          <div>
-            <h4 className="font-medium mb-1">Praktischer Impuls</h4>
-            <p className="text-sm text-muted-foreground">
-              Starte eine praxisnahe Übung für &quot;{skillName}&quot;
+          <div className="text-left">
+            <h4 className="text-lg font-semibold">
+              {isPending ? "Impuls wird generiert..." : "Impuls starten"}
+            </h4>
+            <p className="text-sm text-white/70">
+              Praxisnahe Übung für {skillName}
             </p>
           </div>
-          <button
-            onClick={handleGenerate}
-            disabled={isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
-            {isPending ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
-                Generiere...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                Impuls generieren
-              </>
-            )}
-          </button>
         </div>
-      </div>
+      </button>
     )
   }
 
@@ -430,7 +431,7 @@ export function StructuredImpulseCard({
           userId={userId}
           contextSkill={skillName}
           contextType="impulse_completed"
-          onClose={() => setShowFeedback(false)}
+          onClose={handleFeedbackClose}
         />
       )}
     </div>

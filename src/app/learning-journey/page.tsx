@@ -2,7 +2,7 @@
 
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
-import { BlobBackground, Navigation } from "@/components/shared"
+import { Navigation } from "@/components/shared"
 import { getCurrentUser } from "@/app/actions/user-sync"
 import {
   getLearningRoadmap,
@@ -14,26 +14,29 @@ import {
   updateImpulseStep,
   saveImpulseEvidence
 } from "@/app/actions/learning-journey"
-import { LearningRoadmap } from "@/components/learning-journey"
+import { LearningJourneyView } from "@/components/learning-journey"
 import type { ImpulseStep } from "@prisma/client"
 
 // Loading skeleton
 function LoadingSkeleton() {
   return (
-    <div className="container mx-auto max-w-4xl py-8">
-      <div className="animate-pulse space-y-6">
-        <div className="h-8 w-64 bg-muted rounded" />
-        <div className="h-4 w-48 bg-muted rounded" />
-        <div className="h-32 bg-muted rounded-xl" />
-        <div className="h-48 bg-muted rounded-xl" />
-        <div className="h-48 bg-muted rounded-xl" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="h-14 bg-white border-b border-gray-200" />
+      <div className="max-w-2xl mx-auto px-4 pt-20 pb-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-10 w-48 bg-gray-200 rounded-lg" />
+          <div className="h-6 w-72 bg-gray-100 rounded" />
+          <div className="h-40 bg-white rounded-2xl border border-gray-100" />
+          <div className="h-32 bg-white rounded-2xl border border-gray-100" />
+          <div className="h-32 bg-white rounded-2xl border border-gray-100" />
+        </div>
       </div>
     </div>
   )
 }
 
 // Server-side data fetching
-async function LearningJourneyContent({ userId }: { userId: string }) {
+async function LearningJourneyContent({ userId, userName }: { userId: string; userName: string | null }) {
   // Generate/refresh the learning plan
   const { planId } = await generateOrRefreshLearningPlan(userId)
 
@@ -45,8 +48,14 @@ async function LearningJourneyContent({ userId }: { userId: string }) {
 
   if (!plan) {
     return (
-      <div className="container mx-auto max-w-4xl py-8">
-        <p className="text-muted-foreground">Kein Lernplan gefunden.</p>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation userName={userName} />
+        <div className="max-w-2xl mx-auto px-4 pt-24 pb-8 text-center">
+          <p className="text-gray-500">Noch kein Lernplan vorhanden.</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Wähle zuerst deine aktuelle und Zielrolle aus.
+          </p>
+        </div>
       </div>
     )
   }
@@ -78,39 +87,17 @@ async function LearningJourneyContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-brand-gray-50 bg-grid">
-      <BlobBackground />
-      <Navigation />
-      <div className="container mx-auto max-w-4xl pt-24 pb-24 sm:pb-8 px-4">
-        <header className="mb-10">
-          <h1 className="text-3xl font-bold tracking-tight text-convidera-dark">
-            Deine Learning Journey
-          </h1>
-          {roadmap.meta.currentRoleName && (
-            <p className="mt-2 text-brand-gray-500">
-              {roadmap.meta.currentRoleName}
-              {roadmap.meta.targetRoleName && roadmap.meta.targetRoleName !== roadmap.meta.currentRoleName && (
-                <> → <span className="text-convidera-blue font-medium">{roadmap.meta.targetRoleName}</span></>
-              )}
-            </p>
-          )}
-          <p className="mt-1 text-sm text-brand-gray-400">
-            {roadmap.meta.totalGaps} Skill{roadmap.meta.totalGaps !== 1 ? "s" : ""} mit Entwicklungspotenzial
-          </p>
-        </header>
-
-        <LearningRoadmap
-          plan={plan}
-          roadmap={roadmap}
-          userId={userId}
-          onSetFocus={handleSetFocus}
-          onRemoveFocus={handleRemoveFocus}
-          onGenerateImpulse={handleGenerateImpulse}
-          onUpdateStep={handleUpdateStep}
-          onSaveEvidence={handleSaveEvidence}
-        />
-      </div>
-    </div>
+    <LearningJourneyView
+      plan={plan}
+      roadmap={roadmap}
+      userId={userId}
+      userName={userName}
+      onSetFocus={handleSetFocus}
+      onRemoveFocus={handleRemoveFocus}
+      onGenerateImpulse={handleGenerateImpulse}
+      onUpdateStep={handleUpdateStep}
+      onSaveEvidence={handleSaveEvidence}
+    />
   )
 }
 
@@ -123,12 +110,12 @@ export default async function LearningJourneyPage() {
   }
 
   if (!user.currentRoleId) {
-    redirect('/onboarding')
+    redirect('/my-career')
   }
 
   return (
     <Suspense fallback={<LoadingSkeleton />}>
-      <LearningJourneyContent userId={user.id} />
+      <LearningJourneyContent userId={user.id} userName={user.name} />
     </Suspense>
   )
 }

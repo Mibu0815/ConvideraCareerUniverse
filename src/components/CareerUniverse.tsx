@@ -337,56 +337,71 @@ export default function CareerUniverse({ userData }: Props) {
           {/* ═══ RIGHT: Widgets ═══ */}
           <div style={{ flex: "1 1 540px", display: "flex", flexDirection: "column", gap: "20px" }}>
 
-            {/* Role Selector */}
-            <div className="gc" style={{ ...glass, ...anim(2), padding: "20px 26px", display: "flex", alignItems: "center", gap: "16px" }}>
+            {/* Role Selector - Clickable Card */}
+            <div
+              className="gc"
+              onClick={() => router.push('/my-career')}
+              style={{
+                ...glass, ...anim(2),
+                padding: "20px 26px",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                cursor: "pointer",
+              }}
+            >
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: "10.5px", fontWeight: 700, color: C.textFaint, letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: "7px", display: "block" }}>Von Rolle</label>
-                <select className="ss" value={fromRole} onChange={e => setFromRole(e.target.value)} style={{
-                  width: "100%", padding: "10px 14px", borderRadius: "12px",
+                <label style={{ fontSize: "10.5px", fontWeight: 700, color: C.textFaint, letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: "7px", display: "block" }}>Aktuelle Rolle</label>
+                <div style={{
+                  padding: "10px 14px", borderRadius: "12px",
                   border: `1px solid ${C.border}`, fontSize: "14px", fontWeight: 500,
                   color: fromRole ? C.dark : C.textFaint, background: "rgba(255,255,255,.85)",
                 }}>
-                  <option value="">Aktuelle Rolle wählen…</option>
-                  {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
+                  {fromRole || "Rolle wählen →"}
+                </div>
               </div>
               <div style={{
-                width: "36px", height: "36px", borderRadius: "50%", background: "#F1F5F9",
+                width: "36px", height: "36px", borderRadius: "50%", background: C.blue,
                 display: "flex", alignItems: "center", justifyContent: "center", marginTop: "22px", flexShrink: 0,
               }}>
-                <ArrowRight size={16} color={C.textMuted}/>
+                <ArrowRight size={16} color="#fff"/>
               </div>
               <div style={{ flex: 1 }}>
                 <label style={{ fontSize: "10.5px", fontWeight: 700, color: C.textFaint, letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: "7px", display: "block" }}>Zielrolle</label>
-                <select className="ss" value={toRole} onChange={e => setToRole(e.target.value)} style={{
-                  width: "100%", padding: "10px 14px", borderRadius: "12px",
+                <div style={{
+                  padding: "10px 14px", borderRadius: "12px",
                   border: `1px solid ${C.border}`, fontSize: "14px", fontWeight: 500,
                   color: toRole ? C.dark : C.textFaint, background: "rgba(255,255,255,.85)",
                 }}>
-                  <option value="">Zielrolle wählen…</option>
-                  {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
+                  {toRole || "Ziel wählen →"}
+                </div>
               </div>
             </div>
 
             {/* 2×2 Grid */}
             <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: "20px" }}>
 
-              {/* KPI Card */}
-              <div className="gc" style={{ ...glass, ...anim(3), padding: "28px", position: "relative", overflow: "hidden" }}>
+              {/* KPI Card - Clickable */}
+              <div
+                className="gc"
+                onClick={() => router.push('/my-career/compare')}
+                style={{ ...glass, ...anim(3), padding: "28px", position: "relative", overflow: "hidden", cursor: "pointer" }}
+              >
                 <span style={{
                   position: "absolute", top: "18px", right: "18px",
                   background: C.blue, color: "#fff", fontSize: "9.5px", fontWeight: 700,
                   padding: "3.5px 10px", borderRadius: "7px", letterSpacing: ".9px",
-                }}>NEW</span>
+                }}>KLICK</span>
                 <h3 style={{ fontSize: "18px", fontWeight: 700, color: C.dark, lineHeight: 1.3, marginBottom: "6px", paddingRight: "54px" }}>
-                  Dein Weg zur nächsten Karrierestufe
+                  {userData?.currentRole && userData?.targetRole
+                    ? `${userData.currentRole.title} → ${userData.targetRole.title}`
+                    : "Dein Weg zur nächsten Karrierestufe"}
                 </h3>
                 <p style={{ fontSize: "12.5px", color: C.textFaint, marginBottom: "22px", letterSpacing: ".15px" }}>
-                  Detaillierter Vergleich zum nächsten Level.
+                  Klicke hier für den detaillierten Skill-Vergleich.
                 </p>
                 <div style={{ display: "flex", gap: "22px", marginBottom: "22px" }}>
-                  {[{ c: C.blue, l: "Current" }, { c: C.dark, l: "Target" }].map(d => (
+                  {[{ c: C.blue, l: "Aktuell" }, { c: C.dark, l: "Ziel" }].map(d => (
                     <div key={d.l} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: d.c }}/>
                       <span style={{ fontSize: "12px", color: C.textMuted, fontWeight: 500 }}>{d.l}</span>
@@ -395,29 +410,43 @@ export default function CareerUniverse({ userData }: Props) {
                 </div>
                 <div style={{ display: "flex", gap: "30px" }}>
                   <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, color: C.blue, letterSpacing: ".8px", textTransform: "uppercase", marginBottom: "5px" }}>Gaps</div>
-                    <div style={{ fontSize: "48px", fontWeight: 800, color: C.dark, lineHeight: 1, letterSpacing: "-3px" }}>17</div>
-                    <div style={{ fontSize: "11.5px", color: C.textFaint, marginTop: "4px" }}>Kompetenzen</div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: C.blue, letterSpacing: ".8px", textTransform: "uppercase", marginBottom: "5px" }}>Fokus-Skills</div>
+                    <div style={{ fontSize: "48px", fontWeight: 800, color: C.dark, lineHeight: 1, letterSpacing: "-3px" }}>
+                      {userData?.learningData?.inProgressSkills?.length ?? 0}
+                    </div>
+                    <div style={{ fontSize: "11.5px", color: C.textFaint, marginTop: "4px" }}>von 3 aktiv</div>
                   </div>
                   <div style={{ width: "1px", background: C.border, alignSelf: "stretch", margin: "4px 0" }}/>
                   <div>
-                    <div style={{ fontSize: "10px", fontWeight: 700, color: "#10B981", letterSpacing: ".8px", textTransform: "uppercase", marginBottom: "5px" }}>Upgrades</div>
-                    <div style={{ fontSize: "48px", fontWeight: 800, color: C.dark, lineHeight: 1, letterSpacing: "-3px" }}>6</div>
-                    <div style={{ fontSize: "11.5px", color: C.textFaint, marginTop: "4px" }}>Level-Ups möglich</div>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: "#10B981", letterSpacing: ".8px", textTransform: "uppercase", marginBottom: "5px" }}>Impulse</div>
+                    <div style={{ fontSize: "48px", fontWeight: 800, color: C.dark, lineHeight: 1, letterSpacing: "-3px" }}>
+                      {userData?.learningData?.completedImpulsesCount ?? 0}
+                    </div>
+                    <div style={{ fontSize: "11.5px", color: C.textFaint, marginTop: "4px" }}>abgeschlossen</div>
                   </div>
                 </div>
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "4px", background: "#EFF2F5" }}>
-                  <div style={{ width: "35%", height: "100%", background: `linear-gradient(90deg,${C.blue},#3388FF)`, borderRadius: "0 3px 3px 0" }}/>
+                  <div style={{
+                    width: `${((userData?.learningData?.inProgressSkills?.length ?? 0) / 3) * 100}%`,
+                    height: "100%",
+                    background: `linear-gradient(90deg,${C.blue},#3388FF)`,
+                    borderRadius: "0 3px 3px 0",
+                    transition: "width 0.5s ease"
+                  }}/>
                 </div>
               </div>
 
-              {/* Radar Chart */}
-              <div className="gc" style={{ ...glass, ...anim(4), padding: "22px", position: "relative" }}>
+              {/* Radar Chart - Clickable */}
+              <div
+                className="gc"
+                onClick={() => router.push('/learning-journey')}
+                style={{ ...glass, ...anim(4), padding: "22px", position: "relative", cursor: "pointer" }}
+              >
                 <span style={{
                   position: "absolute", top: "18px", right: "18px", zIndex: 2,
                   background: C.blue, color: "#fff", fontSize: "9.5px", fontWeight: 700,
                   padding: "3.5px 10px", borderRadius: "7px", letterSpacing: ".9px",
-                }}>NEW</span>
+                }}>LERNPFAD</span>
                 <ResponsiveContainer width="100%" height={245}>
                   <RadarChart data={radarData} cx="50%" cy="52%" outerRadius="72%">
                     <PolarGrid stroke={C.border} strokeWidth={1}/>
@@ -448,31 +477,36 @@ export default function CareerUniverse({ userData }: Props) {
                 </div>
               </div>
 
-              {/* Career Path */}
-              <div className="gc" style={{
-                ...glass, ...anim(5), padding: "28px", position: "relative",
-                display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "180px",
-              }}>
+              {/* Career Path - Clickable */}
+              <div
+                className="gc"
+                onClick={() => router.push('/my-career')}
+                style={{
+                  ...glass, ...anim(5), padding: "28px", position: "relative",
+                  display: "flex", flexDirection: "column", justifyContent: "center", minHeight: "180px",
+                  cursor: "pointer",
+                }}
+              >
                 <span style={{
                   position: "absolute", top: "18px", right: "18px",
                   background: C.blue, color: "#fff", fontSize: "9.5px", fontWeight: 700,
                   padding: "3.5px 10px", borderRadius: "7px", letterSpacing: ".9px",
-                }}>NEW</span>
+                }}>START</span>
                 <h3 style={{ fontSize: "18px", fontWeight: 700, color: C.dark, lineHeight: 1.3, marginBottom: "10px", paddingRight: "54px" }}>
                   Bereit für deine Karriere-Reise?
                 </h3>
                 <p style={{ fontSize: "12.5px", color: C.textFaint, lineHeight: 1.65, marginBottom: "24px" }}>
                   Wähle deine Rollen für einen detaillierten Vergleich aller Skills und Verantwortlichkeiten.
                 </p>
-                <button className="outline-btn" onClick={() => router.push('/my-career')} style={{
-                  background: "none", border: `1.5px solid ${C.border}`,
+                <div style={{
+                  background: C.blue, color: "#fff",
                   padding: "10px 22px", borderRadius: "12px",
-                  fontSize: "13px", fontWeight: 600, color: C.blue,
-                  cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "8px",
-                  alignSelf: "flex-start", fontFamily: "'Outfit',sans-serif",
+                  fontSize: "13px", fontWeight: 600,
+                  display: "inline-flex", alignItems: "center", gap: "8px",
+                  alignSelf: "flex-start",
                 }}>
                   Vergleich starten <ArrowRight size={14}/>
-                </button>
+                </div>
               </div>
 
               {/* AI Mentor (Dark) */}

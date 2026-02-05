@@ -3,8 +3,8 @@
 
 import { useState, useTransition } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, Target, Pause, User2 } from "lucide-react"
-import { ImpulseLevelIndicator } from "./ImpulseLevelIndicator"
+import { Sparkles, ChevronRight, Check, Clock, Target, User2 } from "lucide-react"
+import { ImpulseLevelIndicator, getLevelLabel } from "./ImpulseLevelIndicator"
 import { StructuredImpulseCard } from "./StructuredImpulseCard"
 import { QuickFeedback } from "@/components/feedback/QuickFeedback"
 import type { StructuredImpulse } from "@/types/practical-impulse"
@@ -32,7 +32,6 @@ interface LearningFocusItem {
     targetLevel: string
     isCompleted: boolean
     userReflection: string | null
-    // Neue strukturierte Felder
     checkInMessage?: string | null
     taskDescription?: string | null
     reflectionQuestion?: string | null
@@ -91,82 +90,129 @@ export function SkillTimelineItem({
   const isFocused = item.status === "IN_PROGRESS"
   const isCompleted = item.status === "COMPLETED"
   const latestImpulse = item.PracticalImpulse[0] ?? null
+  const hasActiveImpulse = latestImpulse && !latestImpulse.isCompleted
 
   const handleFocusToggle = () => {
     setError(null)
     startTransition(async () => {
       if (isFocused) {
         await onRemoveFocus(planId, item.skillId)
+        onRefresh()
       } else {
         const result = await onSetFocus(planId, item.skillId)
         if (!result.success && result.error) {
           setError(result.error)
+          onRefresh()
         } else if (result.success) {
-          // Trigger feedback when skill is set as focus
           setShowFeedback(true)
         }
       }
-      onRefresh()
     })
   }
 
+  const handleFeedbackClose = () => {
+    setShowFeedback(false)
+    onRefresh()
+  }
+
+  // Progress calculation
+  const progressPercent = Math.round((item.currentLevel / item.targetLevel) * 100)
+
   return (
-    <div className={`rounded-xl border transition-all ${
-      isFocused ? "border-primary bg-primary/5 shadow-sm" :
-      isCompleted ? "border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/20" :
-      "bg-card hover:border-muted-foreground/30"
-    }`}>
-      {/* Header (always visible) */}
-      <button
+    <div className={`
+      rounded-2xl border-2 transition-all bg-white
+      ${isFocused
+        ? "border-convidera-blue shadow-lg shadow-convidera-blue/10"
+        : isCompleted
+          ? "border-emerald-300 bg-emerald-50/30"
+          : "border-gray-100 hover:border-gray-200 hover:shadow-md"
+      }
+    `}>
+      {/* Card Header - Always Visible */}
+      <div
+        className="p-5 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-3 p-4 text-left"
       >
-        {/* Level indicator bars */}
-        <div className="flex items-center gap-1 shrink-0">
-          {Array.from({ length: item.targetLevel }, (_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 w-4 rounded-full transition-colors ${
-                i < item.currentLevel ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
-          <span className="text-xs text-muted-foreground ml-1 font-mono">
-            {item.currentLevel}/{item.targetLevel}
-          </span>
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className={`text-sm font-semibold truncate ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
-              {item.Skill.title}
-            </h3>
-            {isFocused && (
-              <span className="shrink-0 text-xs px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground font-medium">
-                Fokus {item.focusOrder}
-              </span>
-            )}
-            {isCompleted && (
-              <span className="shrink-0 text-xs px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
-                ✓
-              </span>
-            )}
+        <div className="flex items-start gap-4">
+          {/* Progress Ring */}
+          <div className="relative w-14 h-14 shrink-0">
+            <svg className="w-14 h-14 -rotate-90">
+              <circle
+                cx="28"
+                cy="28"
+                r="24"
+                fill="none"
+                stroke="#E5E7EB"
+                strokeWidth="4"
+              />
+              <circle
+                cx="28"
+                cy="28"
+                r="24"
+                fill="none"
+                stroke={isCompleted ? "#10B981" : "#0055FF"}
+                strokeWidth="4"
+                strokeDasharray={`${progressPercent * 1.51} 151`}
+                strokeLinecap="round"
+                className="transition-all duration-500"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              {isCompleted ? (
+                <Check className="w-5 h-5 text-emerald-600" />
+              ) : (
+                <span className="text-sm font-bold text-gray-900">
+                  {item.currentLevel}/{item.targetLevel}
+                </span>
+              )}
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {item.CompetenceField?.title}
-            {item.CompetenceField?.Owner && ` · Mentor: ${item.CompetenceField.Owner.name}`}
-          </p>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className={`text-lg font-semibold text-gray-900 ${isCompleted ? "line-through opacity-60" : ""}`}>
+                  {item.Skill.title}
+                </h3>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {item.CompetenceField?.title}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <ImpulseLevelIndicator requiredLevel={item.targetLevel} compact />
+                {isFocused && (
+                  <span className="px-2 py-0.5 rounded-full bg-convidera-blue text-white text-xs font-medium">
+                    Fokus
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Info */}
+            <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+              <span className="flex items-center gap-1">
+                <Target className="w-3.5 h-3.5" />
+                {getLevelLabel(item.targetLevel)}
+              </span>
+              {item.EvidenceNote.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  {item.EvidenceNote.length} Beleg{item.EvidenceNote.length !== 1 ? "e" : ""}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Expand Arrow */}
+          <ChevronRight
+            className={`w-5 h-5 text-gray-300 transition-transform shrink-0 ${isExpanded ? "rotate-90" : ""}`}
+          />
         </div>
+      </div>
 
-        {/* Impulse Level Badge */}
-        <ImpulseLevelIndicator requiredLevel={item.targetLevel} compact />
-
-        <ChevronDown className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform ${
-          isExpanded ? "rotate-180" : ""
-        }`} />
-      </button>
-
-      {/* Expanded Area */}
+      {/* Expanded Content */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -176,105 +222,119 @@ export function SkillTimelineItem({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 space-y-4 border-t pt-4">
+            <div className="px-5 pb-5 pt-0 space-y-4 border-t border-gray-100">
               {/* Error message */}
               {error && (
-                <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
+                <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
                   {error}
-                </p>
-              )}
-
-              {/* Focus Button */}
-              {!isCompleted && (
-                <button
-                  onClick={handleFocusToggle}
-                  disabled={isPending || (!canFocus && !isFocused)}
-                  className={`flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                    isFocused
-                      ? "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                      : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
-                  }`}
-                >
-                  {isFocused ? (
-                    <><Pause className="h-3.5 w-3.5" /> Fokus pausieren</>
-                  ) : (
-                    <><Target className="h-3.5 w-3.5" /> Als Fokus aktivieren</>
-                  )}
-                </button>
-              )}
-
-              {/* Mentor Info */}
-              {item.CompetenceField?.Owner && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 rounded-lg bg-secondary/50">
-                  <User2 className="h-4 w-4 text-primary/60 shrink-0" />
-                  <span>
-                    Functional Lead: <span className="font-medium text-foreground">{item.CompetenceField.Owner.name}</span>
-                  </span>
                 </div>
               )}
 
-              {/* Structured Practical Impulse (only for focused skills) */}
-              {isFocused && (
-                <StructuredImpulseCard
-                  learningFocusId={item.id}
-                  existingImpulse={latestImpulse && !latestImpulse.isCompleted ? {
-                    id: latestImpulse.id,
-                    learningFocusId: item.id,
-                    targetLevel: latestImpulse.targetLevel as any,
-                    currentStep: (latestImpulse.currentStep as ImpulseStep) ?? "CHECK_IN",
-                    checkInMessage: latestImpulse.checkInMessage ?? null,
-                    checkInViewedAt: latestImpulse.checkInViewedAt ?? null,
-                    taskDescription: latestImpulse.taskDescription ?? null,
-                    prompt: latestImpulse.prompt,
-                    expectedOutcome: latestImpulse.expectedOutcome ?? null,
-                    estimatedMinutes: latestImpulse.estimatedMinutes ?? null,
-                    taskStartedAt: latestImpulse.taskStartedAt ?? null,
-                    reflectionQuestion: latestImpulse.reflectionQuestion ?? null,
-                    userReflection: latestImpulse.userReflection ?? null,
-                    reflectionStartedAt: latestImpulse.reflectionStartedAt ?? null,
-                    evidenceSaved: latestImpulse.evidenceSaved ?? false,
-                    evidenceNoteId: latestImpulse.evidenceNoteId ?? null,
-                    evidenceSavedAt: latestImpulse.evidenceSavedAt ?? null,
-                    functionalLeadId: latestImpulse.functionalLeadId ?? null,
-                    functionalLeadName: latestImpulse.functionalLeadName ?? null,
-                    isCompleted: latestImpulse.isCompleted,
-                    completedAt: latestImpulse.completedAt ?? null,
-                    generatedAt: latestImpulse.generatedAt ?? new Date()
-                  } : null}
-                  skillName={item.Skill.title}
-                  currentLevel={item.currentLevel}
-                  targetLevel={item.targetLevel}
-                  functionalLeadName={item.CompetenceField?.Owner?.name}
-                  userId={userId}
-                  onGenerateImpulse={onGenerateImpulse}
-                  onUpdateStep={onUpdateStep}
-                  onSaveEvidence={onSaveEvidence}
-                  onRefresh={onRefresh}
-                />
-              )}
+              {/* Main Action Area */}
+              <div className="mt-4">
+                {!isFocused && !isCompleted ? (
+                  // Not focused - Show activation CTA
+                  <button
+                    onClick={handleFocusToggle}
+                    disabled={isPending || !canFocus}
+                    className="w-full flex items-center justify-center gap-3 p-4 rounded-xl bg-gradient-to-r from-convidera-blue to-blue-600 text-white font-medium hover:shadow-lg hover:shadow-convidera-blue/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    <span>Diesen Skill jetzt lernen</span>
+                  </button>
+                ) : isFocused ? (
+                  // Focused - Show Impulse Card or Generate Button
+                  <div className="space-y-4">
+                    {/* Mentor Info */}
+                    {item.CompetenceField?.Owner && (
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white text-xs font-medium">
+                          {item.CompetenceField.Owner.name[0]}
+                        </div>
+                        <div className="text-sm">
+                          <span className="text-gray-500">Dein Mentor:</span>
+                          <span className="font-medium text-gray-900 ml-1">
+                            {item.CompetenceField.Owner.name}
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
-              {/* Evidence Notes */}
+                    {/* Structured Impulse Card */}
+                    <StructuredImpulseCard
+                      learningFocusId={item.id}
+                      existingImpulse={hasActiveImpulse ? {
+                        id: latestImpulse.id,
+                        learningFocusId: item.id,
+                        targetLevel: latestImpulse.targetLevel as any,
+                        currentStep: (latestImpulse.currentStep as ImpulseStep) ?? "CHECK_IN",
+                        checkInMessage: latestImpulse.checkInMessage ?? null,
+                        checkInViewedAt: latestImpulse.checkInViewedAt ?? null,
+                        taskDescription: latestImpulse.taskDescription ?? null,
+                        prompt: latestImpulse.prompt,
+                        expectedOutcome: latestImpulse.expectedOutcome ?? null,
+                        estimatedMinutes: latestImpulse.estimatedMinutes ?? null,
+                        taskStartedAt: latestImpulse.taskStartedAt ?? null,
+                        reflectionQuestion: latestImpulse.reflectionQuestion ?? null,
+                        userReflection: latestImpulse.userReflection ?? null,
+                        reflectionStartedAt: latestImpulse.reflectionStartedAt ?? null,
+                        evidenceSaved: latestImpulse.evidenceSaved ?? false,
+                        evidenceNoteId: latestImpulse.evidenceNoteId ?? null,
+                        evidenceSavedAt: latestImpulse.evidenceSavedAt ?? null,
+                        functionalLeadId: latestImpulse.functionalLeadId ?? null,
+                        functionalLeadName: latestImpulse.functionalLeadName ?? null,
+                        isCompleted: latestImpulse.isCompleted,
+                        completedAt: latestImpulse.completedAt ?? null,
+                        generatedAt: latestImpulse.generatedAt ?? new Date()
+                      } : null}
+                      skillName={item.Skill.title}
+                      currentLevel={item.currentLevel}
+                      targetLevel={item.targetLevel}
+                      functionalLeadName={item.CompetenceField?.Owner?.name}
+                      userId={userId}
+                      onGenerateImpulse={onGenerateImpulse}
+                      onUpdateStep={onUpdateStep}
+                      onSaveEvidence={onSaveEvidence}
+                      onRefresh={onRefresh}
+                    />
+
+                    {/* Pause Focus Button */}
+                    <button
+                      onClick={handleFocusToggle}
+                      disabled={isPending}
+                      className="w-full p-3 rounded-lg border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 transition-colors"
+                    >
+                      Fokus pausieren
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Evidence Notes Timeline */}
               {item.EvidenceNote.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Evidence-Notes
+                <div className="pt-4 border-t border-gray-100">
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    Deine Belege
                   </h4>
-                  {item.EvidenceNote.map((note) => (
-                    <div key={note.id} className="text-sm p-3 rounded-lg bg-secondary/50">
-                      <p className="text-foreground/80">{note.content}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(note.createdAt).toLocaleDateString("de-DE")}
-                        {note.isAssessmentReady && " · 📋 Für Assessment vorgemerkt"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Skill Description */}
-              {item.Skill.description && (
-                <div className="text-xs text-muted-foreground border-t pt-3">
-                  <span className="font-medium">Skill-Beschreibung:</span> {item.Skill.description}
+                  <div className="space-y-3">
+                    {item.EvidenceNote.slice(0, 3).map((note, index) => (
+                      <div
+                        key={note.id}
+                        className="relative pl-6 before:absolute before:left-2 before:top-2 before:w-1.5 before:h-1.5 before:rounded-full before:bg-emerald-400"
+                      >
+                        <p className="text-sm text-gray-700 line-clamp-2">{note.content}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(note.createdAt).toLocaleDateString("de-DE", {
+                            day: "numeric",
+                            month: "short"
+                          })}
+                          {note.isAssessmentReady && (
+                            <span className="ml-2 text-emerald-600">• Bereit für Assessment</span>
+                          )}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -282,13 +342,13 @@ export function SkillTimelineItem({
         )}
       </AnimatePresence>
 
-      {/* Feedback Component - Triggered when skill is set as focus */}
+      {/* Feedback Portal */}
       {showFeedback && (
         <QuickFeedback
           userId={userId}
           contextSkill={item.Skill.title}
           contextType="skill_started"
-          onClose={() => setShowFeedback(false)}
+          onClose={handleFeedbackClose}
         />
       )}
     </div>
