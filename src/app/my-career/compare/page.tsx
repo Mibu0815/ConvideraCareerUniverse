@@ -1,12 +1,22 @@
 import { getRoles, type GroupedRoles } from '@/app/actions/get-roles';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { getDashboardLearningData, type DashboardLearningData } from '@/app/actions/learning-journey';
 import { CompareView } from './components/CompareView';
 
 // Force dynamic rendering (requires database connection)
 export const dynamic = 'force-dynamic';
 
-async function getUserRoles() {
+interface UserWithLearningData {
+  id: string;
+  currentRoleId: string | null;
+  targetRoleId: string | null;
+  planId: string | null;
+  focusedSkillIds: string[];
+  learningData: DashboardLearningData | null;
+}
+
+async function getUserWithLearningData(): Promise<UserWithLearningData | null> {
   try {
     const supabase = await createClient();
     const { data: { user: supabaseUser } } = await supabase.auth.getUser();
@@ -18,12 +28,34 @@ async function getUserRoles() {
     const user = await prisma.user.findUnique({
       where: { email: supabaseUser.email },
       select: {
+        id: true,
         currentRoleId: true,
         targetRoleId: true,
+        LearningPlan: {
+          select: {
+            id: true,
+            LearningFocus: {
+              where: { status: 'IN_PROGRESS' },
+              select: { skillId: true },
+            },
+          },
+        },
       },
     });
 
-    return user;
+    if (!user) return null;
+
+    // Fetch dashboard learning data in parallel
+    const learningData = await getDashboardLearningData(user.id);
+
+    return {
+      id: user.id,
+      currentRoleId: user.currentRoleId,
+      targetRoleId: user.targetRoleId,
+      planId: user.LearningPlan?.id || null,
+      focusedSkillIds: user.LearningPlan?.LearningFocus.map(f => f.skillId) ?? [],
+      learningData,
+    };
   } catch {
     return null;
   }
@@ -81,9 +113,9 @@ export default async function ComparePage() {
 
   try {
     // Fetch roles and user data in parallel
-    const [roles, userRoles] = await Promise.all([
+    const [roles, userData] = await Promise.all([
       getRoles(),
-      getUserRoles(),
+      getUserWithLearningData(),
     ]);
 
     groupedRoles = roles;
@@ -100,8 +132,13 @@ export default async function ComparePage() {
     return (
       <CompareView
         groupedRoles={groupedRoles}
-        initialFromRoleId={userRoles?.currentRoleId || null}
-        initialToRoleId={userRoles?.targetRoleId || null}
+        initialFromRoleId={userData?.currentRoleId || null}
+        initialToRoleId={userData?.targetRoleId || null}
+        userId={userData?.id || null}
+        initialFocusedSkillIds={userData?.focusedSkillIds ?? []}
+        initialPlanId={userData?.planId || null}
+        completedImpulses={userData?.learningData?.recentCompletedImpulses ?? []}
+        totalFocusedSkills={userData?.learningData?.inProgressSkills.length ?? 0}
       />
     );
   } catch (e) {

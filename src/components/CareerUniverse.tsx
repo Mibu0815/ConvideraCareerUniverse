@@ -88,6 +88,28 @@ const features = [
 
 const navItems = ["Dashboard", "Karriereziele", "Lernpfad", "Insights", "Einstellungen"];
 
+interface InProgressSkill {
+  skillId: string;
+  skillName: string;
+  competenceFieldName: string | null;
+  currentLevel: number;
+  targetLevel: number;
+  learningFocusId: string;
+}
+
+interface LearningData {
+  inProgressSkills: InProgressSkill[];
+  activeImpulse: unknown | null;
+  completedImpulsesCount: number;
+  recentCompletedImpulses: Array<{
+    id: string;
+    skillName: string;
+    completedAt: Date | null;
+    userReflection: string | null;
+  }>;
+  planId: string | null;
+}
+
 interface UserData {
   id: string;
   name: string | null;
@@ -96,6 +118,7 @@ interface UserData {
   targetRoleId: string | null;
   currentRole: { id: string; title: string; level: string; hasLeadership: boolean; leadershipType: string | null } | null;
   targetRole: { id: string; title: string; level: string; hasLeadership: boolean; leadershipType: string | null } | null;
+  learningData?: LearningData | null;
 }
 
 interface Props {
@@ -232,6 +255,7 @@ export default function CareerUniverse({ userData }: Props) {
           </nav>
           <div
             onClick={() => router.push('/my-career')}
+            suppressHydrationWarning
             style={{
               width: "38px", height: "38px", borderRadius: "50%", cursor: "pointer",
               background: `linear-gradient(135deg,${C.blue},#3366FF)`,
@@ -475,34 +499,84 @@ export default function CareerUniverse({ userData }: Props) {
                   <p style={{ fontSize: "12px", color: "rgba(255,255,255,.42)", marginBottom: "16px", lineHeight: 1.6 }}>
                     Dein persönlicher Karriere-Coach, powered by Claude AI.
                   </p>
-                  <div style={{
-                    background: "rgba(0,85,255,0.1)", border: "1px solid rgba(0,85,255,0.18)",
-                    borderRadius: "14px", padding: "13px 16px", marginBottom: "16px",
-                  }}>
-                    <p style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", lineHeight: 1.7 }}>
-                      Fokussiere dich diese Woche auf{" "}
-                      <strong style={{ color: "#60A5FA" }}>Stakeholder Management</strong>
-                      {" "}&#8211; dein größter Gap zur Zielrolle.
-                    </p>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "22px" }}>
-                    {[
-                      "Nutze dein nächstes Meeting für eine kurze Skill-Übung.",
-                      "Dein Fortschritt: 3 von 5 Impulsen diese Woche abgeschlossen.",
-                    ].map((t, i) => (
-                      <div key={i} style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", lineHeight: 1.6, paddingLeft: "15px", position: "relative" }}>
-                        <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>{t}
+
+                  {/* Dynamic skill focus display */}
+                  {userData?.learningData?.inProgressSkills && userData.learningData.inProgressSkills.length > 0 ? (
+                    <>
+                      <div style={{
+                        background: "rgba(0,85,255,0.1)", border: "1px solid rgba(0,85,255,0.18)",
+                        borderRadius: "14px", padding: "13px 16px", marginBottom: "16px",
+                      }}>
+                        <p style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", lineHeight: 1.7 }}>
+                          Du arbeitest gerade an{" "}
+                          <strong style={{ color: "#60A5FA" }}>
+                            {userData.learningData.inProgressSkills[0].skillName}
+                          </strong>
+                          {" "}(Level {userData.learningData.inProgressSkills[0].currentLevel} → {userData.learningData.inProgressSkills[0].targetLevel})
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                  <button className="mentor-btn" onClick={() => router.push('/my-career')} style={{
-                    background: `linear-gradient(135deg,${C.blue},#0044DD)`,
-                    color: "#fff", border: "none", padding: "13px 24px", borderRadius: "13px",
-                    fontSize: "13px", fontWeight: 600, cursor: "pointer", width: "100%",
-                    fontFamily: "'Outfit',sans-serif", letterSpacing: ".2px",
-                    boxShadow: `0 4px 18px ${C.blueGlow}`,
-                  }}>
-                    Smarten Impuls starten &rarr;
+
+                      {/* Show additional focused skills */}
+                      {userData.learningData.inProgressSkills.length > 1 && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+                          {userData.learningData.inProgressSkills.slice(1).map((skill, i) => (
+                            <div key={i} style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", paddingLeft: "15px", position: "relative" }}>
+                              <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>
+                              {skill.skillName} (L{skill.currentLevel} → L{skill.targetLevel})
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Progress info */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "22px" }}>
+                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", lineHeight: 1.6, paddingLeft: "15px", position: "relative" }}>
+                          <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>
+                          {userData.learningData.completedImpulsesCount} Impulse abgeschlossen
+                        </div>
+                        <div style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", lineHeight: 1.6, paddingLeft: "15px", position: "relative" }}>
+                          <span style={{ position: "absolute", left: 0, color: "#60A5FA" }}>&#9656;</span>
+                          {userData.learningData.inProgressSkills.length} / 3 Fokus-Skills aktiv
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{
+                      background: "rgba(255,255,255,0.05)",
+                      borderRadius: "14px",
+                      padding: "16px",
+                      marginBottom: "16px",
+                      textAlign: "center"
+                    }}>
+                      <p style={{ fontSize: "12px", color: "rgba(255,255,255,.58)", marginBottom: "8px" }}>
+                        Noch keine Lernziele aktiv.
+                      </p>
+                      <p style={{ fontSize: "11px", color: "rgba(255,255,255,.38)" }}>
+                        Starte mit einem Skill-Vergleich, um deine Fokus-Skills festzulegen.
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    className="mentor-btn"
+                    onClick={() => {
+                      if (userData?.learningData?.inProgressSkills && userData.learningData.inProgressSkills.length > 0) {
+                        router.push('/learning-journey');
+                      } else {
+                        router.push('/my-career/compare');
+                      }
+                    }}
+                    style={{
+                      background: `linear-gradient(135deg,${C.blue},#0044DD)`,
+                      color: "#fff", border: "none", padding: "13px 24px", borderRadius: "13px",
+                      fontSize: "13px", fontWeight: 600, cursor: "pointer", width: "100%",
+                      fontFamily: "'Outfit',sans-serif", letterSpacing: ".2px",
+                      boxShadow: `0 4px 18px ${C.blueGlow}`,
+                    }}
+                  >
+                    {userData?.learningData?.inProgressSkills && userData.learningData.inProgressSkills.length > 0
+                      ? "Smarten Impuls starten →"
+                      : "Lernziele festlegen →"}
                   </button>
                 </div>
               )}

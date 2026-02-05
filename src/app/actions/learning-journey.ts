@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { FocusPriority, FocusStatus, ImpulseStep, ImpulseLevel } from "@prisma/client"
 import { getImpulseLevel, getImpulseConfig } from "@/lib/impulse-levels"
 import type { StructuredImpulse, GeneratedImpulse } from "@/types/practical-impulse"
+import { logActivity } from "./admin-analytics"
 
 // ─── Typen ───────────────────────────────────────────────
 
@@ -54,97 +55,98 @@ function classifyPriority(
 // ─── Haupt-Action: Roadmap laden ──────────────────────────
 
 export async function getLearningRoadmap(userId: string): Promise<LearningRoadmap> {
-  // 1. User mit aktueller Rolle laden
+  // 1. User mit Assessments und CareerGoals laden
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     include: {
-      // Aktuelle Rolle mit Skill-Requirements
-      Role: {
-        include: {
-          RoleSkillRequirement: {
-            include: {
-              Skill: {
-                include: {
-                  CompetenceField: {
-                    include: { User: true } // User = owner
-                  }
-                }
-              }
-            }
-          }
-        }
+      SkillAssessment: {
+        orderBy: { updatedAt: "desc" }
       },
-      // Aktives Karriereziel (Zielrolle)
       CareerGoal: {
         where: { status: { in: ["EXPLORING", "COMMITTED"] } },
         orderBy: { priority: "asc" },
-        take: 1,
-        include: {
-          Role: {
-            include: {
-              RoleSkillRequirement: {
-                include: {
-                  Skill: {
-                    include: {
-                      CompetenceField: {
-                        include: { User: true }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      // Alle Skill-Assessments des Users
-      SkillAssessment_SkillAssessment_userIdToUser: {
-        orderBy: { updatedAt: "desc" }
+        take: 1
       }
     }
   })
 
-  // 2. Assessment-Lookup erstellen (skillId → aktuelles Level)
+  // 2. Aktuelle Rolle mit Skills laden (falls vorhanden)
+  const currentRole = user.currentRoleId
+    ? await prisma.role.findUnique({
+        where: { id: user.currentRoleId },
+        include: {
+          RoleSkill: {
+            include: {
+              Skill: {
+                include: {
+                  CompetenceField: {
+                    include: { Owner: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+    : null
+
+  // 3. Target Role aus CareerGoal laden (falls vorhanden)
+  const targetGoal = user.CareerGoal[0]
+  const targetRole = targetGoal
+    ? await prisma.role.findUnique({
+        where: { id: targetGoal.roleId },
+        include: {
+          RoleSkill: {
+            include: {
+              Skill: {
+                include: {
+                  CompetenceField: {
+                    include: { Owner: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+    : null
+
+  // 4. Assessment-Lookup erstellen (skillId → aktuelles Level)
   // Prefer validatedLevel over selfLevel
   const assessmentMap = new Map<string, number>()
-  for (const a of user.SkillAssessment_SkillAssessment_userIdToUser) {
+  for (const a of user.SkillAssessment) {
     if (!assessmentMap.has(a.skillId)) {
       assessmentMap.set(a.skillId, a.validatedLevel ?? a.selfLevel)
     }
   }
 
-  // 3. Current role und target role extrahieren
-  const currentRole = user.Role
-  const targetGoal = user.CareerGoal[0]
-  const targetRole = targetGoal?.Role
-
-  // 4. Skills der aktuellen Rolle als Set (für Target-Role-Differenzierung)
+  // 5. Skills der aktuellen Rolle als Set (für Target-Role-Differenzierung)
   const currentRoleSkillIds = new Set(
-    currentRole?.RoleSkillRequirement.map(sr => sr.skillId) ?? []
+    currentRole?.RoleSkill.map(rs => rs.skillId) ?? []
   )
 
-  // 5. Alle relevanten Requirements sammeln (aktuelle + Zielrolle)
-  type SkillReq = NonNullable<typeof currentRole>["RoleSkillRequirement"][0]
+  // 6. Alle relevanten Requirements sammeln (aktuelle + Zielrolle)
+  type SkillReq = NonNullable<typeof currentRole>["RoleSkill"][0]
   const allRequirements: SkillReq[] = [
-    ...(currentRole?.RoleSkillRequirement ?? []),
-    ...(targetRole?.RoleSkillRequirement ?? [])
+    ...(currentRole?.RoleSkill ?? []),
+    ...(targetRole?.RoleSkill ?? [])
   ]
 
-  // 6. Deduplizieren (bei Überschneidung: höheres Required Level gewinnt)
+  // 7. Deduplizieren (bei Überschneidung: höheres Required Level gewinnt)
   const requirementMap = new Map<string, SkillReq>()
   for (const req of allRequirements) {
     const existing = requirementMap.get(req.skillId)
-    if (!existing || req.requiredLevel > existing.requiredLevel) {
+    if (!existing || req.minLevel > existing.minLevel) {
       requirementMap.set(req.skillId, req)
     }
   }
 
-  // 7. Gaps berechnen
+  // 8. Gaps berechnen
   const gaps: SkillGap[] = []
 
   for (const [skillId, req] of requirementMap) {
     const currentLevel = assessmentMap.get(skillId) ?? 0
-    const gapSize = req.requiredLevel - currentLevel
+    const gapSize = req.minLevel - currentLevel
 
     if (gapSize <= 0) continue // Kein Gap — Skill bereits erfüllt
 
@@ -158,11 +160,11 @@ export async function getLearningRoadmap(userId: string): Promise<LearningRoadma
       competenceFieldName: cf.title,
       competenceFieldSlug: cf.slug,
       currentLevel,
-      requiredLevel: req.requiredLevel,
+      requiredLevel: req.minLevel,
       gapSize,
-      priority: classifyPriority({ currentLevel, requiredLevel: req.requiredLevel, gapSize }, isTargetRoleOnly),
-      mentorUserId: cf.User?.id ?? null,
-      mentorName: cf.User?.name ?? null
+      priority: classifyPriority({ currentLevel, requiredLevel: req.minLevel, gapSize }, isTargetRoleOnly),
+      mentorUserId: cf.Owner?.id ?? null,
+      mentorName: cf.Owner?.name ?? null
     })
   }
 
@@ -224,14 +226,26 @@ export async function setSkillFocus(
   }
 
   // Activate focus
-  await prisma.learningFocus.update({
+  const updatedFocus = await prisma.learningFocus.update({
     where: { id: focusItem.id },
     data: {
       status: "IN_PROGRESS",
       focusOrder: currentFocusCount + 1,
       focusedAt: new Date()
+    },
+    include: {
+      Skill: { select: { title: true } }
     }
   })
+
+  // Log activity
+  await logActivity(
+    userId,
+    "SKILL_FOCUSED",
+    skillId,
+    updatedFocus.Skill.title,
+    { learningPlanId, currentLevel: updatedFocus.currentLevel, targetLevel: updatedFocus.targetLevel }
+  ).catch(console.error)
 
   return { success: true }
 }
@@ -437,7 +451,7 @@ export async function getLearningPlanWithItems(userId: string) {
           Skill: true,
           CompetenceField: {
             include: {
-              User: { select: { id: true, name: true, avatarUrl: true } }
+              Owner: { select: { id: true, name: true, avatarUrl: true } }
             }
           },
           PracticalImpulse: {
@@ -473,16 +487,12 @@ export async function generateStructuredImpulse(
       Skill: true,
       CompetenceField: {
         include: {
-          User: { select: { id: true, name: true } } // Functional Lead
+          Owner: { select: { id: true, name: true } } // Functional Lead
         }
       },
       LearningPlan: {
         include: {
-          User: {
-            include: {
-              Role: true
-            }
-          }
+          User: true
         }
       },
       // Vorherige Impulse für Duplikatvermeidung
@@ -499,15 +509,20 @@ export async function generateStructuredImpulse(
     throw new Error("Nicht autorisiert")
   }
 
-  // 3. Level-Config ermitteln
+  // 3. User's current role laden
+  const userCurrentRole = focus.LearningPlan.User.currentRoleId
+    ? await prisma.role.findUnique({ where: { id: focus.LearningPlan.User.currentRoleId } })
+    : null
+
+  // 4. Level-Config ermitteln
   const impulseLevel = getImpulseLevel(focus.targetLevel)
   const levelConfig = getImpulseConfig(impulseLevel)
 
-  // 4. Kontext für die Impulse-Generierung
+  // 5. Kontext für die Impulse-Generierung
   const skillName = focus.Skill.title
   const competenceFieldName = focus.CompetenceField?.title ?? "Allgemein"
-  const functionalLead = focus.CompetenceField?.User
-  const userRole = focus.LearningPlan.User.Role?.title ?? "Mitarbeiter"
+  const functionalLead = focus.CompetenceField?.Owner
+  const userRole = userCurrentRole?.title ?? "Mitarbeiter"
   const previousPrompts = focus.PracticalImpulse.map(p => p.prompt)
 
   // 5. Check-In Nachricht generieren (personalisiert)
@@ -584,7 +599,8 @@ export async function generateStructuredImpulse(
 export async function updateImpulseStep(
   impulseId: string,
   step: ImpulseStep,
-  data?: { reflection?: string }
+  data?: { reflection?: string },
+  userId?: string
 ): Promise<{ success: boolean }> {
   const updateData: Record<string, unknown> = {
     currentStep: step
@@ -609,10 +625,30 @@ export async function updateImpulseStep(
       break
   }
 
-  await prisma.practicalImpulse.update({
+  const impulse = await prisma.practicalImpulse.update({
     where: { id: impulseId },
-    data: updateData
+    data: updateData,
+    include: {
+      LearningFocus: {
+        include: {
+          Skill: { select: { title: true } },
+          LearningPlan: { select: { userId: true } },
+        },
+      },
+    },
   })
+
+  // Log activity when task is started
+  if (step === "TASK" && impulse.LearningFocus?.LearningPlan?.userId) {
+    const userIdToLog = userId || impulse.LearningFocus.LearningPlan.userId
+    await logActivity(
+      userIdToLog,
+      "IMPULSE_STARTED",
+      impulseId,
+      impulse.LearningFocus.Skill?.title,
+      { step: "TASK", skillId: impulse.LearningFocus.skillId }
+    ).catch(console.error) // Don't fail the main action if logging fails
+  }
 
   return { success: true }
 }
@@ -666,6 +702,24 @@ export async function saveImpulseEvidence(
     }
   })
 
+  // 5. Log activity for completed impulse
+  const taskDescription = impulse.taskDescription ?? impulse.prompt ?? ''
+  const hasAITool = /claude|copilot|gpt|ai|cursor/i.test(taskDescription)
+  const hasCloudTech = /supabase|vercel|edge|serverless|cloud|aws/i.test(taskDescription)
+
+  await logActivity(
+    userId,
+    "IMPULSE_COMPLETED",
+    impulseId,
+    impulse.LearningFocus.Skill.title,
+    {
+      skillId: impulse.LearningFocus.skillId,
+      hasAITool,
+      hasCloudTech,
+      is2026Tech: hasAITool || hasCloudTech,
+    }
+  ).catch(console.error) // Don't fail the main action if logging fails
+
   return { success: true, evidenceNoteId: note.id }
 }
 
@@ -708,5 +762,184 @@ export async function getStructuredImpulse(
     isCompleted: impulse.isCompleted,
     completedAt: impulse.completedAt,
     generatedAt: impulse.generatedAt
+  }
+}
+
+// ─── Learning Path Summary für Dashboard ─────────────────
+
+export interface LearningPathSummary {
+  gaps: Array<{
+    skillId: string
+    skillName: string
+    competenceFieldName: string
+    currentLevel: number
+    requiredLevel: number
+    gapSize: number
+    priority: 'CRITICAL' | 'GROWTH' | 'STRETCH'
+  }>
+  focusedCount: number
+  totalGaps: number
+  currentRoleName: string | null
+  targetRoleName: string | null
+}
+
+export async function getLearningPathSummary(userId: string): Promise<LearningPathSummary> {
+  const roadmap = await getLearningRoadmap(userId)
+
+  // Combine all gaps, sorted by priority
+  const allGaps = [
+    ...roadmap.critical.map(g => ({ ...g, priority: 'CRITICAL' as const })),
+    ...roadmap.growth.map(g => ({ ...g, priority: 'GROWTH' as const })),
+    ...roadmap.stretch.map(g => ({ ...g, priority: 'STRETCH' as const })),
+  ]
+
+  // Get focused count from learning plan
+  const plan = await prisma.learningPlan.findUnique({
+    where: { userId },
+    include: {
+      LearningFocus: {
+        where: { status: 'IN_PROGRESS' }
+      }
+    }
+  })
+
+  return {
+    gaps: allGaps.map(g => ({
+      skillId: g.skillId,
+      skillName: g.skillName,
+      competenceFieldName: g.competenceFieldName,
+      currentLevel: g.currentLevel,
+      requiredLevel: g.requiredLevel,
+      gapSize: g.gapSize,
+      priority: g.priority,
+    })),
+    focusedCount: plan?.LearningFocus.length ?? 0,
+    totalGaps: roadmap.meta.totalGaps,
+    currentRoleName: roadmap.meta.currentRoleName,
+    targetRoleName: roadmap.meta.targetRoleName,
+  }
+}
+
+// ─── Dashboard Data Loading ─────────────────────────────────
+
+export interface DashboardLearningData {
+  inProgressSkills: Array<{
+    skillId: string
+    skillName: string
+    competenceFieldName: string | null
+    currentLevel: number
+    targetLevel: number
+    learningFocusId: string
+  }>
+  activeImpulse: StructuredImpulse | null
+  completedImpulsesCount: number
+  recentCompletedImpulses: Array<{
+    id: string
+    skillName: string
+    completedAt: Date | null
+    userReflection: string | null
+  }>
+  planId: string | null
+}
+
+export async function getDashboardLearningData(
+  userId: string
+): Promise<DashboardLearningData> {
+  // Fetch learning plan with IN_PROGRESS focuses
+  const plan = await prisma.learningPlan.findUnique({
+    where: { userId },
+    include: {
+      LearningFocus: {
+        where: { status: 'IN_PROGRESS' },
+        include: {
+          Skill: { select: { title: true } },
+          CompetenceField: { select: { title: true } },
+          PracticalImpulse: {
+            where: { isCompleted: false },
+            orderBy: { generatedAt: 'desc' },
+            take: 1,
+          },
+        },
+        orderBy: { focusOrder: 'asc' },
+        take: 3, // Max 3 focused skills
+      },
+    },
+  })
+
+  // Count completed impulses and get recent ones
+  const [completedCount, recentCompleted] = await Promise.all([
+    plan
+      ? prisma.practicalImpulse.count({
+          where: {
+            LearningFocus: { learningPlanId: plan.id },
+            isCompleted: true,
+          },
+        })
+      : 0,
+    plan
+      ? prisma.practicalImpulse.findMany({
+          where: {
+            LearningFocus: { learningPlanId: plan.id },
+            isCompleted: true,
+          },
+          include: {
+            LearningFocus: {
+              include: { Skill: { select: { title: true } } },
+            },
+          },
+          orderBy: { completedAt: 'desc' },
+          take: 5,
+        })
+      : [],
+  ])
+
+  const inProgressSkills = plan?.LearningFocus.map((f) => ({
+    skillId: f.skillId,
+    skillName: f.Skill.title,
+    competenceFieldName: f.CompetenceField?.title ?? null,
+    currentLevel: f.currentLevel,
+    targetLevel: f.targetLevel,
+    learningFocusId: f.id,
+  })) ?? []
+
+  const activeImpulseRaw = plan?.LearningFocus[0]?.PracticalImpulse[0]
+  const activeImpulse: StructuredImpulse | null = activeImpulseRaw
+    ? {
+        id: activeImpulseRaw.id,
+        learningFocusId: activeImpulseRaw.learningFocusId,
+        targetLevel: activeImpulseRaw.targetLevel,
+        currentStep: activeImpulseRaw.currentStep,
+        checkInMessage: activeImpulseRaw.checkInMessage,
+        checkInViewedAt: activeImpulseRaw.checkInViewedAt,
+        taskDescription: activeImpulseRaw.taskDescription,
+        prompt: activeImpulseRaw.prompt,
+        expectedOutcome: activeImpulseRaw.expectedOutcome,
+        estimatedMinutes: activeImpulseRaw.estimatedMinutes,
+        taskStartedAt: activeImpulseRaw.taskStartedAt,
+        reflectionQuestion: activeImpulseRaw.reflectionQuestion,
+        userReflection: activeImpulseRaw.userReflection,
+        reflectionStartedAt: activeImpulseRaw.reflectionStartedAt,
+        evidenceSaved: activeImpulseRaw.evidenceSaved,
+        evidenceNoteId: activeImpulseRaw.evidenceNoteId,
+        evidenceSavedAt: activeImpulseRaw.evidenceSavedAt,
+        functionalLeadId: activeImpulseRaw.functionalLeadId,
+        functionalLeadName: activeImpulseRaw.functionalLeadName,
+        isCompleted: activeImpulseRaw.isCompleted,
+        completedAt: activeImpulseRaw.completedAt,
+        generatedAt: activeImpulseRaw.generatedAt,
+      }
+    : null
+
+  return {
+    inProgressSkills,
+    activeImpulse,
+    completedImpulsesCount: completedCount,
+    recentCompletedImpulses: recentCompleted.map((i) => ({
+      id: i.id,
+      skillName: i.LearningFocus.Skill.title,
+      completedAt: i.completedAt,
+      userReflection: i.userReflection,
+    })),
+    planId: plan?.id ?? null,
   }
 }

@@ -23,16 +23,39 @@ import { ResponsibilityDeltaView } from './ResponsibilityDeltaView';
 import { SoftSkillsView } from './SoftSkillsView';
 import { cn } from '@/lib/utils';
 import { BlobBackground, Navigation } from '@/components/shared';
+import { setSkillFocus, generateOrRefreshLearningPlan } from '@/app/actions/learning-journey';
+import { LernHistorie } from './LernHistorie';
+
+interface CompletedImpulse {
+  id: string;
+  skillName: string;
+  completedAt: Date | null;
+  userReflection: string | null;
+}
 
 interface CompareViewProps {
   groupedRoles: GroupedRoles[];
   initialFromRoleId?: string | null;
   initialToRoleId?: string | null;
+  userId?: string | null;
+  initialFocusedSkillIds?: string[];
+  initialPlanId?: string | null;
+  completedImpulses?: CompletedImpulse[];
+  totalFocusedSkills?: number;
 }
 
 type TabType = 'hardSkills' | 'softSkills' | 'responsibilities';
 
-export function CompareView({ groupedRoles, initialFromRoleId, initialToRoleId }: CompareViewProps) {
+export function CompareView({
+  groupedRoles,
+  initialFromRoleId,
+  initialToRoleId,
+  userId,
+  initialFocusedSkillIds = [],
+  initialPlanId,
+  completedImpulses = [],
+  totalFocusedSkills = 0,
+}: CompareViewProps) {
   const [fromRoleId, setFromRoleId] = useState<string | null>(initialFromRoleId || null);
   const [toRoleId, setToRoleId] = useState<string | null>(initialToRoleId || null);
   const [comparison, setComparison] = useState<RoleComparisonResult | null>(null);
@@ -40,8 +63,44 @@ export function CompareView({ groupedRoles, initialFromRoleId, initialToRoleId }
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<TabType>('hardSkills');
   const [mentorMessage, setMentorMessage] = useState<string | null>(null);
+  const [focusedSkillIds, setFocusedSkillIds] = useState<Set<string>>(new Set(initialFocusedSkillIds));
+  const [focusingSkillId, setFocusingSkillId] = useState<string | null>(null);
+  const [planId, setPlanId] = useState<string | null>(initialPlanId || null);
 
   const animationKey = `${fromRoleId}-${toRoleId}`;
+
+  // Handler for focusing a skill
+  const handleSkillFocus = useCallback(async (skillId: string): Promise<{ success: boolean; error?: string }> => {
+    if (!userId) {
+      return { success: false, error: 'Nicht angemeldet' };
+    }
+
+    setFocusingSkillId(skillId);
+
+    try {
+      // Ensure we have a learning plan
+      let currentPlanId = planId;
+      if (!currentPlanId) {
+        const { planId: newPlanId } = await generateOrRefreshLearningPlan(userId);
+        currentPlanId = newPlanId;
+        setPlanId(newPlanId);
+      }
+
+      // Set the skill as focused
+      const result = await setSkillFocus(currentPlanId, skillId, userId);
+
+      if (result.success) {
+        setFocusedSkillIds(prev => new Set([...prev, skillId]));
+      }
+
+      return result;
+    } catch (err) {
+      console.error('Failed to focus skill:', err);
+      return { success: false, error: 'Fehler beim Fokussieren' };
+    } finally {
+      setFocusingSkillId(null);
+    }
+  }, [userId, planId]);
 
   const fetchComparison = useCallback(async () => {
     if (!toRoleId) return;
@@ -172,7 +231,10 @@ export function CompareView({ groupedRoles, initialFromRoleId, initialToRoleId }
               transition={{ duration: 0.3, ease: 'easeOut' }}
               className="space-y-6"
             >
-              <SummaryCards comparison={comparison} />
+              <LernHistorie
+                completedImpulses={completedImpulses}
+                totalFocusedSkills={totalFocusedSkills}
+              />
 
               <div className="grid lg:grid-cols-5 gap-6">
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="lg:col-span-2 bg-brand-white rounded-bento border border-brand-gray-200 p-6 shadow-bento">
@@ -235,7 +297,13 @@ export function CompareView({ groupedRoles, initialFromRoleId, initialToRoleId }
                     <AnimatePresence mode="wait">
                       {activeTab === 'hardSkills' && (
                         <motion.div key="hardSkills" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2 }}>
-                          <SkillDeltaView skills={comparison.skillComparisons} animationKey={animationKey} />
+                          <SkillDeltaView
+                            skills={comparison.skillComparisons}
+                            animationKey={animationKey}
+                            onSkillFocus={userId ? handleSkillFocus : undefined}
+                            focusedSkillIds={focusedSkillIds}
+                            focusingSkillId={focusingSkillId}
+                          />
                         </motion.div>
                       )}
                       {activeTab === 'softSkills' && (
@@ -298,51 +366,6 @@ export function CompareView({ groupedRoles, initialFromRoleId, initialToRoleId }
           </motion.div>
         )}
       </main>
-    </div>
-  );
-}
-
-function SummaryCards({ comparison }: { comparison: RoleComparisonResult }) {
-  const { summary } = comparison;
-
-  const cards: Array<{
-    label: string;
-    value: number | string;
-    icon: typeof TrendingUp;
-    bgColor: string;
-    description: string;
-  }> = [
-    { label: 'Skill Upgrades', value: summary.totalSkillUpgrades, icon: TrendingUp, bgColor: 'bg-brand-gray-900', description: `Avg +${summary.averageLevelIncrease} levels` },
-    { label: 'New Skills', value: summary.totalNewSkills, icon: Sparkles, bgColor: 'bg-brand-gray-800', description: 'To learn' },
-    { label: 'New Tasks', value: summary.newResponsibilities, icon: FileText, bgColor: 'bg-brand-accent', description: 'Responsibilities' },
-  ];
-
-  if (summary.leadershipChange !== 'none') {
-    cards.push({
-      label: 'Leadership',
-      value: summary.leadershipChange === 'gained' ? '✓' : summary.leadershipChange === 'upgraded' ? '↑' : '−',
-      icon: Users,
-      bgColor: 'bg-brand-gray-700',
-      description: summary.leadershipChange === 'gained' ? 'New leadership role' : summary.leadershipChange === 'upgraded' ? 'Leadership upgrade' : 'Leadership removed',
-    });
-  }
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {cards.map((card, index) => (
-        <motion.div key={card.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className="relative group">
-          <div className="bg-brand-white border border-brand-gray-200 rounded-bento p-5 hover:shadow-bento-hover transition-shadow">
-            <div className="flex items-start justify-between mb-3">
-              <div className={cn('w-10 h-10 rounded-bento flex items-center justify-center', card.bgColor)}>
-                <card.icon className="w-5 h-5 text-brand-white" />
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-brand-gray-900 font-mono mb-1">{card.value}</div>
-            <div className="text-sm font-medium text-brand-gray-600">{card.label}</div>
-            <div className="text-xs text-brand-gray-400 mt-1">{card.description}</div>
-          </div>
-        </motion.div>
-      ))}
     </div>
   );
 }

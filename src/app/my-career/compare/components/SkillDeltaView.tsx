@@ -10,6 +10,9 @@ import {
   LayoutGrid,
   List,
   ChevronRight,
+  Target,
+  Check,
+  Loader2,
 } from 'lucide-react';
 import type { SkillComparison } from '@/lib/services/career-logic';
 import { cn } from '@/lib/utils';
@@ -17,6 +20,9 @@ import { cn } from '@/lib/utils';
 interface SkillDeltaViewProps {
   skills: SkillComparison[];
   animationKey?: string;
+  onSkillFocus?: (skillId: string) => Promise<{ success: boolean; error?: string }>;
+  focusedSkillIds?: Set<string>;
+  focusingSkillId?: string | null;
 }
 
 const LEVEL_NAMES = ['None', 'Learner', 'Practitioner', 'Expert', 'Master'];
@@ -33,7 +39,13 @@ const LEVEL_COLORS: Record<number, { bg: string; text: string; border: string }>
 type ViewMode = 'grid' | 'list';
 type FilterMode = 'all' | 'upgrades' | 'new' | 'removed';
 
-export function SkillDeltaView({ skills, animationKey }: SkillDeltaViewProps) {
+export function SkillDeltaView({
+  skills,
+  animationKey,
+  onSkillFocus,
+  focusedSkillIds,
+  focusingSkillId
+}: SkillDeltaViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filter, setFilter] = useState<FilterMode>('all');
 
@@ -177,7 +189,14 @@ export function SkillDeltaView({ skills, animationKey }: SkillDeltaViewProps) {
                 </h4>
                 <div className="space-y-2">
                   {fieldSkills.map((skill, index) => (
-                    <SkillListItem key={skill.skillId} skill={skill} index={index} />
+                    <SkillListItem
+                      key={skill.skillId}
+                      skill={skill}
+                      index={index}
+                      onFocus={onSkillFocus}
+                      isFocused={focusedSkillIds?.has(skill.skillId)}
+                      isFocusing={focusingSkillId === skill.skillId}
+                    />
                   ))}
                 </div>
               </motion.div>
@@ -205,9 +224,23 @@ export function SkillDeltaView({ skills, animationKey }: SkillDeltaViewProps) {
   );
 }
 
-function SkillListItem({ skill, index }: { skill: SkillComparison; index: number }) {
+function SkillListItem({
+  skill,
+  index,
+  onFocus,
+  isFocused,
+  isFocusing,
+}: {
+  skill: SkillComparison;
+  index: number;
+  onFocus?: (skillId: string) => Promise<{ success: boolean; error?: string }>;
+  isFocused?: boolean;
+  isFocusing?: boolean;
+}) {
   const fromColors = LEVEL_COLORS[skill.fromLevel] || LEVEL_COLORS[0];
   const toColors = LEVEL_COLORS[skill.toLevel] || LEVEL_COLORS[0];
+
+  const canFocus = skill.delta > 0 && !skill.isRemoved && onFocus;
 
   return (
     <motion.div
@@ -245,6 +278,12 @@ function SkillListItem({ skill, index }: { skill: SkillComparison; index: number
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
               <Minus className="w-3 h-3" />
               Removed
+            </span>
+          )}
+          {isFocused && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-convidera-blue/10 text-convidera-blue">
+              <Target className="w-3 h-3" />
+              Fokussiert
             </span>
           )}
         </div>
@@ -310,6 +349,31 @@ function SkillListItem({ skill, index }: { skill: SkillComparison; index: number
             '='
           )}
         </div>
+
+        {/* Focus Button */}
+        {canFocus && (
+          <button
+            onClick={() => onFocus(skill.skillId)}
+            disabled={isFocused || isFocusing}
+            className={cn(
+              'w-10 h-10 rounded-bento flex items-center justify-center transition-all',
+              isFocused
+                ? 'bg-green-100 text-green-600 cursor-default'
+                : isFocusing
+                ? 'bg-brand-gray-100 text-brand-gray-400 cursor-wait'
+                : 'bg-brand-gray-100 text-brand-gray-500 hover:bg-convidera-blue hover:text-white'
+            )}
+            title={isFocused ? 'Bereits fokussiert' : isFocusing ? 'Wird fokussiert...' : 'Als Lernziel markieren'}
+          >
+            {isFocusing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isFocused ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Target className="w-4 h-4" />
+            )}
+          </button>
+        )}
       </div>
     </motion.div>
   );
