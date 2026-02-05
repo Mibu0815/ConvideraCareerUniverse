@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
 } from "recharts";
 import {
   Sparkles, Target, ChevronRight, Zap, Flame, Clock,
-  CheckCircle2, ArrowRight, Play, Brain, Award,
+  CheckCircle2, ArrowRight, Play, Brain, Award, Check, PartyPopper,
 } from "lucide-react";
 import type { StructuredImpulse } from "@/types/practical-impulse";
+import { updateImpulseStep } from "@/app/actions/learning-journey";
 
 /* ── Design Tokens ── */
 const C = {
@@ -109,11 +111,43 @@ interface Props {
 export default function CareerUniverse({ userData, userState }: Props) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [completedStep, setCompletedStep] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  // Handle completing the current step from homepage
+  const handleCompleteStep = () => {
+    const activeImpulse = userData?.learningData?.activeImpulse;
+    if (!activeImpulse) return;
+
+    const stepMap: Record<string, "TASK" | "REFLECTION" | "EVIDENCE"> = {
+      "CHECK_IN": "TASK",
+      "TASK": "REFLECTION",
+      "REFLECTION": "EVIDENCE",
+    };
+
+    const nextStep = stepMap[activeImpulse.currentStep];
+    if (!nextStep) return;
+
+    startTransition(async () => {
+      const result = await updateImpulseStep(activeImpulse.id, nextStep);
+      if (result.success) {
+        setCompletedStep(activeImpulse.currentStep);
+        setShowSuccess(true);
+        // Auto-hide success after animation and redirect
+        setTimeout(() => {
+          setShowSuccess(false);
+          router.push('/learning-journey');
+          router.refresh();
+        }, 1500);
+      }
+    });
+  };
 
   const anim = (i: number): React.CSSProperties => ({
     opacity: mounted ? 1 : 0,
@@ -486,29 +520,108 @@ export default function CareerUniverse({ userData, userState }: Props) {
                     </div>
                   )}
 
-                  {/* CTA */}
+                  {/* CTA - Dynamic based on impulse step */}
                   <div style={{ padding: "20px 24px" }}>
-                    <button
-                      className="cta-btn"
-                      onClick={(e) => { e.stopPropagation(); router.push('/learning-journey'); }}
-                      style={{
-                        width: "100%",
-                        background: `linear-gradient(135deg, ${accentColor}, ${isSoftSkill ? '#16a34a' : '#0044DD'})`,
-                        color: "#fff", border: "none",
-                        padding: "14px 24px", borderRadius: "14px",
-                        fontSize: "15px", fontWeight: 600, cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
-                        fontFamily: "'Outfit', sans-serif",
-                        boxShadow: `0 4px 18px ${accentGlow}`,
-                      }}
-                    >
-                      {activeImpulse ? (
-                        <><Zap size={18} /> Impuls fortsetzen</>
+                    <AnimatePresence mode="wait">
+                      {showSuccess ? (
+                        <motion.div
+                          key="success"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          style={{
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            gap: "12px", padding: "14px 24px", borderRadius: "14px",
+                            background: "rgba(16,185,129,0.1)",
+                            border: "1px solid rgba(16,185,129,0.3)",
+                          }}
+                        >
+                          <motion.div
+                            initial={{ rotate: -20, scale: 0 }}
+                            animate={{ rotate: 0, scale: 1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                          >
+                            <PartyPopper size={24} color="#10B981" />
+                          </motion.div>
+                          <span style={{ fontSize: "15px", fontWeight: 600, color: "#10B981" }}>
+                            {completedStep === "TASK" ? "Super gemacht!" : "Weiter so!"}
+                          </span>
+                        </motion.div>
+                      ) : activeImpulse?.currentStep === "TASK" ? (
+                        <motion.div
+                          key="task-actions"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+                        >
+                          {/* Primary: Complete Task */}
+                          <button
+                            className="cta-btn"
+                            onClick={(e) => { e.stopPropagation(); handleCompleteStep(); }}
+                            disabled={isPending}
+                            style={{
+                              width: "100%",
+                              background: `linear-gradient(135deg, #10B981, #059669)`,
+                              color: "#fff", border: "none",
+                              padding: "14px 24px", borderRadius: "14px",
+                              fontSize: "15px", fontWeight: 600, cursor: isPending ? "wait" : "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                              fontFamily: "'Outfit', sans-serif",
+                              boxShadow: "0 4px 18px rgba(16,185,129,0.3)",
+                              opacity: isPending ? 0.7 : 1,
+                            }}
+                          >
+                            {isPending ? (
+                              <>Wird gespeichert...</>
+                            ) : (
+                              <><Check size={18} /> Aufgabe erledigt</>
+                            )}
+                          </button>
+                          {/* Secondary: Go to details */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); router.push('/learning-journey'); }}
+                            style={{
+                              width: "100%",
+                              background: "transparent",
+                              color: C.textMuted, border: `1px solid ${C.border}`,
+                              padding: "10px 20px", borderRadius: "12px",
+                              fontSize: "13px", fontWeight: 500, cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                              fontFamily: "'Outfit', sans-serif",
+                            }}
+                          >
+                            Aufgabe ansehen <ArrowRight size={14} />
+                          </button>
+                        </motion.div>
                       ) : (
-                        <><Sparkles size={18} /> Neuen Impuls starten</>
+                        <motion.button
+                          key="default-cta"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="cta-btn"
+                          onClick={(e) => { e.stopPropagation(); router.push('/learning-journey'); }}
+                          style={{
+                            width: "100%",
+                            background: `linear-gradient(135deg, ${accentColor}, ${isSoftSkill ? '#16a34a' : '#0044DD'})`,
+                            color: "#fff", border: "none",
+                            padding: "14px 24px", borderRadius: "14px",
+                            fontSize: "15px", fontWeight: 600, cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                            fontFamily: "'Outfit', sans-serif",
+                            boxShadow: `0 4px 18px ${accentGlow}`,
+                          }}
+                        >
+                          {activeImpulse ? (
+                            <><Zap size={18} /> Impuls fortsetzen</>
+                          ) : (
+                            <><Sparkles size={18} /> Neuen Impuls starten</>
+                          )}
+                          <ArrowRight size={16} />
+                        </motion.button>
                       )}
-                      <ArrowRight size={16} />
-                    </button>
+                    </AnimatePresence>
                   </div>
                 </div>
               ) : (
