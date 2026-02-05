@@ -7,6 +7,53 @@ import CareerUniverse from '@/components/CareerUniverse';
 // Ensure fresh data on each request (no caching)
 export const dynamic = 'force-dynamic';
 
+// Helper to calculate streak (consecutive days with activity)
+async function calculateStreak(userId: string): Promise<number> {
+  const activities = await prisma.activityLog.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    select: { createdAt: true },
+  });
+
+  if (activities.length === 0) return 0;
+
+  let streak = 0;
+  let currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+
+  // Group activities by date
+  const activityDates = new Set(
+    activities.map(a => {
+      const d = new Date(a.createdAt);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    })
+  );
+
+  // Check if there's activity today or yesterday (to not break streak)
+  const today = currentDate.getTime();
+  const yesterday = today - 86400000;
+
+  if (!activityDates.has(today) && !activityDates.has(yesterday)) {
+    return 0; // Streak broken
+  }
+
+  // Count consecutive days backwards
+  let checkDate = activityDates.has(today) ? today : yesterday;
+  while (activityDates.has(checkDate)) {
+    streak++;
+    checkDate -= 86400000;
+  }
+
+  return streak;
+}
+
+// Helper to detect soft skill
+function isSoftSkill(skillName: string): boolean {
+  const softSkillPatterns = /stakeholder|kommunikation|feedback|präsentation|moderation|coaching|leadership|team|konflikt|verhandlung|empathie|negotiation|facilitation/i;
+  return softSkillPatterns.test(skillName);
+}
+
 async function getUserWithRolesAndLearning() {
   const supabase = await createClient();
   const { data: { user: supabaseUser } } = await supabase.auth.getUser();
@@ -28,8 +75,8 @@ async function getUserWithRolesAndLearning() {
 
   if (!user) return null;
 
-  // Fetch role details, learning data, and roadmap in parallel
-  const [currentRole, targetRole, learningData, roadmap] = await Promise.all([
+  // Fetch all data in parallel
+  const [currentRole, targetRole, learningData, roadmap, activeGoal, streak] = await Promise.all([
     user.currentRoleId
       ? prisma.role.findUnique({
           where: { id: user.currentRoleId },
@@ -44,6 +91,18 @@ async function getUserWithRolesAndLearning() {
       : null,
     getDashboardLearningData(user.id),
     getLearningRoadmap(user.id),
+    // Get active career goal
+    prisma.careerGoal.findFirst({
+      where: {
+        userId: user.id,
+        status: { in: ['EXPLORING', 'COMMITTED'] },
+      },
+      include: {
+        Role: { select: { title: true, level: true } },
+      },
+      orderBy: { priority: 'asc' },
+    }),
+    calculateStreak(user.id),
   ]);
 
   // Calculate progress toward target role
@@ -60,16 +119,35 @@ async function getUserWithRolesAndLearning() {
     ? Math.round((completedSkillsCount / totalGaps) * 100)
     : 0;
 
+  // Determine the primary focus skill and if it's a soft skill
+  const primaryFocusSkill = learningData.inProgressSkills[0] ?? null;
+  const primarySkillIsSoft = primaryFocusSkill
+    ? isSoftSkill(primaryFocusSkill.skillName)
+    : false;
+
+  // Calculate remaining impulses for "level up" (estimate: ~3 impulses per skill gap)
+  const inProgressCount = learningData.inProgressSkills.length;
+  const remainingImpulsesEstimate = Math.max(0, (totalGaps - completedSkillsCount) * 3 - learningData.completedImpulsesCount);
+
   return {
     ...user,
     currentRole,
     targetRole,
     learningData,
+    activeGoal: activeGoal ? {
+      roleTitle: activeGoal.Role.title,
+      roleLevel: activeGoal.Role.level,
+      status: activeGoal.status,
+    } : null,
     progressData: {
       totalGaps,
       completedSkillsCount,
       progressPercent,
+      remainingImpulses: remainingImpulsesEstimate,
     },
+    streak,
+    primaryFocusSkill,
+    primarySkillIsSoft,
   };
 }
 
