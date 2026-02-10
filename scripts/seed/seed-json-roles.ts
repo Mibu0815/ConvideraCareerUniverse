@@ -136,6 +136,7 @@ class JsonRoleSeeder {
     const occupationalField = await prisma.occupationalField.upsert({
       where: { slug: fieldSlug },
       create: {
+        id: fieldSlug,
         title: data.category,
         slug: fieldSlug,
       },
@@ -219,7 +220,7 @@ class JsonRoleSeeder {
         cfExisting++;
       } else {
         cf = await prisma.competenceField.create({
-          data: { title: cfTitle, slug: cfSlug },
+          data: { id: cfSlug, title: cfTitle, slug: cfSlug },
         });
         cfCreated++;
       }
@@ -240,7 +241,7 @@ class JsonRoleSeeder {
         // Also try to find by title+fieldId combination
         if (!skill) {
           skill = await prisma.skill.findFirst({
-            where: { title: skillName, fieldId: cfId },
+            where: { title: skillName, competenceFieldId: cfId },
           });
         }
         // Also try to find by title alone (may be in different competence field)
@@ -253,7 +254,7 @@ class JsonRoleSeeder {
           existingCount++;
         } else {
           skill = await prisma.skill.create({
-            data: { title: skillName, slug: skillSlug, fieldId: cfId },
+            data: { id: skillSlug, title: skillName, slug: skillSlug, competenceFieldId: cfId },
           });
           skillCount++;
         }
@@ -275,7 +276,7 @@ class JsonRoleSeeder {
       const ssSlug = generateSlug(ssTitle);
       const ss = await prisma.softSkill.upsert({
         where: { slug: ssSlug },
-        create: { title: ssTitle, slug: ssSlug },
+        create: { id: ssSlug, title: ssTitle, slug: ssSlug },
         update: {},
       });
       this.softSkillCache.set(ssTitle, ss.id);
@@ -301,7 +302,7 @@ class JsonRoleSeeder {
     const role = await prisma.role.upsert({
       where: { slug: roleSlug },
       create: {
-        id: level.traxId || undefined,
+        id: level.id,
         title: level.title,
         slug: roleSlug,
         level: roleLevel,
@@ -313,6 +314,8 @@ class JsonRoleSeeder {
         directReportTo: family.directReportTo,
         language: family.languages[0] || 'english',
         fieldId,
+        traxId: level.traxId || null,
+        updatedAt: new Date(),
       },
       update: {
         title: level.title,
@@ -322,13 +325,14 @@ class JsonRoleSeeder {
         leadershipType: hasLeadership ? leadershipType : null,
         hasBudgetResp: level.budgetResponsibility,
         directReportTo: family.directReportTo,
+        updatedAt: new Date(),
       },
     });
 
     console.log(`\n  📋 Role: ${role.title} (${roleLevel})`);
 
-    // Delete existing RoleSkills
-    await prisma.roleSkill.deleteMany({ where: { roleId: role.id } });
+    // Delete existing RoleSkillRequirements
+    await prisma.roleSkillRequirement.deleteMany({ where: { roleId: role.id } });
 
     // Create new RoleSkills
     let linkedSkills = 0;
@@ -349,11 +353,11 @@ class JsonRoleSeeder {
       }
 
       if (skillId) {
-        await prisma.roleSkill.create({
+        await prisma.roleSkillRequirement.create({
           data: {
             roleId: role.id,
             skillId,
-            minLevel: skillInput.level,
+            requiredLevel: skillInput.level,
           },
         });
         linkedSkills++;
@@ -377,6 +381,7 @@ class JsonRoleSeeder {
     // Create Responsibilities
     await prisma.responsibility.createMany({
       data: level.responsibilities.map((text, index) => ({
+        id: `${role.id}-resp-${index}`,
         text,
         order: index,
         roleId: role.id,
@@ -403,14 +408,16 @@ class JsonRoleSeeder {
       }
     }
 
-    await prisma.role.update({
-      where: { id: role.id },
-      data: {
-        softSkills: {
-          set: softSkillIds.map(id => ({ id })),
+    // Delete existing and create new RoleSoftSkillRequirements
+    await prisma.roleSoftSkillRequirement.deleteMany({ where: { roleId: role.id } });
+    for (const ssId of softSkillIds) {
+      await prisma.roleSoftSkillRequirement.create({
+        data: {
+          roleId: role.id,
+          softSkillId: ssId,
         },
-      },
-    });
+      });
+    }
 
     console.log(`     ✓ ${linkedSoftSkills} Soft Skills verknüpft${refMode}`);
     if (missingSoftSkills.length > 0 && !useLegacyMode) {
