@@ -70,13 +70,17 @@ export function FocusSkillProvider({
   // Update state when initial props change
   useEffect(() => {
     if (initialSkills.length > 0) {
-      setFocusSkillsState(initialSkills);
+      setFocusSkillsState(prev => {
+        const prevIds = prev.map(s => s.skillId).join(',');
+        const nextIds = initialSkills.map(s => s.skillId).join(',');
+        return prevIds === nextIds ? prev : initialSkills;
+      });
     }
   }, [initialSkills]);
 
   useEffect(() => {
     if (initialActiveImpulse !== undefined) {
-      setActiveImpulseState(initialActiveImpulse);
+      setActiveImpulseState(prev => prev === initialActiveImpulse ? prev : initialActiveImpulse);
     }
   }, [initialActiveImpulse]);
 
@@ -112,13 +116,17 @@ export function FocusSkillProvider({
     completedImpulsesCount?: number;
   }) => {
     if (data.inProgressSkills) {
-      setFocusSkillsState(data.inProgressSkills);
+      setFocusSkillsState(prev => {
+        const prevIds = prev.map(s => s.skillId).join(',');
+        const nextIds = data.inProgressSkills!.map(s => s.skillId).join(',');
+        return prevIds === nextIds ? prev : data.inProgressSkills!;
+      });
     }
     if (data.activeImpulse !== undefined) {
-      setActiveImpulseState(data.activeImpulse);
+      setActiveImpulseState(prev => prev === data.activeImpulse ? prev : data.activeImpulse);
     }
     if (data.completedImpulsesCount !== undefined) {
-      setCompletedImpulsesCountState(data.completedImpulsesCount);
+      setCompletedImpulsesCountState(prev => prev === data.completedImpulsesCount ? prev : data.completedImpulsesCount!);
     }
   }, []);
 
