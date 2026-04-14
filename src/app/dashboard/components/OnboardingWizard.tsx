@@ -136,7 +136,7 @@ export function OnboardingWizard({ user, groupedRoles }: Props) {
                   <Sparkles className="w-8 h-8 text-brand-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-brand-gray-900 mb-2">
-                  Willkommen, {user.name.split(' ')[0]}!
+                  Willkommen, {(user.name ?? 'User').split(' ')[0]}!
                 </h2>
                 <p className="text-brand-gray-600 mb-8">
                   Lass uns dein Career Universe einrichten. Das dauert nur 2 Minuten.

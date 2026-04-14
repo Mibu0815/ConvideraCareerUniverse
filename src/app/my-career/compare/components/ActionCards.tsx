@@ -29,6 +29,8 @@ interface ActionCardsProps {
   comparison: RoleComparisonResult;
   fromRoleId: string | null;
   toRoleId: string;
+  initialMentorMessage?: string | null;
+  onMentorMessageConsumed?: () => void;
 }
 
 export function ActionCards({ comparison, fromRoleId, toRoleId }: ActionCardsProps) {

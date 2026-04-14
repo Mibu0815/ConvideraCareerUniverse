@@ -123,7 +123,7 @@ export function FocusSkillProvider({
       });
     }
     if (data.activeImpulse !== undefined) {
-      setActiveImpulseState(prev => prev === data.activeImpulse ? prev : data.activeImpulse);
+      setActiveImpulseState(prev => prev === data.activeImpulse ? prev : data.activeImpulse ?? null);
     }
     if (data.completedImpulsesCount !== undefined) {
       setCompletedImpulsesCountState(prev => prev === data.completedImpulsesCount ? prev : data.completedImpulsesCount!);

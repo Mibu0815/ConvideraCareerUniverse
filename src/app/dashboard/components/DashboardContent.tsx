@@ -94,10 +94,10 @@ export function DashboardContent({ user, kpis }: Props) {
                 <button className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-brand-gray-100 transition-colors">
                   <div className="w-8 h-8 rounded-full bg-brand-gray-200 flex items-center justify-center overflow-hidden">
                     {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                      <img src={user.avatarUrl} alt={user.name ?? ''} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-sm font-medium text-brand-gray-600">
-                        {user.name.charAt(0).toUpperCase()}
+                        {(user.name ?? '?').charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -134,7 +134,7 @@ export function DashboardContent({ user, kpis }: Props) {
           className="mb-8"
         >
           <h2 className="text-3xl font-bold text-brand-gray-900">
-            Hallo {user.name.split(' ')[0]},
+            Hallo {(user.name ?? 'User').split(' ')[0]},
           </h2>
           {user.targetRoleName ? (
             <p className="text-lg text-brand-gray-600 mt-1">

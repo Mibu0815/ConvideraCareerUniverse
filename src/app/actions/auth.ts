@@ -8,9 +8,9 @@ import { redirect } from 'next/navigation'
 export interface AuthUser {
   id: string
   email: string
-  name: string
+  name: string | null
   avatarUrl: string | null
-  platformRole: 'ADMIN' | 'FUNCTIONAL_LEAD' | 'MEMBER'
+  platformRole: string
   currentRoleId: string | null
   currentRoleName: string | null
   targetRoleId: string | null
@@ -20,7 +20,6 @@ export interface AuthUser {
 
 /**
  * Get the current authenticated user with their profile data
- * Links Supabase Auth user to our User table via email
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const supabase = await createClient()
@@ -31,58 +30,81 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     return null
   }
 
-  // Find or create user in our database
-  let dbUser = await prisma.user.findUnique({
+  const dbUser = await prisma.user.findUnique({
     where: { email: authUser.email },
-    include: {
-      Role: true,
-      CareerGoal: {
-        where: {
-          status: { in: ['EXPLORING', 'COMMITTED'] }
-        },
-        include: {
-          Role: true
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: 1
-      }
-    }
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      avatarUrl: true,
+      platformRole: true,
+      currentRoleId: true,
+      targetRoleId: true,
+    },
   })
 
-  // If user doesn't exist in our DB, create them
   if (!dbUser) {
-    dbUser = await prisma.user.create({
+    // Create user if not exists
+    const newUser = await prisma.user.create({
       data: {
+        id: authUser.id,
         email: authUser.email,
         name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
         avatarUrl: authUser.user_metadata?.avatar_url || null,
-        platformRole: 'MEMBER',
-        isActive: true,
+        updatedAt: new Date(),
       },
-      include: {
-        Role: true,
-        CareerGoal: {
-          include: { Role: true },
-          take: 1
-        }
-      }
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarUrl: true,
+        platformRole: true,
+        currentRoleId: true,
+        targetRoleId: true,
+      },
     })
+
+    return {
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+      avatarUrl: newUser.avatarUrl,
+      platformRole: newUser.platformRole,
+      currentRoleId: null,
+      currentRoleName: null,
+      targetRoleId: null,
+      targetRoleName: null,
+      isFirstLogin: true,
+    }
   }
 
-  const activeGoal = dbUser.CareerGoal?.[0]
-  const isFirstLogin = !dbUser.currentRoleId
+  // Fetch role names in parallel
+  const [currentRole, targetRole] = await Promise.all([
+    dbUser.currentRoleId
+      ? prisma.role.findUnique({
+          where: { id: dbUser.currentRoleId },
+          select: { title: true },
+        })
+      : null,
+    dbUser.targetRoleId
+      ? prisma.role.findUnique({
+          where: { id: dbUser.targetRoleId },
+          select: { title: true },
+        })
+      : null,
+  ])
 
   return {
     id: dbUser.id,
     email: dbUser.email,
     name: dbUser.name,
     avatarUrl: dbUser.avatarUrl,
-    platformRole: dbUser.platformRole as 'ADMIN' | 'FUNCTIONAL_LEAD' | 'MEMBER',
+    platformRole: dbUser.platformRole,
     currentRoleId: dbUser.currentRoleId,
-    currentRoleName: dbUser.Role?.title || null,
-    targetRoleId: activeGoal?.targetRoleId || null,
-    targetRoleName: activeGoal?.Role?.title || null,
-    isFirstLogin,
+    currentRoleName: currentRole?.title || null,
+    targetRoleId: dbUser.targetRoleId,
+    targetRoleName: targetRole?.title || null,
+    isFirstLogin: !dbUser.currentRoleId,
   }
 }
 
@@ -90,84 +112,28 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
  * Get dashboard KPIs for the current user
  */
 export async function getDashboardKPIs(userId: string) {
-  // Get user's skill assessments
-  const assessments = await prisma.skillAssessment.findMany({
-    where: { userId },
-    include: {
-      Skill: true
-    }
-  })
+  const [assessments, learningFocus] = await Promise.all([
+    prisma.skillAssessment.findMany({
+      where: { userId },
+      select: { skillId: true, selfLevel: true, validatedLevel: true },
+    }),
+    prisma.learningFocus.findMany({
+      where: { LearningPlan: { userId } },
+      select: { status: true },
+    }),
+  ])
 
-  // Get user's learning focus items
-  const learningFocus = await prisma.learningFocus.findMany({
-    where: {
-      LearningPlan: { userId }
-    }
-  })
-
-  // Get user with current role requirements
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      Role: {
-        include: {
-          RoleSkillRequirement: true
-        }
-      },
-      CareerGoal: {
-        where: { status: { in: ['EXPLORING', 'COMMITTED'] } },
-        include: {
-          Role: {
-            include: {
-              RoleSkillRequirement: true
-            }
-          }
-        },
-        take: 1
-      }
-    }
-  })
-
-  const currentRoleRequirements = user?.Role?.RoleSkillRequirement || []
-  const targetRoleRequirements = user?.CareerGoal?.[0]?.Role?.RoleSkillRequirement || []
-
-  // Calculate gaps
-  let totalGaps = 0
-  let skillUpgrades = 0
-  let newSkillsNeeded = 0
-
-  const assessmentMap = new Map(assessments.map(a => [a.skillId, a.validatedLevel ?? a.selfLevel ?? 0]))
-
-  // Check target role skills for gaps
-  for (const req of targetRoleRequirements) {
-    const currentLevel = assessmentMap.get(req.skillId) || 0
-    if (currentLevel < req.requiredLevel) {
-      totalGaps++
-      if (currentLevel > 0) {
-        skillUpgrades++
-      } else {
-        newSkillsNeeded++
-      }
-    }
-  }
-
-  // Calculate progress percentage
-  const totalRequirements = targetRoleRequirements.length || 1
-  const completedRequirements = targetRoleRequirements.filter(req => {
-    const currentLevel = assessmentMap.get(req.skillId) || 0
-    return currentLevel >= req.requiredLevel
-  }).length
-
-  const progressPercent = Math.round((completedRequirements / totalRequirements) * 100)
-
-  // Count focused items
   const focusedItems = learningFocus.filter(lf => lf.status === 'IN_PROGRESS').length
   const completedItems = learningFocus.filter(lf => lf.status === 'COMPLETED').length
+  const totalGaps = learningFocus.length
+  const progressPercent = totalGaps > 0
+    ? Math.round((completedItems / totalGaps) * 100)
+    : 0
 
   return {
     totalGaps,
-    skillUpgrades,
-    newSkillsNeeded,
+    skillUpgrades: 0,
+    newSkillsNeeded: 0,
     progressPercent,
     focusedItems,
     completedItems,
@@ -176,42 +142,23 @@ export async function getDashboardKPIs(userId: string) {
 }
 
 /**
- * Update user's current role (for onboarding)
+ * Update user's current role
  */
 export async function setCurrentRole(userId: string, roleId: string) {
   await prisma.user.update({
     where: { id: userId },
-    data: { currentRoleId: roleId }
+    data: { currentRoleId: roleId, updatedAt: new Date() },
   })
 }
 
 /**
- * Set user's target role (for onboarding)
+ * Set user's target role
  */
 export async function setTargetRole(userId: string, roleId: string) {
-  // Upsert career goal
-  const existingGoal = await prisma.careerGoal.findFirst({
-    where: { userId }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { targetRoleId: roleId, updatedAt: new Date() },
   })
-
-  if (existingGoal) {
-    await prisma.careerGoal.update({
-      where: { id: existingGoal.id },
-      data: {
-        targetRoleId: roleId,
-        status: 'EXPLORING',
-        updatedAt: new Date()
-      }
-    })
-  } else {
-    await prisma.careerGoal.create({
-      data: {
-        userId,
-        targetRoleId: roleId,
-        status: 'EXPLORING'
-      }
-    })
-  }
 }
 
 /**
