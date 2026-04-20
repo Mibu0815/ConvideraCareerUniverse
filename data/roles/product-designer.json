@@ -1,0 +1,131 @@
+{
+  "roleFamily": "Product Designer",
+  "category": "Design",
+  "team": "Squad",
+  "directReportTo": "Head Of Design",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "product-designer-junior",
+      "slug": "product-designer-junior",
+      "title": "Product Designer (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior Product Designer mit Fokus auf Umsetzung gegebener Konzepte und kontinuierlichem Lernen in User Research, UI Design und Prototyping.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Unterstützung bei User Research und Interview-Auswertung",
+        "Umsetzung von UI-Komponenten entlang bestehender Design Systeme",
+        "Erstellung von Wireframes und Low-Fi-Prototypen"
+      ],
+      "softSkills": [
+        "Creativity",
+        "Analytical Thinking",
+        "Communication Skills",
+        "Collaboration",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "User Interviewing", "level": 1, "competenceField": "Product Design UX" },
+        { "name": "Design Research", "level": 1, "competenceField": "Product Design UI" },
+        { "name": "UI Prototyping", "level": 1, "competenceField": "Product Design UI" },
+        { "name": "Screen Design", "level": 1, "competenceField": "Product Design UI" }
+      ]
+    },
+    {
+      "id": "product-designer-professional",
+      "slug": "product-designer-professional",
+      "title": "Product Designer (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Eigenständige Konzeption und Gestaltung digitaler Produkte inklusive Usability-Testing und Arbeit mit Design Systems.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Konzeption von Features auf Basis von User Research",
+        "Design von UI-Flows inklusive responsiver Gestaltung",
+        "Beitrag zur Weiterentwicklung bestehender Design Systeme"
+      ],
+      "softSkills": [
+        "Creativity",
+        "Analytical Thinking",
+        "Communication Skills",
+        "Collaboration",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "User Interviewing", "level": 2, "competenceField": "Product Design UX" },
+        { "name": "Design Research", "level": 2, "competenceField": "Product Design UI" },
+        { "name": "UI Prototyping", "level": 2, "competenceField": "Product Design UI" },
+        { "name": "Screen Design", "level": 2, "competenceField": "Product Design UI" },
+        { "name": "Responsive Design", "level": 1, "competenceField": "Product Design UI" },
+        { "name": "UI Systemization", "level": 1, "competenceField": "Product Design UI" }
+      ]
+    },
+    {
+      "id": "product-designer-senior",
+      "slug": "product-designer-senior",
+      "title": "Product Designer (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Senior Product Designer mit End-to-End-Verantwortung für komplexe Design-Initiativen, inklusive Information Architecture und Interaction Design.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "End-to-End-Verantwortung für Design-Initiativen größerer Features",
+        "Architektur von Informationsstrukturen und Interaktions-Patterns",
+        "Mentoring von Junior- und Professional-Designern"
+      ],
+      "softSkills": [
+        "Creativity",
+        "Analytical Thinking",
+        "Communication Skills",
+        "Collaboration",
+        "Leadership Competency"
+      ],
+      "skills": [
+        { "name": "User Interviewing", "level": 3, "competenceField": "Product Design UX" },
+        { "name": "Information Architecture", "level": 2, "competenceField": "Product Design UX" },
+        { "name": "Design Research", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "UI Prototyping", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "Screen Design", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "Responsive Design", "level": 2, "competenceField": "Product Design UI" },
+        { "name": "UI Systemization", "level": 2, "competenceField": "Product Design UI" },
+        { "name": "UI Animation", "level": 2, "competenceField": "Product Design UI" }
+      ]
+    },
+    {
+      "id": "design-functional-lead",
+      "slug": "design-functional-lead",
+      "title": "Design (m/f/d)",
+      "level": "Functional Lead",
+      "levelOrder": 4,
+      "description": "Fachliche Leitung der Design-Disziplin — Verantwortung für Design System, Design-Qualität, Methodik und fachliche Weiterentwicklung des Teams.",
+      "leadership": "Functional",
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Fachliche Leitung der Design-Disziplin",
+        "Ownership für Design System und Design-Standards",
+        "Hiring, Coaching und Weiterentwicklung der Design-Community"
+      ],
+      "softSkills": [
+        "Leadership Competency",
+        "Communication Skills",
+        "Coordination Skills",
+        "Strategic Thinking",
+        "Creativity"
+      ],
+      "skills": [
+        { "name": "User Interviewing", "level": 3, "competenceField": "Product Design UX" },
+        { "name": "Information Architecture", "level": 3, "competenceField": "Product Design UX" },
+        { "name": "Design Research", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "UI Prototyping", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "Screen Design", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "Responsive Design", "level": 3, "competenceField": "Product Design UI" },
+        { "name": "UI Systemization", "level": 4, "competenceField": "Product Design UI" },
+        { "name": "Kreativ-Konzeption", "level": 3, "competenceField": "Creative Strategy" }
+      ]
+    }
+  ]
+}
