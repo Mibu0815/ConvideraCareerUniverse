@@ -9,9 +9,9 @@
       "id": "team-lead-digital-solution-delivery",
       "slug": "team-lead-digital-solution-delivery",
       "title": "Team Lead Digital Solution Delivery - Squad Lead (m/f/d)",
-      "level": "Functional Lead",
+      "level": "Team Lead",
       "levelOrder": 4,
-      "description": "Squad Lead mit fachlicher und teilweise disziplinarischer Führung eines cross-funktionalen Delivery-Teams. NOTE: Originally 'Team Lead' — mapped to FUNCTIONAL_LEAD until TEAM_LEAD enum is added.",
+      "description": "Squad Lead mit fachlicher und teilweise disziplinarischer Führung eines cross-funktionalen Delivery-Teams.",
       "leadership": "Disciplinary",
       "budgetResponsibility": false,
       "responsibilities": [

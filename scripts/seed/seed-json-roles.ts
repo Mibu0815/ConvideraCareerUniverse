@@ -79,6 +79,8 @@ function mapLevel(level: string): RoleLevel {
     'junior': 'JUNIOR',
     'professional': 'PROFESSIONAL',
     'senior': 'SENIOR',
+    'team lead': 'TEAM_LEAD',
+    'team-lead': 'TEAM_LEAD',
     'functional lead': 'FUNCTIONAL_LEAD',
     'functional-lead': 'FUNCTIONAL_LEAD',
     'head of': 'HEAD_OF',
@@ -318,6 +320,7 @@ class JsonRoleSeeder {
       },
       update: {
         title: level.title,
+        level: roleLevel,
         description: level.description,
         team: level.team || family.team,
         hasLeadership: hasLeadership,
