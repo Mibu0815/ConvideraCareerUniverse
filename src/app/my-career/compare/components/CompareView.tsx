@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useTransition, useEffect } from 'react';
+import { useState, useCallback, useTransition, useEffect, type ReactNode } from 'react';
+import type { PlatformRole } from '@prisma/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
@@ -43,6 +44,8 @@ interface CompareViewProps {
   initialPlanId?: string | null;
   completedImpulses?: CompletedImpulse[];
   totalFocusedSkills?: number;
+  platformRole?: PlatformRole;
+  validationBadge?: ReactNode;
 }
 
 type TabType = 'hardSkills' | 'softSkills' | 'responsibilities';
@@ -56,6 +59,8 @@ export function CompareView({
   initialPlanId,
   completedImpulses = [],
   totalFocusedSkills = 0,
+  platformRole,
+  validationBadge,
 }: CompareViewProps) {
   const [fromRoleId, setFromRoleId] = useState<string | null>(initialFromRoleId || null);
   const [toRoleId, setToRoleId] = useState<string | null>(initialToRoleId || null);
@@ -154,7 +159,7 @@ export function CompareView({
   return (
     <div className="min-h-screen bg-brand-gray-50 bg-grid">
       <BlobBackground />
-      <Navigation />
+      <Navigation platformRole={platformRole} validationBadge={validationBadge} />
       <header className="border-b border-brand-gray-200 bg-brand-white/80 backdrop-blur-sm sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">

@@ -2,7 +2,9 @@ import { getRoles, type GroupedRoles } from '@/app/actions/get-roles';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { getDashboardLearningData, type DashboardLearningData } from '@/app/actions/learning-journey';
+import { ValidationBadge } from '@/components/shared/ValidationBadge';
 import { CompareView } from './components/CompareView';
+import type { PlatformRole } from '@prisma/client';
 
 // Force dynamic rendering (requires database connection)
 export const dynamic = 'force-dynamic';
@@ -14,6 +16,7 @@ interface UserWithLearningData {
   planId: string | null;
   focusedSkillIds: string[];
   learningData: DashboardLearningData | null;
+  platformRole: PlatformRole;
 }
 
 async function getUserWithLearningData(): Promise<UserWithLearningData | null> {
@@ -31,6 +34,7 @@ async function getUserWithLearningData(): Promise<UserWithLearningData | null> {
         id: true,
         currentRoleId: true,
         targetRoleId: true,
+        platformRole: true,
         LearningPlan: {
           select: {
             id: true,
@@ -55,6 +59,7 @@ async function getUserWithLearningData(): Promise<UserWithLearningData | null> {
       planId: user.LearningPlan?.id || null,
       focusedSkillIds: user.LearningPlan?.LearningFocus.map(f => f.skillId) ?? [],
       learningData,
+      platformRole: user.platformRole,
     };
   } catch {
     return null;
@@ -139,6 +144,8 @@ export default async function ComparePage() {
         initialPlanId={userData?.planId || null}
         completedImpulses={userData?.learningData?.recentCompletedImpulses ?? []}
         totalFocusedSkills={userData?.learningData?.inProgressSkills.length ?? 0}
+        platformRole={userData?.platformRole}
+        validationBadge={<ValidationBadge />}
       />
     );
   } catch (e) {

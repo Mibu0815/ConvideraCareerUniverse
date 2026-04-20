@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { isAdmin, isDomainExpert } from '@/lib/auth/permissions'
 import { Navigation } from '@/components/shared/Navigation'
+import { ValidationBadge } from '@/components/shared/ValidationBadge'
 import { ProfileClient } from './ProfileClient'
 
 export default async function ProfilePage() {
@@ -114,7 +115,11 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <Navigation userName={user.name} />
+      <Navigation
+        userName={user.name}
+        platformRole={user.platformRole}
+        validationBadge={<ValidationBadge />}
+      />
       <div className="min-h-screen bg-gray-50 pt-14">
         <ProfileClient
           user={{

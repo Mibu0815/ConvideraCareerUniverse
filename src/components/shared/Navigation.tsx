@@ -2,20 +2,26 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, BookOpen, Users, LogOut, User, ChevronDown } from 'lucide-react';
+import { Compass, BookOpen, Users, LogOut, User, ChevronDown, Clock, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import type { PlatformRole } from '@prisma/client';
+import type { ReactNode } from 'react';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: Compass },
   { name: 'Meine Journey', href: '/learning-journey', icon: BookOpen },
+  { name: 'Meine Timeline', href: '/timeline', icon: Clock },
   { name: 'Explore Roles', href: '/my-career', icon: Users },
 ];
 
 interface NavigationProps {
   userName?: string | null;
+  platformRole?: PlatformRole;
+  validationBadge?: ReactNode;
 }
 
-export function Navigation({ userName }: NavigationProps) {
+export function Navigation({ userName, platformRole, validationBadge }: NavigationProps) {
+  const canValidate = platformRole === 'FUNCTIONAL_LEAD' || platformRole === 'ADMIN';
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -91,6 +97,25 @@ export function Navigation({ userName }: NavigationProps) {
               </button>
             );
           })}
+          {canValidate && (
+            <button
+              onClick={() => router.push('/admin/validations')}
+              className={`
+                relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                ${isActive('/admin/validations')
+                  ? 'text-convidera-blue bg-convidera-blue/5'
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                }
+              `}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span className="hidden md:inline">Validierungen</span>
+              {validationBadge}
+              {isActive('/admin/validations') && (
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-convidera-blue rounded-full" />
+              )}
+            </button>
+          )}
         </nav>
 
         {/* Profile Dropdown */}

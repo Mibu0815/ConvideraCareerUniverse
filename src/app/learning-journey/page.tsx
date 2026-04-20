@@ -3,6 +3,7 @@
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { Navigation } from "@/components/shared"
+import { ValidationBadge } from "@/components/shared/ValidationBadge"
 import { getCurrentUser } from "@/app/actions/user-sync"
 import {
   getLearningRoadmap,
@@ -15,7 +16,7 @@ import {
   saveImpulseEvidence
 } from "@/app/actions/learning-journey"
 import { LearningJourneyView } from "@/components/learning-journey"
-import type { ImpulseStep } from "@prisma/client"
+import type { ImpulseStep, PlatformRole } from "@prisma/client"
 
 // Loading skeleton
 function LoadingSkeleton() {
@@ -36,7 +37,15 @@ function LoadingSkeleton() {
 }
 
 // Server-side data fetching
-async function LearningJourneyContent({ userId, userName }: { userId: string; userName: string | null }) {
+async function LearningJourneyContent({
+  userId,
+  userName,
+  platformRole,
+}: {
+  userId: string
+  userName: string | null
+  platformRole: PlatformRole
+}) {
   // Generate/refresh the learning plan
   const { planId } = await generateOrRefreshLearningPlan(userId)
 
@@ -49,7 +58,11 @@ async function LearningJourneyContent({ userId, userName }: { userId: string; us
   if (!plan) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navigation userName={userName} />
+        <Navigation
+          userName={userName}
+          platformRole={platformRole}
+          validationBadge={<ValidationBadge />}
+        />
         <div className="max-w-2xl mx-auto px-4 pt-24 pb-8 text-center">
           <p className="text-gray-500">Noch kein Lernplan vorhanden.</p>
           <p className="text-sm text-gray-400 mt-2">
@@ -97,6 +110,8 @@ async function LearningJourneyContent({ userId, userName }: { userId: string; us
       onGenerateImpulse={handleGenerateImpulse}
       onUpdateStep={handleUpdateStep}
       onSaveEvidence={handleSaveEvidence}
+      platformRole={platformRole}
+      validationBadge={<ValidationBadge />}
     />
   )
 }
@@ -115,7 +130,11 @@ export default async function LearningJourneyPage() {
 
   return (
     <Suspense fallback={<LoadingSkeleton />}>
-      <LearningJourneyContent userId={user.id} userName={user.name} />
+      <LearningJourneyContent
+        userId={user.id}
+        userName={user.name}
+        platformRole={user.platformRole as PlatformRole}
+      />
     </Suspense>
   )
 }

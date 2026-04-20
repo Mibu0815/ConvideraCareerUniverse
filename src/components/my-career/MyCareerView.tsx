@@ -1,6 +1,8 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useRouter } from "next/navigation"
+import type { PlatformRole } from "@prisma/client"
 import { Navigation } from "@/components/shared"
 import {
   Target,
@@ -71,6 +73,8 @@ interface MyCareerViewProps {
   goals: GoalData[]
   skillsByField: SkillFieldGroup[]
   recentActivity: ActivityData[]
+  platformRole?: PlatformRole
+  validationBadge?: ReactNode
 }
 
 // ─── Design Tokens ───────────────────────────────────────
@@ -189,6 +193,8 @@ export function MyCareerView({
   goals,
   skillsByField,
   recentActivity,
+  platformRole,
+  validationBadge,
 }: MyCareerViewProps) {
   const router = useRouter()
   const activeGoals = goals.filter((g) => g.status === "EXPLORING" || g.status === "COMMITTED")
@@ -197,7 +203,11 @@ export function MyCareerView({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation userName={userName} />
+      <Navigation
+        userName={userName}
+        platformRole={platformRole}
+        validationBadge={validationBadge}
+      />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-20 pb-12">
         {/* Page Header */}

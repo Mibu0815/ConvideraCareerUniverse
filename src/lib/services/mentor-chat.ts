@@ -302,6 +302,40 @@ export async function chatWithMentor(
   return response.advice;
 }
 
+/**
+ * Kurzer, motivierender Evidence-Nudge nach einem Self-Assessment.
+ * Verwendet denselben Anthropic-Client wie die restlichen Mentor-Funktionen.
+ */
+export async function getEvidenceNudge(params: {
+  skillName: string
+  newLevel: number
+  competenceField: string
+}): Promise<string> {
+  const levelLabels = ['', 'Learner', 'Practitioner', 'Advanced', 'Master']
+  const label = levelLabels[params.newLevel] ?? `Level ${params.newLevel}`
+
+  const userMessage = `
+Der Mitarbeiter hat gerade ${params.skillName} (${params.competenceField}) auf Level ${params.newLevel} (${label}) eingeschätzt.
+
+Schreibe eine kurze, motivierende Aufforderung (2 Sätze, informell, Du-Form), die den Mitarbeiter ermutigt, eine konkrete Evidence dafür einzureichen. Nenne ein spezifisches Beispiel, was als Evidence für L${params.newLevel} in diesem Skill-Bereich passen würde. Nur der Text, keine Formatierung.
+`.trim()
+
+  const client = getAnthropicClient()
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 200,
+    system:
+      'Du bist der Convidera Career Mentor. Antworte knapp, motivierend, Du-Form, ohne Markdown.',
+    messages: [{ role: 'user', content: userMessage }],
+  })
+
+  return response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+    .map((block) => block.text)
+    .join('\n')
+    .trim()
+}
+
 // Helper: Extrahiert Key Actions aus dem Advice-Text
 function extractKeyActions(text: string): string[] {
   const actions: string[] = [];

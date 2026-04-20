@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { getCurrentUser } from "@/app/actions/user-sync"
 import { getLearningRoadmap } from "@/app/actions/learning-journey"
-import { Navigation } from "@/components/shared"
+import { ValidationBadge } from "@/components/shared/ValidationBadge"
 import { MyCareerView } from "@/components/my-career/MyCareerView"
 
 export const dynamic = "force-dynamic"
@@ -202,6 +202,8 @@ async function MyCareerContent({ userId, userName }: { userId: string; userName:
         details: a.entityName,
         createdAt: a.createdAt.toISOString(),
       }))}
+      platformRole={user.platformRole}
+      validationBadge={<ValidationBadge />}
     />
   )
 }

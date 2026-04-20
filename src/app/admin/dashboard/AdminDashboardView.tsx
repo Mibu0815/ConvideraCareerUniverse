@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import type { PlatformRole } from '@prisma/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart3,
@@ -61,11 +62,13 @@ interface AdminDashboardViewProps {
   feedbackStats: FeedbackStats;
   userName: string;
   userRole: string;
+  platformRole?: PlatformRole;
+  validationBadge?: ReactNode;
 }
 
 type TabType = 'overview' | 'mitarbeiter' | 'techradar' | 'analytics' | 'feedback';
 
-export function AdminDashboardView({ dashboardData, adminAnalytics, feedbackData, feedbackStats, userName, userRole }: AdminDashboardViewProps) {
+export function AdminDashboardView({ dashboardData, adminAnalytics, feedbackData, feedbackStats, userName, userRole, platformRole, validationBadge }: AdminDashboardViewProps) {
   const [activeTab, setActiveTab] = useState<TabType>('analytics');
 
   return (
@@ -77,7 +80,7 @@ export function AdminDashboardView({ dashboardData, adminAnalytics, feedbackData
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl" />
       </div>
-      <Navigation />
+      <Navigation userName={userName} platformRole={platformRole} validationBadge={validationBadge} />
 
       <header className="relative border-b border-white/10 bg-white/5 backdrop-blur-xl sticky top-16 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

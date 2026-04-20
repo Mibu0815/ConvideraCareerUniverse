@@ -357,3 +357,14 @@ a:focus-visible,
 .focus-ring:focus-visible {
   @apply outline-none ring-2 ring-convidera-blue ring-offset-2;
 }
+
+/* Hatched pattern for pending/submitted evidence bars */
+.bg-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(255, 255, 255, 0.4) 3px,
+    rgba(255, 255, 255, 0.4) 6px
+  );
+}

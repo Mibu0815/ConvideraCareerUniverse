@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import type { PlatformRole } from '@prisma/client'
 
 export interface PrismaUser {
   id: string
@@ -11,7 +12,7 @@ export interface PrismaUser {
   avatarUrl: string | null
   currentRoleId: string | null
   targetRoleId: string | null
-  platformRole: string
+  platformRole: PlatformRole
 }
 
 /**

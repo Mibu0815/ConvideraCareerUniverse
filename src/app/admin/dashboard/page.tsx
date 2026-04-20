@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getLeadDashboardData } from '@/lib/services/personalized-pathways';
 import { getAdminAnalytics } from '@/app/actions/admin-analytics';
 import { getRecentFeedback, getFeedbackStats, type FeedbackSummary } from '@/app/actions/feedback';
+import { ValidationBadge } from '@/components/shared/ValidationBadge';
 import { AdminDashboardView } from './AdminDashboardView';
 
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,8 @@ export default async function AdminDashboardPage() {
       feedbackStats={feedbackStats}
       userName={user.name || user.email}
       userRole={user.platformRole}
+      platformRole={user.platformRole}
+      validationBadge={<ValidationBadge />}
     />
   );
 }

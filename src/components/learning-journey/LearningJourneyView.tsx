@@ -1,7 +1,7 @@
 // src/components/learning-journey/LearningJourneyView.tsx
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Sparkles, Target, ChevronDown, Check } from "lucide-react"
@@ -10,7 +10,7 @@ import { SkillTimelineItem } from "./SkillTimelineItem"
 import { useFocusSkill } from "@/context"
 import type { LearningRoadmap as RoadmapType } from "@/app/actions/learning-journey"
 import type { StructuredImpulse } from "@/types/practical-impulse"
-import type { ImpulseStep } from "@prisma/client"
+import type { ImpulseStep, PlatformRole } from "@prisma/client"
 
 interface Props {
   plan: any
@@ -22,6 +22,8 @@ interface Props {
   onGenerateImpulse: (focusId: string) => Promise<StructuredImpulse>
   onUpdateStep: (impulseId: string, step: ImpulseStep, data?: { reflection?: string }) => Promise<{ success: boolean }>
   onSaveEvidence: (impulseId: string, reflection: string) => Promise<{ success: boolean; evidenceNoteId: string }>
+  platformRole?: PlatformRole
+  validationBadge?: ReactNode
 }
 
 export function LearningJourneyView({
@@ -33,7 +35,9 @@ export function LearningJourneyView({
   onRemoveFocus,
   onGenerateImpulse,
   onUpdateStep,
-  onSaveEvidence
+  onSaveEvidence,
+  platformRole,
+  validationBadge
 }: Props) {
   const router = useRouter()
   const { initializeFromServerData } = useFocusSkill()
@@ -104,7 +108,11 @@ export function LearningJourneyView({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation userName={userName} />
+      <Navigation
+        userName={userName}
+        platformRole={platformRole}
+        validationBadge={validationBadge}
+      />
 
       <main className="max-w-2xl mx-auto px-4 pt-20 pb-24">
         {/* Hero Header */}
