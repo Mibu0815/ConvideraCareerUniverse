@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { PLATFORM_ROLE_BADGE } from '@/lib/constants/platform-roles'
+import { SkillTreeEditor } from '@/components/skill-tree/SkillTreeEditor'
 import type { AdminCompetenceField, AdminUserRow, PendingValidation } from '../types'
 
 export function AdminManagementSection({
@@ -71,14 +72,8 @@ export function AdminManagementSection({
                 </div>
                 <span className="text-xs text-gray-400">{field.skills.length} Skills</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {field.skills.map(skill => (
-                  <span key={skill.id}
-                    className="text-xs px-2.5 py-1 rounded-md bg-gray-50 border border-gray-200 text-gray-600">
-                    {skill.title}
-                  </span>
-                ))}
-              </div>
+              <SkillTreeEditor field={field} />
+              <p className="text-xs text-gray-400">Klicke auf einen Skill um ihn umzubenennen</p>
             </div>
           ))}
         </div>

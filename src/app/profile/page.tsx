@@ -41,10 +41,8 @@ export default async function ProfilePage() {
     ? await prisma.role.findUnique({ where: { id: user.currentRoleId } })
     : null
 
-  console.log('[DEBUG] platformRole:', user.platformRole, typeof user.platformRole)
   const domainExpert = isDomainExpert(user)
   const admin = isAdmin(user)
-  console.log('[DEBUG] isAdmin:', admin, 'isDomainExpert:', domainExpert)
 
   const pendingValidations = domainExpert
     ? await prisma.evidence.findMany({
@@ -160,6 +158,7 @@ export default async function ProfilePage() {
           allCompetenceFields={allCompetenceFields.map(f => ({
             id: f.id,
             title: f.title,
+            slug: f.slug,
             ownerId: f.ownerId,
             ownerName: f.Owner?.name ?? null,
             skills: f.Skill.map(s => ({ id: s.id, title: s.title })),

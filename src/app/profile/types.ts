@@ -32,6 +32,7 @@ export interface PendingValidation {
 export interface AdminCompetenceField {
   id: string
   title: string
+  slug: string
   ownerId: string | null
   ownerName: string | null
   skills: SkillSummary[]
