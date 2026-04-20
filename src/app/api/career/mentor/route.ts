@@ -5,6 +5,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { compareRoles } from '@/lib/services/career-logic';
 import { getMentorAdvice, getMentorGreeting, chatWithMentor, MissingApiKeyError } from '@/lib/services/mentor-chat';
 
+// ─── In-memory rate limiting (10 req/user/min) ───
+
+const rateLimiter = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimiter.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimiter.set(userId, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= 10) return false;
+  entry.count++;
+  return true;
+}
+
 interface MentorMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -32,6 +48,15 @@ export interface MentorResponse {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP (user identity not available without auth parsing)
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(clientIp)) {
+      return NextResponse.json(
+        { error: 'Zu viele Anfragen. Bitte warten Sie eine Minute.' },
+        { status: 429 }
+      );
+    }
+
     const body: MentorRequest = await request.json();
 
     if (!body.toRoleId) {

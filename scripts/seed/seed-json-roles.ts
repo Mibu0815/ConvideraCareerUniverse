@@ -241,7 +241,7 @@ class JsonRoleSeeder {
         // Also try to find by title+fieldId combination
         if (!skill) {
           skill = await prisma.skill.findFirst({
-            where: { title: skillName, competenceFieldId: cfId },
+            where: { title: skillName, fieldId: cfId },
           });
         }
         // Also try to find by title alone (may be in different competence field)
@@ -254,7 +254,7 @@ class JsonRoleSeeder {
           existingCount++;
         } else {
           skill = await prisma.skill.create({
-            data: { id: skillSlug, title: skillName, slug: skillSlug, competenceFieldId: cfId },
+            data: { id: skillSlug, title: skillName, slug: skillSlug, fieldId: cfId },
           });
           skillCount++;
         }
@@ -314,7 +314,6 @@ class JsonRoleSeeder {
         directReportTo: family.directReportTo,
         language: family.languages[0] || 'english',
         fieldId,
-        traxId: level.traxId || null,
         updatedAt: new Date(),
       },
       update: {
@@ -332,7 +331,7 @@ class JsonRoleSeeder {
     console.log(`\n  📋 Role: ${role.title} (${roleLevel})`);
 
     // Delete existing RoleSkillRequirements
-    await prisma.roleSkillRequirement.deleteMany({ where: { roleId: role.id } });
+    await prisma.roleSkill.deleteMany({ where: { roleId: role.id } });
 
     // Create new RoleSkills
     let linkedSkills = 0;
@@ -353,11 +352,11 @@ class JsonRoleSeeder {
       }
 
       if (skillId) {
-        await prisma.roleSkillRequirement.create({
+        await prisma.roleSkill.create({
           data: {
             roleId: role.id,
             skillId,
-            requiredLevel: skillInput.level,
+            minLevel: skillInput.level,
           },
         });
         linkedSkills++;
@@ -408,16 +407,15 @@ class JsonRoleSeeder {
       }
     }
 
-    // Delete existing and create new RoleSoftSkillRequirements
-    await prisma.roleSoftSkillRequirement.deleteMany({ where: { roleId: role.id } });
-    for (const ssId of softSkillIds) {
-      await prisma.roleSoftSkillRequirement.create({
-        data: {
-          roleId: role.id,
-          softSkillId: ssId,
+    // Update role's soft skill connections (implicit many-to-many)
+    await prisma.role.update({
+      where: { id: role.id },
+      data: {
+        SoftSkill: {
+          set: softSkillIds.map(id => ({ id })),
         },
-      });
-    }
+      },
+    });
 
     console.log(`     ✓ ${linkedSoftSkills} Soft Skills verknüpft${refMode}`);
     if (missingSoftSkills.length > 0 && !useLegacyMode) {

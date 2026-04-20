@@ -43,7 +43,7 @@ export function LearningJourneyView({
     (item: any) => item.status === "IN_PROGRESS"
   )
 
-  // Sync to global context
+  // Sync to global context (use plan as dep, not focusedSkills which is recreated each render)
   useEffect(() => {
     // Map focused skills to context format
     const inProgressSkills = focusedSkills.map((item: any) => ({
@@ -77,7 +77,8 @@ export function LearningJourneyView({
       activeImpulse,
       completedImpulsesCount: completedCount,
     })
-  }, [focusedSkills, initializeFromServerData])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan, initializeFromServerData])
 
   // Get other skills (not focused, not completed)
   const backlogSkills = plan.LearningFocus.filter(

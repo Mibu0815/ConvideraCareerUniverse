@@ -10,7 +10,7 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model CompetenceField {
-  id            String          @id
+  id            String          @id @default(cuid())
   title         String          @unique
   slug          String          @unique
   color         String?
@@ -22,7 +22,7 @@ model CompetenceField {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OccupationalField {
-  id    String @id
+  id    String @id @default(cuid())
   title String @unique
   slug  String @unique
   Role  Role[]
@@ -30,7 +30,7 @@ model OccupationalField {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Responsibility {
-  id       String  @id
+  id       String  @id @default(cuid())
   text     String
   category String?
   order    Int     @default(0)
@@ -42,7 +42,7 @@ model Responsibility {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Role {
-  id                String            @id
+  id                String            @id @default(cuid())
   title             String
   slug              String            @unique
   level             RoleLevel
@@ -68,7 +68,7 @@ model Role {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Skill {
-  id                  String              @id
+  id                  String              @id @default(cuid())
   title               String
   slug                String              @unique
   description         String?
@@ -85,6 +85,8 @@ model Skill {
   UserSkillEvidence   UserSkillEvidence[]
   LearningFocus       LearningFocus[]
   SkillAssessment     SkillAssessment[]
+  Evidence            Evidence[]
+  AssessmentHistory   AssessmentHistory[]
 
   @@unique([title, fieldId])
   @@index([fieldId])
@@ -92,7 +94,7 @@ model Skill {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model SoftSkill {
-  id       String  @id
+  id       String  @id @default(cuid())
   title    String  @unique
   slug     String  @unique
   category String?
@@ -118,6 +120,12 @@ model User {
   OwnedCompetenceFields CompetenceField[]   @relation("CompetenceFieldOwner")
   ActivityLog           ActivityLog[]
   Feedback              Feedback[]
+  Evidence              Evidence[]
+  ValidatedEvidence     Evidence[]          @relation("ValidatedEvidence")
+  ValidationEvent       ValidationEvent[]
+  TimelineEvent         TimelineEvent[]
+  AssessmentHistory     AssessmentHistory[]
+  AssessedHistory       AssessmentHistory[] @relation("AssessmentHistoryAssessor")
 
   @@index([email])
   @@index([platformRole])
@@ -135,7 +143,7 @@ model RoleSkill {
 }
 
 model SkillValidationConfig {
-  id                      String   @id
+  id                      String   @id @default(cuid())
   skillId                 String   @unique
   level1Points            Int      @default(10)
   level2Points            Int      @default(30)
@@ -157,7 +165,7 @@ model SkillValidationConfig {
 }
 
 model TimelineEntry {
-  id          String   @id
+  id          String   @id @default(cuid())
   userId      String
   skillId     String?
   roleId      String?
@@ -178,7 +186,7 @@ model TimelineEntry {
 }
 
 model UserSkillEvidence {
-  id                     String           @id
+  id                     String           @id @default(cuid())
   userId                 String
   skillId                String
   type                   EvidenceType
@@ -458,4 +466,88 @@ model Feedback {
   @@index([userId])
   @@index([createdAt])
   @@index([rating])
+}
+
+// ─── Assessment Audit Trail ───
+
+enum AssessmentType {
+  SELF
+  VALIDATED
+}
+
+model AssessmentHistory {
+  id           String         @id @default(cuid())
+  userId       String
+  skillId      String
+  level        Int
+  type         AssessmentType
+  assessedById String?
+  createdAt    DateTime       @default(now())
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill        Skill          @relation(fields: [skillId], references: [id])
+  assessedBy   User?          @relation("AssessmentHistoryAssessor", fields: [assessedById], references: [id])
+
+  @@index([userId, skillId, createdAt])
+}
+
+// ─── Evidence Timeline & Validation ───
+
+enum AssessmentStatus {
+  SELF_ASSESSED
+  EVIDENCE_SUBMITTED
+  VALIDATED
+}
+
+model Evidence {
+  id              String           @id @default(cuid())
+  userId          String
+  skillId         String
+  title           String
+  description     String           @db.Text
+  evidenceUrl     String?
+  status          AssessmentStatus @default(SELF_ASSESSED)
+  selfLevel       Int
+  validatedLevel  Int?
+  validatedById   String?
+  validatedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill           Skill            @relation(fields: [skillId], references: [id])
+  validatedBy     User?            @relation("ValidatedEvidence", fields: [validatedById], references: [id])
+  validationEvents ValidationEvent[]
+  timelineEvents  TimelineEvent[]
+
+  @@index([userId, skillId])
+}
+
+model ValidationEvent {
+  id          String           @id @default(cuid())
+  evidenceId  String
+  validatorId String
+  fromStatus  AssessmentStatus
+  toStatus    AssessmentStatus
+  comment     String?          @db.Text
+  createdAt   DateTime         @default(now())
+
+  evidence    Evidence         @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  validator   User             @relation(fields: [validatorId], references: [id])
+}
+
+model TimelineEvent {
+  id          String    @id @default(cuid())
+  userId      String
+  evidenceId  String?
+  eventType   String
+  title       String
+  description String?   @db.Text
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  evidence    Evidence? @relation(fields: [evidenceId], references: [id])
+
+  @@index([userId, createdAt])
 }
