@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "lastUpdated": "2026-02-03",
+  "version": "1.1",
+  "lastUpdated": "2026-04-20",
   "softSkills": [
     {
       "id": "analytical-thinking",
@@ -11,16 +11,40 @@
       "name": "Appearance"
     },
     {
+      "id": "assertiveness",
+      "name": "Assertiveness"
+    },
+    {
       "id": "collaboration",
       "name": "Collaboration"
+    },
+    {
+      "id": "commercial-awareness",
+      "name": "Commercial Awareness"
     },
     {
       "id": "communication-skills",
       "name": "Communication Skills"
     },
     {
+      "id": "confidence",
+      "name": "Confidence"
+    },
+    {
+      "id": "conflict-ability",
+      "name": "Conflict Ability"
+    },
+    {
+      "id": "coordination-skills",
+      "name": "Coordination Skills"
+    },
+    {
       "id": "creativity",
       "name": "Creativity"
+    },
+    {
+      "id": "critical-faculty",
+      "name": "Critical Faculty"
     },
     {
       "id": "critical-thinking",
@@ -35,6 +59,10 @@
       "name": "Diligence"
     },
     {
+      "id": "diplomatic-skills",
+      "name": "Diplomatic Skills"
+    },
+    {
       "id": "disruptive-thinking",
       "name": "Disruptive Thinking"
     },
@@ -45,6 +73,42 @@
     {
       "id": "flexibility",
       "name": "Flexibility"
+    },
+    {
+      "id": "goal-orientation",
+      "name": "Goal Orientation"
+    },
+    {
+      "id": "individual-responsibility",
+      "name": "Individual Responsibility"
+    },
+    {
+      "id": "intercultural-competency",
+      "name": "Intercultural Competency"
+    },
+    {
+      "id": "leadership-competency",
+      "name": "Leadership Competency"
+    },
+    {
+      "id": "negotiating-skills",
+      "name": "Negotiating Skills"
+    },
+    {
+      "id": "networking",
+      "name": "Networking"
+    },
+    {
+      "id": "organizational-capability",
+      "name": "Organizational Capability"
+    },
+    {
+      "id": "outside-the-box-thinking",
+      "name": "Outside-the-box Thinking"
+    },
+    {
+      "id": "perseverance",
+      "name": "Perseverance"
     },
     {
       "id": "persistence",
@@ -71,16 +135,36 @@
       "name": "Pyramidal Communication"
     },
     {
+      "id": "reliability",
+      "name": "Reliability"
+    },
+    {
       "id": "resilience",
       "name": "Resilience"
+    },
+    {
+      "id": "self-awareness",
+      "name": "Self-Awareness"
+    },
+    {
+      "id": "self-management",
+      "name": "Self-Management"
     },
     {
       "id": "self-reliance",
       "name": "Self-Reliance"
     },
     {
+      "id": "sense-of-responsibility",
+      "name": "Sense of Responsibility"
+    },
+    {
       "id": "service-orientation",
       "name": "Service Orientation"
+    },
+    {
+      "id": "shaping-skills",
+      "name": "Shaping Skills"
     },
     {
       "id": "solution-orientation",
