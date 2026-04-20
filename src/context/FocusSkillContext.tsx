@@ -67,7 +67,8 @@ export function FocusSkillProvider({
   const hasActiveSkill = !!activeSkill;
   const skillIsSoft = activeSkill ? isSoftSkill(activeSkill.skillName) : false;
 
-  // Update state when initial props change
+  // Update state when initial props change (use JSON key to avoid infinite loops from new array refs)
+  const initialSkillsKey = JSON.stringify(initialSkills.map(s => s.skillId));
   useEffect(() => {
     if (initialSkills.length > 0) {
       setFocusSkillsState(prev => {
@@ -76,13 +77,16 @@ export function FocusSkillProvider({
         return prevIds === nextIds ? prev : initialSkills;
       });
     }
-  }, [initialSkills]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSkillsKey]);
 
+  const initialImpulseId = initialActiveImpulse?.id ?? null;
   useEffect(() => {
     if (initialActiveImpulse !== undefined) {
       setActiveImpulseState(prev => prev === initialActiveImpulse ? prev : initialActiveImpulse);
     }
-  }, [initialActiveImpulse]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialImpulseId]);
 
   useEffect(() => {
     setCompletedImpulsesCountState(initialCompletedCount);

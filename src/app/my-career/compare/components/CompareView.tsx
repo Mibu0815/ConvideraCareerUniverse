@@ -359,8 +359,6 @@ export function CompareView({
                 comparison={comparison}
                 fromRoleId={fromRoleId}
                 toRoleId={toRoleId!}
-                initialMentorMessage={mentorMessage}
-                onMentorMessageConsumed={() => setMentorMessage(null)}
               />
             </motion.div>
           )}

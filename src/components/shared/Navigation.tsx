@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, BookOpen, Users, LogOut } from 'lucide-react';
+import { Compass, BookOpen, Users, LogOut, User, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const navItems = [
@@ -17,6 +18,8 @@ interface NavigationProps {
 export function Navigation({ userName }: NavigationProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -28,6 +31,20 @@ export function Navigation({ userName }: NavigationProps) {
     await supabase.auth.signOut();
     router.push('/auth/login');
   };
+
+  const initials = userName
+    ? userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b border-gray-200">
@@ -76,24 +93,41 @@ export function Navigation({ userName }: NavigationProps) {
           })}
         </nav>
 
-        {/* Profile & Logout */}
-        <div className="flex items-center gap-3">
-          {/* User Avatar */}
-          <div
-            onClick={() => router.push('/my-career')}
-            className="w-8 h-8 rounded-full cursor-pointer bg-gradient-to-br from-convidera-blue to-blue-600 flex items-center justify-center text-white text-sm font-semibold shadow-md hover:shadow-lg transition-shadow"
-          >
-            {userName?.[0]?.toUpperCase() || '?'}
-          </div>
-
-          {/* Logout Button */}
+        {/* Profile Dropdown */}
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            title="Abmelden"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <LogOut className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-convidera-blue to-blue-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
+              {initials}
+            </div>
+            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
           </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 shadow-lg overflow-hidden z-50">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-sm font-medium text-convidera-dark truncate">{userName || 'User'}</p>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => { setMenuOpen(false); router.push('/profile'); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <User className="w-4 h-4 text-gray-400" />
+                  Mein Profil
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); handleLogout(); }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Abmelden
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
