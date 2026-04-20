@@ -224,7 +224,7 @@ ${question || 'Bitte gib mir eine personalisierte Karriereberatung basierend auf
 
   const client = getAnthropicClient();
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1500,
     system: SYSTEM_PROMPT,
     messages,
@@ -322,7 +322,7 @@ Schreibe eine kurze, motivierende Aufforderung (2 Sätze, informell, Du-Form), d
 
   const client = getAnthropicClient()
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-haiku-4-5',
     max_tokens: 200,
     system:
       'Du bist der Convidera Career Mentor. Antworte knapp, motivierend, Du-Form, ohne Markdown.',
