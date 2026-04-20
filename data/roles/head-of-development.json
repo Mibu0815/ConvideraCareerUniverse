@@ -1,0 +1,37 @@
+{
+  "roleFamily": "Head Of Development",
+  "category": "Software Engineering",
+  "team": "Squad",
+  "directReportTo": "CTO",
+  "languages": ["english"],
+  "levels": [
+    {
+      "id": "head-of-development",
+      "slug": "head-of-development",
+      "title": "Head Of Development (m/f/d)",
+      "level": "Head Of",
+      "levelOrder": 5,
+      "description": "Gesamtverantwortung für die Entwicklungsdisziplin mit disziplinarischer Führung, Architektur-Strategie und Stakeholder-Management.",
+      "leadership": "Disciplinary",
+      "budgetResponsibility": true,
+      "responsibilities": [
+        "Gesamtverantwortung für Architektur und technische Strategie",
+        "Disziplinarische Führung der Entwicklungsteams",
+        "Stakeholder-Management auf C-Level"
+      ],
+      "softSkills": [
+        "Leadership Competency",
+        "Strategic Thinking",
+        "Communication Skills",
+        "Analytical Thinking"
+      ],
+      "skills": [
+        { "name": "System/Software Architecture", "level": 4, "competenceField": "Backend Development" },
+        { "name": "Programming Fundamentals", "level": 3, "competenceField": "Backend Development" },
+        { "name": "SOLID Principles & Guidelines", "level": 4, "competenceField": "Backend Development" },
+        { "name": "Domain Driven Development", "level": 3, "competenceField": "Backend Development" },
+        { "name": "Stakeholder Management", "level": 3, "competenceField": "Account Management" }
+      ]
+    }
+  ]
+}

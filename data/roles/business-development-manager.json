@@ -1,0 +1,123 @@
+{
+  "roleFamily": "Business Development Manager",
+  "category": "Consulting & Strategy",
+  "team": "Sales & Strategy",
+  "directReportTo": "Head Of Business Development",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "business-development-manager-junior",
+      "slug": "business-development-manager-junior",
+      "title": "Business Development Manager (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior Business Development Manager mit Fokus auf Lead-Qualifizierung und operative Sales-Unterstützung.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Unterstützung bei der Identifikation und Qualifizierung von Leads",
+        "Vorbereitung von Angeboten und Präsentationen",
+        "Pflege des CRM-Systems"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Analytical Thinking",
+        "Collaboration"
+      ],
+      "skills": [
+        { "name": "(Sales) Presentation / Pitching", "level": 1, "competenceField": "Sales" },
+        { "name": "Gesprächsführung", "level": 1, "competenceField": "Sales" },
+        { "name": "Angebotserstellung", "level": 1, "competenceField": "Sales" },
+        { "name": "Stakeholder Management", "level": 1, "competenceField": "Account Management" },
+        { "name": "Workshop Facilitation", "level": 1, "competenceField": "Innovation Management" }
+      ]
+    },
+    {
+      "id": "business-development-manager-professional",
+      "slug": "business-development-manager-professional",
+      "title": "Business Development Manager (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Eigenständige Neukundenakquise, Angebotserstellung und Vertragsverhandlungen auf Mittelmanagement-Ebene.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Leadgenerierung und Neukundenakquise",
+        "Durchführung von Bedarfsanalysen beim Kunden",
+        "Erstellung und Verhandlung von Angeboten"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Analytical Thinking",
+        "Collaboration",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "(Sales) Presentation / Pitching", "level": 2, "competenceField": "Sales" },
+        { "name": "Gesprächsführung", "level": 2, "competenceField": "Sales" },
+        { "name": "Angebotserstellung", "level": 2, "competenceField": "Sales" },
+        { "name": "Stakeholder Management", "level": 2, "competenceField": "Account Management" },
+        { "name": "Workshop Facilitation", "level": 2, "competenceField": "Innovation Management" }
+      ]
+    },
+    {
+      "id": "business-development-manager-senior",
+      "slug": "business-development-manager-senior",
+      "title": "Business Development Manager (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Strategische Neukundengewinnung, langfristige Kundenentwicklung und Mentoring junior BDMs.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Strategische Neukundengewinnung und Aufbau langfristiger Kundenbeziehungen",
+        "Leitung komplexer Angebotsprozesse",
+        "Mentoring von Junior BDMs"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Analytical Thinking",
+        "Collaboration",
+        "Self-Management",
+        "Leadership Competency"
+      ],
+      "skills": [
+        { "name": "(Sales) Presentation / Pitching", "level": 3, "competenceField": "Sales" },
+        { "name": "Gesprächsführung", "level": 3, "competenceField": "Sales" },
+        { "name": "Angebotserstellung", "level": 3, "competenceField": "Sales" },
+        { "name": "Stakeholder Management", "level": 3, "competenceField": "Account Management" },
+        { "name": "Workshop Facilitation", "level": 2, "competenceField": "Innovation Management" },
+        { "name": "Change Management (langfristig)", "level": 2, "competenceField": "Digital Strategy" }
+      ]
+    },
+    {
+      "id": "business-development-head-of",
+      "slug": "business-development-head-of",
+      "title": "Business Development (m/f/d)",
+      "level": "Head Of",
+      "levelOrder": 5,
+      "description": "Gesamtverantwortung für Business Development und Sales-Strategie mit disziplinarischer Führung.",
+      "leadership": "Disciplinary",
+      "budgetResponsibility": true,
+      "responsibilities": [
+        "Gesamtverantwortung für Business Development und Sales-Strategie",
+        "Aufbau und Führung des BD-Teams",
+        "Verhandlung und Abschluss von Schlüsselkunden"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Leadership Competency",
+        "Strategic Thinking",
+        "Analytical Thinking"
+      ],
+      "skills": [
+        { "name": "(Sales) Presentation / Pitching", "level": 4, "competenceField": "Sales" },
+        { "name": "Gesprächsführung", "level": 4, "competenceField": "Sales" },
+        { "name": "Angebotserstellung", "level": 3, "competenceField": "Sales" },
+        { "name": "Stakeholder Management", "level": 4, "competenceField": "Account Management" },
+        { "name": "Workshop Facilitation", "level": 3, "competenceField": "Innovation Management" },
+        { "name": "Change Management (langfristig)", "level": 3, "competenceField": "Digital Strategy" }
+      ]
+    }
+  ]
+}

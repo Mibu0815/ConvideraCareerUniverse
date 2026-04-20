@@ -1,0 +1,122 @@
+{
+  "roleFamily": "Frontend Developer",
+  "category": "Software Engineering",
+  "team": "Squad",
+  "directReportTo": "Team Lead Digital Solution Delivery - Squad Lead",
+  "languages": ["english"],
+  "levels": [
+    {
+      "id": "frontend-developer-junior",
+      "slug": "frontend-developer-junior",
+      "title": "Frontend Developer (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior Frontend Developer mit Fokus auf Implementierung nach Vorgabe und kontinuierlichem Lernen.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Implementierung von UI-Komponenten nach Design-Vorgaben",
+        "Code-Reviews und Einarbeitung in bestehende Codebase",
+        "Beheben von kleineren Bugs"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Collaboration",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "HTML and CSS", "level": 1, "competenceField": "Frontend Development" },
+        { "name": "JavaScript", "level": 1, "competenceField": "Frontend Development" },
+        { "name": "Testing", "level": 1, "competenceField": "Frontend Development" },
+        { "name": "Git(Hub)", "level": 1, "competenceField": "DevOps" }
+      ]
+    },
+    {
+      "id": "frontend-developer-professional",
+      "slug": "frontend-developer-professional",
+      "title": "Frontend Developer (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Eigenständige Feature-Entwicklung inklusive Accessibility und Performance-Optimierung.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Umsetzung von Features von der Spezifikation bis Production",
+        "Performance-Optimierung bestehender Komponenten",
+        "Beitrag zu Architektur-Entscheidungen"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Collaboration",
+        "Analytical Thinking"
+      ],
+      "skills": [
+        { "name": "HTML and CSS", "level": 2, "competenceField": "Frontend Development" },
+        { "name": "JavaScript", "level": 2, "competenceField": "Frontend Development" },
+        { "name": "Testing", "level": 2, "competenceField": "Frontend Development" },
+        { "name": "Git(Hub)", "level": 2, "competenceField": "DevOps" },
+        { "name": "Web Accessibility", "level": 1, "competenceField": "Frontend Development" },
+        { "name": "Performance Debugging and Optimization", "level": 1, "competenceField": "Frontend Development" }
+      ]
+    },
+    {
+      "id": "frontend-developer-senior",
+      "slug": "frontend-developer-senior",
+      "title": "Frontend Developer (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Senior Frontend Developer mit End-to-End-Verantwortung, Mentoring und Architektur-Fokus.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Architektur und Design größerer Frontend-Module",
+        "Mentoring von Junior- und Professional-Entwicklern",
+        "Technische Leadership in Squad-Kontext"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Analytical Thinking",
+        "Leadership Competency",
+        "Collaboration"
+      ],
+      "skills": [
+        { "name": "HTML and CSS", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "JavaScript", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "Testing", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "Web Accessibility", "level": 2, "competenceField": "Frontend Development" },
+        { "name": "Performance Debugging and Optimization", "level": 2, "competenceField": "Frontend Development" },
+        { "name": "Web Security", "level": 2, "competenceField": "Frontend Development" },
+        { "name": "Packages and API Design", "level": 2, "competenceField": "Frontend Development" }
+      ]
+    },
+    {
+      "id": "frontend-development-functional-lead",
+      "slug": "frontend-development-functional-lead",
+      "title": "Frontend Development (m/f/d)",
+      "level": "Functional Lead",
+      "levelOrder": 4,
+      "description": "Fachliche Leitung der Frontend-Disziplin inklusive Tooling, Standards und Community of Practice.",
+      "leadership": "Functional",
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Fachliche Leitung der Frontend-Disziplin",
+        "Definition und Pflege von Frontend-Standards und -Tooling",
+        "Weiterbildung und Hiring im Bereich Frontend"
+      ],
+      "softSkills": [
+        "Leadership Competency",
+        "Communication Skills",
+        "Analytical Thinking"
+      ],
+      "skills": [
+        { "name": "HTML and CSS", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "JavaScript", "level": 4, "competenceField": "Frontend Development" },
+        { "name": "Testing", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "Web Accessibility", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "Performance Debugging and Optimization", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "Web Security", "level": 3, "competenceField": "Frontend Development" },
+        { "name": "Packages and API Design", "level": 3, "competenceField": "Frontend Development" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "roleFamily": "Team Lead Digital Solution Delivery",
+  "category": "Product Management",
+  "team": "Squad",
+  "directReportTo": "Head Of Digital Solutions",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "team-lead-digital-solution-delivery",
+      "slug": "team-lead-digital-solution-delivery",
+      "title": "Team Lead Digital Solution Delivery - Squad Lead (m/f/d)",
+      "level": "Functional Lead",
+      "levelOrder": 4,
+      "description": "Squad Lead mit fachlicher und teilweise disziplinarischer Führung eines cross-funktionalen Delivery-Teams. NOTE: Originally 'Team Lead' — mapped to FUNCTIONAL_LEAD until TEAM_LEAD enum is added.",
+      "leadership": "Disciplinary",
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Fachliche und operative Leitung eines Squads",
+        "Stakeholder-Management und Priorisierung",
+        "Coaching und Weiterentwicklung des Teams"
+      ],
+      "softSkills": [
+        "Leadership Competency",
+        "Communication Skills",
+        "Strategic Thinking",
+        "Collaboration"
+      ],
+      "skills": [
+        { "name": "Stakeholder Management", "level": 3, "competenceField": "Account Management" },
+        { "name": "Workshop Facilitation", "level": 3, "competenceField": "Innovation Management" },
+        { "name": "Product Requirement", "level": 3, "competenceField": "Product Management" },
+        { "name": "Change Management (langfristig)", "level": 2, "competenceField": "Digital Strategy" }
+      ]
+    }
+  ]
+}

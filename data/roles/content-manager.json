@@ -1,0 +1,118 @@
+{
+  "roleFamily": "Content Manager",
+  "category": "Digital Marketing",
+  "team": "Marketing Excellence",
+  "directReportTo": "Head Of Content",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "content-manager-junior",
+      "slug": "content-manager-junior",
+      "title": "Content Manager (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior Content Manager mit Fokus auf operative Content-Erstellung und redaktionelle Unterstützung.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Verfassen und Redigieren von Beiträgen nach Briefing",
+        "Pflege des Redaktionskalenders",
+        "Grundlegende SEO-Optimierung von Content"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Creativity",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Texterstellung / Writing", "level": 1, "competenceField": "Content Management" },
+        { "name": "Redaktionsplanung", "level": 1, "competenceField": "Content Management" },
+        { "name": "Suchmaschinenkompetenz", "level": 1, "competenceField": "SEO" }
+      ]
+    },
+    {
+      "id": "content-manager-professional",
+      "slug": "content-manager-professional",
+      "title": "Content Manager (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Selbstständige Content-Produktion, redaktionelle Planung und Koordination mit Autoren.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Selbstständige Content-Produktion entlang der Content-Strategie",
+        "Koordination von freien Autoren und internen Stakeholdern",
+        "Monitoring und Optimierung von Content-KPIs"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Creativity",
+        "Analytical Thinking",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Texterstellung / Writing", "level": 2, "competenceField": "Content Management" },
+        { "name": "Redaktionsplanung", "level": 2, "competenceField": "Content Management" },
+        { "name": "Suchmaschinenkompetenz", "level": 2, "competenceField": "SEO" },
+        { "name": "Copywriting", "level": 1, "competenceField": "Content Management" }
+      ]
+    },
+    {
+      "id": "content-manager-senior",
+      "slug": "content-manager-senior",
+      "title": "Content Manager (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Senior Content Manager mit redaktioneller Gesamtverantwortung und Mentoring-Rolle.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Redaktionelle Gesamtverantwortung für definierte Themenbereiche",
+        "Mentoring von Junior und Professional Content-Kollegen",
+        "Weiterentwicklung des redaktionellen Standards"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Creativity",
+        "Analytical Thinking",
+        "Leadership Competency"
+      ],
+      "skills": [
+        { "name": "Texterstellung / Writing", "level": 3, "competenceField": "Content Management" },
+        { "name": "Redaktionsplanung", "level": 3, "competenceField": "Content Management" },
+        { "name": "Suchmaschinenkompetenz", "level": 3, "competenceField": "SEO" },
+        { "name": "Copywriting", "level": 2, "competenceField": "Content Management" },
+        { "name": "Autorenmanagement", "level": 2, "competenceField": "Content Management" }
+      ]
+    },
+    {
+      "id": "content-strategist-functional-lead",
+      "slug": "content-strategist-functional-lead",
+      "title": "Content Strategist (m/f/d)",
+      "level": "Functional Lead",
+      "levelOrder": 4,
+      "description": "Fachliche Leitung der Content-Disziplin und Verantwortung für die Content-Strategie.",
+      "leadership": "Functional",
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Definition und Weiterentwicklung der Content-Strategie",
+        "Fachliche Leitung der Content-Disziplin",
+        "Alignment mit Brand-, SEO- und Performance-Marketing"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Leadership Competency",
+        "Strategic Thinking",
+        "Creativity"
+      ],
+      "skills": [
+        { "name": "Texterstellung / Writing", "level": 3, "competenceField": "Content Management" },
+        { "name": "Redaktionsplanung", "level": 4, "competenceField": "Content Management" },
+        { "name": "Systemisches Content Management", "level": 3, "competenceField": "Content Management" },
+        { "name": "Themenraderstellung und Funnelstufen", "level": 3, "competenceField": "Content Strategy" },
+        { "name": "Redaktionsstruktur", "level": 3, "competenceField": "Content Strategy" },
+        { "name": "Suchmaschinenkompetenz", "level": 3, "competenceField": "SEO" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "roleFamily": "Digital Analyst",
+  "category": "Performance & Analytics",
+  "team": "Performance & Analytics",
+  "directReportTo": "Head Of Performance & Analytics",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "digital-analyst-junior",
+      "slug": "digital-analyst-junior",
+      "title": "Digital Analyst (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior Digital Analyst mit Fokus auf Datenaufbereitung und Standard-Reports.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Erstellung wiederkehrender Standard-Reports",
+        "Datenaufbereitung für interne Stakeholder",
+        "Unterstützung bei Tracking-Setups"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Web Analytics", "level": 1, "competenceField": "Analysis" },
+        { "name": "Reporting", "level": 1, "competenceField": "Analysis" },
+        { "name": "Excel", "level": 1, "competenceField": "Analysis" }
+      ]
+    },
+    {
+      "id": "digital-analyst-professional",
+      "slug": "digital-analyst-professional",
+      "title": "Digital Analyst (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Eigenständige Analytics-Fragestellungen, KPI-Konzepte und tiefere Reporting-Projekte.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Beantwortung komplexer Analytics-Fragen",
+        "Konzeption und Aufbau von KPI-Dashboards",
+        "Beratung von Marketing- und Produkt-Teams auf Basis von Daten"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Communication Skills",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Web Analytics", "level": 2, "competenceField": "Analysis" },
+        { "name": "Reporting", "level": 2, "competenceField": "Analysis" },
+        { "name": "Excel", "level": 2, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 2, "competenceField": "Analysis" },
+        { "name": "Business Intelligence Tools", "level": 1, "competenceField": "Analysis" }
+      ]
+    },
+    {
+      "id": "digital-analyst-senior",
+      "slug": "digital-analyst-senior",
+      "title": "Digital Analyst (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Senior Digital Analyst mit strategischer Verantwortung für Analytics-Architektur und Insights.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Strategische Weiterentwicklung der Analytics-Architektur",
+        "Übersetzung komplexer Analysen in Business-Empfehlungen",
+        "Mentoring im Analytics-Team"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Communication Skills",
+        "Strategic Thinking"
+      ],
+      "skills": [
+        { "name": "Web Analytics", "level": 3, "competenceField": "Analysis" },
+        { "name": "Reporting", "level": 3, "competenceField": "Analysis" },
+        { "name": "Excel", "level": 3, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 3, "competenceField": "Analysis" },
+        { "name": "Business Intelligence Tools", "level": 2, "competenceField": "Analysis" },
+        { "name": "Market Research", "level": 2, "competenceField": "Analysis" }
+      ]
+    }
+  ]
+}

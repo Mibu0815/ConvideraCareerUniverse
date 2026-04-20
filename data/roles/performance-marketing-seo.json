@@ -1,0 +1,83 @@
+{
+  "roleFamily": "Performance Marketing Manager - SEO",
+  "category": "Digital Marketing",
+  "team": "Marketing Excellence",
+  "directReportTo": "Head Of Performance Marketing",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "performance-marketing-seo-junior",
+      "slug": "performance-marketing-seo-junior",
+      "title": "Performance Marketing Manager - SEO (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior SEO Manager mit Fokus auf Keyword-Recherche, Onpage-Basics und Reporting.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Durchführung von Keyword-Recherchen",
+        "Umsetzung von Onpage-Optimierungen nach Vorgabe",
+        "Aufbereitung von SEO-Reports"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Suchmaschinenkompetenz", "level": 1, "competenceField": "SEO" },
+        { "name": "Web Analytics", "level": 1, "competenceField": "Analysis" }
+      ]
+    },
+    {
+      "id": "performance-marketing-seo-professional",
+      "slug": "performance-marketing-seo-professional",
+      "title": "Performance Marketing Manager - SEO (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Eigenständige SEO-Strategie-Umsetzung inklusive technischer und inhaltlicher Maßnahmen.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Entwicklung und Umsetzung von SEO-Konzepten",
+        "Technische SEO-Analysen und Content-Optimierung",
+        "Abstimmung mit Content- und Development-Teams"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Communication Skills",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Suchmaschinenkompetenz", "level": 2, "competenceField": "SEO" },
+        { "name": "Web Analytics", "level": 2, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 1, "competenceField": "Analysis" }
+      ]
+    },
+    {
+      "id": "performance-marketing-seo-senior",
+      "slug": "performance-marketing-seo-senior",
+      "title": "Performance Marketing Manager - SEO (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Senior SEO Manager mit strategischer Verantwortung und Leadership im Team.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Strategische SEO-Roadmap und Priorisierung",
+        "Mentoring und fachliche Anleitung von Junior-/Professional-Kollegen",
+        "Zusammenarbeit mit Content, Dev und Produktmanagement"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Communication Skills",
+        "Strategic Thinking"
+      ],
+      "skills": [
+        { "name": "Suchmaschinenkompetenz", "level": 3, "competenceField": "SEO" },
+        { "name": "Web Analytics", "level": 3, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 2, "competenceField": "Analysis" },
+        { "name": "Business Intelligence Tools", "level": 2, "competenceField": "Analysis" }
+      ]
+    }
+  ]
+}

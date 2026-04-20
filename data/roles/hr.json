@@ -1,0 +1,85 @@
+{
+  "roleFamily": "HR",
+  "category": "Business Administration",
+  "team": "People & Culture",
+  "directReportTo": "Head Of People & Culture",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "hr-coordinator-junior",
+      "slug": "hr-coordinator-junior",
+      "title": "HR Coordinator (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior HR Coordinator mit Fokus auf operative Recruiting-Unterstützung und Bewerbermanagement.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Bewerbermanagement und Terminkoordination",
+        "Unterstützung bei Active Sourcing",
+        "Onboarding-Organisation"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Self-Management",
+        "Collaboration",
+        "Intercultural Competency"
+      ],
+      "skills": [
+        { "name": "Recruiting", "level": 1, "competenceField": "HR Management" }
+      ]
+    },
+    {
+      "id": "hr-manager-professional",
+      "slug": "hr-manager-professional",
+      "title": "HR Manager (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "HR Manager mit selbstständiger Verantwortung für Recruiting-Prozesse und Mitarbeiterentwicklung.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Führung von Recruiting-Prozessen",
+        "Coaching von Führungskräften in HR-Themen",
+        "Unterstützung bei Mitarbeiterentwicklung"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Analytical Thinking",
+        "Self-Management",
+        "Collaboration",
+        "Intercultural Competency"
+      ],
+      "skills": [
+        { "name": "Recruiting", "level": 2, "competenceField": "HR Management" },
+        { "name": "Coaching", "level": 1, "competenceField": "HR Management" }
+      ]
+    },
+    {
+      "id": "hr-business-partner-senior",
+      "slug": "hr-business-partner-senior",
+      "title": "HR Business Partner (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "HR Business Partner mit strategischer Verantwortung für Teams und Führungskräfte-Coaching.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Strategische HR-Beratung für zugewiesene Geschäftsbereiche",
+        "Coaching und Entwicklung von Führungskräften",
+        "Mitgestaltung von People-Strategien"
+      ],
+      "softSkills": [
+        "Communication Skills",
+        "Leadership Competency",
+        "Strategic Thinking",
+        "Analytical Thinking",
+        "Intercultural Competency"
+      ],
+      "skills": [
+        { "name": "Recruiting", "level": 3, "competenceField": "HR Management" },
+        { "name": "Coaching", "level": 3, "competenceField": "HR Management" }
+      ]
+    }
+  ]
+}

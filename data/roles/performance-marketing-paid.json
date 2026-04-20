@@ -1,0 +1,86 @@
+{
+  "roleFamily": "Performance Marketing Manager - Paid",
+  "category": "Digital Marketing",
+  "team": "Marketing Excellence",
+  "directReportTo": "Head Of Performance Marketing",
+  "languages": ["english", "german"],
+  "levels": [
+    {
+      "id": "performance-marketing-paid-junior",
+      "slug": "performance-marketing-paid-junior",
+      "title": "Performance Marketing Manager - Paid (m/f/d)",
+      "level": "Junior",
+      "levelOrder": 1,
+      "description": "Junior Performance Marketing Manager mit Fokus auf operative Kampagnenumsetzung und Reporting.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Operative Umsetzung von Paid-Kampagnen",
+        "Pflege und Optimierung von Anzeigen",
+        "Wöchentliches Reporting an Stakeholder"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Kampagnenplanung / Werbestrategie", "level": 1, "competenceField": "Paid Advertising" },
+        { "name": "Anzeigenerstellung", "level": 1, "competenceField": "Paid Advertising" },
+        { "name": "Web Analytics", "level": 1, "competenceField": "Analysis" }
+      ]
+    },
+    {
+      "id": "performance-marketing-paid-professional",
+      "slug": "performance-marketing-paid-professional",
+      "title": "Performance Marketing Manager - Paid (m/f/d)",
+      "level": "Professional",
+      "levelOrder": 2,
+      "description": "Eigenständige Kampagnenverantwortung über mehrere Kanäle hinweg.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Eigenständige Konzeption und Steuerung von Paid-Kampagnen",
+        "Budget-Allokation und Bidding-Strategie",
+        "A/B-Testing und Performance-Optimierung"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Communication Skills",
+        "Self-Management"
+      ],
+      "skills": [
+        { "name": "Kampagnenplanung / Werbestrategie", "level": 2, "competenceField": "Paid Advertising" },
+        { "name": "Anzeigenerstellung", "level": 2, "competenceField": "Paid Advertising" },
+        { "name": "Web Analytics", "level": 2, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 1, "competenceField": "Analysis" }
+      ]
+    },
+    {
+      "id": "performance-marketing-paid-senior",
+      "slug": "performance-marketing-paid-senior",
+      "title": "Performance Marketing Manager - Paid (m/f/d)",
+      "level": "Senior",
+      "levelOrder": 3,
+      "description": "Senior-Rolle mit strategischer Verantwortung für Paid-Mix und Mentoring.",
+      "leadership": false,
+      "budgetResponsibility": false,
+      "responsibilities": [
+        "Strategische Planung des Paid-Mix über Kanäle hinweg",
+        "Mentoring und Qualitätssicherung im Team",
+        "Beratung von Stakeholdern auf Management-Ebene"
+      ],
+      "softSkills": [
+        "Analytical Thinking",
+        "Communication Skills",
+        "Strategic Thinking"
+      ],
+      "skills": [
+        { "name": "Kampagnenplanung / Werbestrategie", "level": 3, "competenceField": "Paid Advertising" },
+        { "name": "Anzeigenerstellung", "level": 3, "competenceField": "Paid Advertising" },
+        { "name": "Web Analytics", "level": 3, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 2, "competenceField": "Analysis" },
+        { "name": "Business Intelligence Tools", "level": 2, "competenceField": "Analysis" }
+      ]
+    }
+  ]
+}
