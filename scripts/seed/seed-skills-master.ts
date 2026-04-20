@@ -162,12 +162,12 @@ async function seedHardSkills(): Promise<{ cfStats: SeedStats; skillStats: SeedS
       });
 
       if (existingSkill) {
-        if (existingSkill.title !== skill.name || existingSkill.competenceFieldId !== cfId) {
+        if (existingSkill.title !== skill.name || existingSkill.fieldId !== cfId) {
           await prisma.skill.update({
             where: { slug: skill.id },
             data: {
               title: skill.name,
-              competenceFieldId: cfId,
+              fieldId: cfId,
             },
           });
           skillStats.updated++;
@@ -180,7 +180,7 @@ async function seedHardSkills(): Promise<{ cfStats: SeedStats; skillStats: SeedS
             id: skill.id,
             title: skill.name,
             slug: skill.id,
-            competenceFieldId: cfId,
+            fieldId: cfId,
           },
         });
         skillStats.created++;
