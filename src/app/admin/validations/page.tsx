@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { getPendingValidations } from '@/lib/services/evidence-timeline'
 import { ValidationPanelWrapper } from '@/components/evidence/ValidationPanelWrapper'
+import { Navigation } from '@/components/shared/Navigation'
+import { ValidationBadge } from '@/components/shared/ValidationBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,17 +27,26 @@ export default async function ValidationsPage() {
   const pending = await getPendingValidations()
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-medium text-gray-900">
-          Offene Validierungen
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {pending.length} Einreichung{pending.length !== 1 ? 'en' : ''}{' '}
-          ausstehend
-        </p>
+    <>
+      <Navigation
+        userName={dbUser.name}
+        platformRole={dbUser.platformRole}
+        validationBadge={<ValidationBadge />}
+      />
+      <div className="min-h-screen bg-gray-50 pt-14">
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-medium text-gray-900">
+              Offene Validierungen
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {pending.length} Einreichung{pending.length !== 1 ? 'en' : ''}{' '}
+              ausstehend
+            </p>
+          </div>
+          <ValidationPanelWrapper initialPending={pending} />
+        </div>
       </div>
-      <ValidationPanelWrapper initialPending={pending} />
-    </div>
+    </>
   )
 }

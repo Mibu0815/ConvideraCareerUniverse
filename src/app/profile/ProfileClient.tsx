@@ -38,6 +38,7 @@ export function ProfileClient({
   const [mode, setMode] = useState<ProfileMode>('personal')
   const badge = PLATFORM_ROLE_BADGE[user.platformRole] ?? PLATFORM_ROLE_BADGE.MEMBER
   const showToggle = isAdmin || isDomainExpert
+  console.log('[DEBUG] ProfileClient props — isAdmin:', isAdmin, 'isDomainExpert:', isDomainExpert, 'showToggle:', showToggle, 'platformRole:', user.platformRole)
 
   const initials = (user.name ?? user.email)
     .split(' ')

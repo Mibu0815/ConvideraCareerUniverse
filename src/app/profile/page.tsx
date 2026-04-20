@@ -41,8 +41,10 @@ export default async function ProfilePage() {
     ? await prisma.role.findUnique({ where: { id: user.currentRoleId } })
     : null
 
+  console.log('[DEBUG] platformRole:', user.platformRole, typeof user.platformRole)
   const domainExpert = isDomainExpert(user)
   const admin = isAdmin(user)
+  console.log('[DEBUG] isAdmin:', admin, 'isDomainExpert:', domainExpert)
 
   const pendingValidations = domainExpert
     ? await prisma.evidence.findMany({
