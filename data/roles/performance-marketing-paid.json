@@ -11,7 +11,7 @@
       "title": "Performance Marketing Manager - Paid (m/f/d)",
       "level": "Junior",
       "levelOrder": 1,
-      "description": "Junior Performance Marketing Manager mit Fokus auf operative Kampagnenumsetzung und Reporting.",
+      "description": "Junior Performance Marketing Manager (Paid) mit Fokus auf operative Kampagnenumsetzung, Reporting und grundlegender Suchmaschinen- und Analytics-Kompetenz.",
       "leadership": false,
       "budgetResponsibility": false,
       "responsibilities": [
@@ -20,13 +20,23 @@
         "Wöchentliches Reporting an Stakeholder"
       ],
       "softSkills": [
+        "Service Orientation",
+        "Entrepreneurial Thinking",
         "Analytical Thinking",
-        "Self-Management"
+        "Strategic Thinking",
+        "Structuredness",
+        "Communication Skills"
       ],
       "skills": [
         { "name": "Kampagnenplanung / Werbestrategie", "level": 1, "competenceField": "Paid Advertising" },
-        { "name": "Anzeigenerstellung", "level": 1, "competenceField": "Paid Advertising" },
-        { "name": "Web Analytics", "level": 1, "competenceField": "Analysis" }
+        { "name": "Anzeigenerstellung", "level": 2, "competenceField": "Paid Advertising" },
+        { "name": "Suchmaschinenkompetenz", "level": 2, "competenceField": "SEO" },
+        { "name": "Web Analytics", "level": 1, "competenceField": "Analysis" },
+        { "name": "Excel", "level": 1, "competenceField": "Analysis" },
+        { "name": "Listening", "level": 1, "competenceField": "Analysis" },
+        { "name": "Reporting", "level": 1, "competenceField": "Analysis" },
+        { "name": "Social Media Analytics", "level": 1, "competenceField": "Analysis" },
+        { "name": "Bild- und Videoauswahl", "level": 1, "competenceField": "Producing (Bild & Ton)" }
       ]
     },
     {
@@ -35,7 +45,7 @@
       "title": "Performance Marketing Manager - Paid (m/f/d)",
       "level": "Professional",
       "levelOrder": 2,
-      "description": "Eigenständige Kampagnenverantwortung über mehrere Kanäle hinweg.",
+      "description": "Eigenständige Kampagnenverantwortung über mehrere Kanäle hinweg, inklusive KPI-Konzeption und Präsentation gegenüber Stakeholdern. TRAX-Anomalie: Suchmaschinenkompetenz sinkt von Junior L2 auf L1 (Reflektiert Spezialisierung auf Paid).",
       "leadership": false,
       "budgetResponsibility": false,
       "responsibilities": [
@@ -44,15 +54,25 @@
         "A/B-Testing und Performance-Optimierung"
       ],
       "softSkills": [
+        "Service Orientation",
+        "Entrepreneurial Thinking",
         "Analytical Thinking",
+        "Strategic Thinking",
+        "Structuredness",
         "Communication Skills",
-        "Self-Management"
+        "Presentation Skills"
       ],
       "skills": [
         { "name": "Kampagnenplanung / Werbestrategie", "level": 2, "competenceField": "Paid Advertising" },
         { "name": "Anzeigenerstellung", "level": 2, "competenceField": "Paid Advertising" },
+        { "name": "Suchmaschinenkompetenz", "level": 1, "competenceField": "SEO" },
         { "name": "Web Analytics", "level": 2, "competenceField": "Analysis" },
-        { "name": "KPI Konzepterstellung & Setup", "level": 1, "competenceField": "Analysis" }
+        { "name": "Excel", "level": 2, "competenceField": "Analysis" },
+        { "name": "Listening", "level": 1, "competenceField": "Analysis" },
+        { "name": "Reporting", "level": 2, "competenceField": "Analysis" },
+        { "name": "Social Media Analytics", "level": 1, "competenceField": "Analysis" },
+        { "name": "KPI Konzepterstellung & Setup", "level": 2, "competenceField": "Analysis" },
+        { "name": "Bild- und Videoauswahl", "level": 2, "competenceField": "Producing (Bild & Ton)" }
       ]
     },
     {
@@ -61,7 +81,7 @@
       "title": "Performance Marketing Manager - Paid (m/f/d)",
       "level": "Senior",
       "levelOrder": 3,
-      "description": "Senior-Rolle mit strategischer Verantwortung für Paid-Mix und Mentoring.",
+      "description": "Senior-Rolle mit strategischer Verantwortung für den Paid-Mix, Mentoring und Stakeholder-Beratung auf Management-Ebene.",
       "leadership": false,
       "budgetResponsibility": false,
       "responsibilities": [
@@ -70,16 +90,26 @@
         "Beratung von Stakeholdern auf Management-Ebene"
       ],
       "softSkills": [
+        "Service Orientation",
+        "Entrepreneurial Thinking",
         "Analytical Thinking",
+        "Strategic Thinking",
+        "Structuredness",
         "Communication Skills",
-        "Strategic Thinking"
+        "Presentation Skills",
+        "Time Management"
       ],
       "skills": [
         { "name": "Kampagnenplanung / Werbestrategie", "level": 3, "competenceField": "Paid Advertising" },
         { "name": "Anzeigenerstellung", "level": 3, "competenceField": "Paid Advertising" },
-        { "name": "Web Analytics", "level": 3, "competenceField": "Analysis" },
+        { "name": "Suchmaschinenkompetenz", "level": 1, "competenceField": "SEO" },
+        { "name": "Web Analytics", "level": 2, "competenceField": "Analysis" },
+        { "name": "Excel", "level": 2, "competenceField": "Analysis" },
+        { "name": "Listening", "level": 1, "competenceField": "Analysis" },
+        { "name": "Reporting", "level": 3, "competenceField": "Analysis" },
+        { "name": "Social Media Analytics", "level": 2, "competenceField": "Analysis" },
         { "name": "KPI Konzepterstellung & Setup", "level": 2, "competenceField": "Analysis" },
-        { "name": "Business Intelligence Tools", "level": 2, "competenceField": "Analysis" }
+        { "name": "Bild- und Videoauswahl", "level": 2, "competenceField": "Producing (Bild & Ton)" }
       ]
     }
   ]
