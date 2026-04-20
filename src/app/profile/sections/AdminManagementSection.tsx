@@ -1,19 +1,38 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { PLATFORM_ROLE_BADGE } from '@/lib/constants/platform-roles'
 import { SkillTreeEditor } from '@/components/skill-tree/SkillTreeEditor'
-import type { AdminCompetenceField, AdminUserRow, PendingValidation } from '../types'
+import { RolesAndPathsTabs } from '@/components/admin/RolesAndPathsTabs'
+import type {
+  AdminCompetenceField,
+  AdminUserRow,
+  PendingValidation,
+  AdminRole,
+  AdminPathRole,
+  AdminOccupationalField,
+  AdminSkill,
+  AdminCareerPath,
+} from '../types'
 
 export function AdminManagementSection({
   allCompetenceFields,
   allUsers,
   pendingValidations,
+  adminRoles,
+  adminPathRoles,
+  adminOccupationalFields,
+  adminSkills,
+  adminCareerPaths,
 }: {
   allCompetenceFields: AdminCompetenceField[]
   allUsers: AdminUserRow[]
   pendingValidations: PendingValidation[]
+  adminRoles: AdminRole[]
+  adminPathRoles: AdminPathRole[]
+  adminOccupationalFields: AdminOccupationalField[]
+  adminSkills: AdminSkill[]
+  adminCareerPaths: AdminCareerPath[]
 }) {
   const [activeTab, setActiveTab] = useState<'skills' | 'roles' | 'team'>('skills')
 
@@ -80,22 +99,13 @@ export function AdminManagementSection({
       )}
 
       {activeTab === 'roles' && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <div className="space-y-2">
-            {[
-              { href: '/admin/dashboard', label: 'Admin-Dashboard', desc: 'Plattform-Übersicht' },
-            ].map(item => (
-              <Link key={item.href} href={item.href}
-                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <div>
-                  <div className="text-sm text-gray-900">{item.label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{item.desc}</div>
-                </div>
-                <span className="text-gray-400">›</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <RolesAndPathsTabs
+          roles={adminRoles}
+          pathRoles={adminPathRoles}
+          occupationalFields={adminOccupationalFields}
+          allSkills={adminSkills}
+          paths={adminCareerPaths}
+        />
       )}
 
       {activeTab === 'team' && (

@@ -61,9 +61,28 @@ model Role {
   RoleSkill         RoleSkill[]
   SoftSkill         SoftSkill[]
   CareerGoal        CareerGoal[]
+  PathsFrom         CareerPath[]      @relation("CareerPathFrom")
+  PathsTo           CareerPath[]      @relation("CareerPathTo")
 
   @@index([fieldId])
   @@index([level])
+}
+
+model CareerPath {
+  id          String   @id @default(cuid())
+  fromRoleId  String
+  toRoleId    String
+  isTypical   Boolean  @default(true)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  FromRole    Role     @relation("CareerPathFrom", fields: [fromRoleId], references: [id], onDelete: Cascade)
+  ToRole      Role     @relation("CareerPathTo", fields: [toRoleId], references: [id], onDelete: Cascade)
+
+  @@unique([fromRoleId, toRoleId])
+  @@index([fromRoleId])
+  @@index([toRoleId])
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

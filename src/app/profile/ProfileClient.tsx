@@ -12,6 +12,11 @@ import type {
   AdminCompetenceField,
   AdminUserRow,
   AssessmentStats,
+  AdminRole,
+  AdminOccupationalField,
+  AdminSkill,
+  AdminCareerPath,
+  AdminPathRole,
 } from './types'
 
 type ProfileMode = 'personal' | 'management'
@@ -24,6 +29,11 @@ interface ProfileClientProps {
   assessmentStats: AssessmentStats
   isAdmin: boolean
   isDomainExpert: boolean
+  adminRoles: AdminRole[]
+  adminPathRoles: AdminPathRole[]
+  adminOccupationalFields: AdminOccupationalField[]
+  adminSkills: AdminSkill[]
+  adminCareerPaths: AdminCareerPath[]
 }
 
 export function ProfileClient({
@@ -34,6 +44,11 @@ export function ProfileClient({
   assessmentStats,
   isAdmin,
   isDomainExpert,
+  adminRoles,
+  adminPathRoles,
+  adminOccupationalFields,
+  adminSkills,
+  adminCareerPaths,
 }: ProfileClientProps) {
   const [mode, setMode] = useState<ProfileMode>('personal')
   const badge = PLATFORM_ROLE_BADGE[user.platformRole] ?? PLATFORM_ROLE_BADGE.MEMBER
@@ -120,6 +135,11 @@ export function ProfileClient({
                 allCompetenceFields={allCompetenceFields}
                 allUsers={allUsers}
                 pendingValidations={pendingValidations}
+                adminRoles={adminRoles}
+                adminPathRoles={adminPathRoles}
+                adminOccupationalFields={adminOccupationalFields}
+                adminSkills={adminSkills}
+                adminCareerPaths={adminCareerPaths}
               />
             ) : (
               <DomainExpertSection

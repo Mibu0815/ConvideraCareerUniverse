@@ -51,3 +51,6 @@ export interface AssessmentStats {
   pending: number
   selfAssessed: number
 }
+
+export type { AdminRole, AdminOccupationalField, AdminSkill } from '@/components/admin/RolesManagementPanel'
+export type { AdminCareerPath, AdminPathRole } from '@/components/admin/CareerPathsPanel'

@@ -106,6 +106,49 @@ export default async function ProfilePage() {
     currentRole: u.currentRoleId ? roleMap.get(u.currentRoleId) ?? null : null,
   }))
 
+  const adminRolesRaw = admin
+    ? await prisma.role.findMany({
+        include: {
+          OccupationalField: { select: { title: true, slug: true } },
+          RoleSkill: {
+            include: {
+              Skill: {
+                include: { CompetenceField: { select: { title: true } } },
+              },
+            },
+          },
+        },
+        orderBy: [{ OccupationalField: { title: 'asc' } }, { level: 'asc' }],
+      })
+    : []
+
+  const adminOccupationalFieldsRaw = admin
+    ? await prisma.occupationalField.findMany({ orderBy: { title: 'asc' } })
+    : []
+
+  const adminSkillsRaw = admin
+    ? await prisma.skill.findMany({
+        include: { CompetenceField: { select: { title: true } } },
+        orderBy: { title: 'asc' },
+      })
+    : []
+
+  const adminCareerPathsRaw = admin
+    ? await prisma.careerPath.findMany({
+        include: {
+          FromRole: {
+            select: {
+              id: true,
+              title: true,
+              level: true,
+              OccupationalField: { select: { title: true } },
+            },
+          },
+          ToRole: { select: { id: true, title: true, level: true } },
+        },
+      })
+    : []
+
   const evidenceStatuses = user.Evidence.map(e => e.status)
   const assessmentStats = {
     validated: evidenceStatuses.filter(s => s === 'VALIDATED').length,
@@ -167,6 +210,62 @@ export default async function ProfilePage() {
           assessmentStats={assessmentStats}
           isAdmin={admin}
           isDomainExpert={domainExpert}
+          adminRoles={adminRolesRaw.map(r => ({
+            id: r.id,
+            title: r.title,
+            slug: r.slug,
+            level: r.level,
+            description: r.description,
+            hasLeadership: r.hasLeadership,
+            fieldId: r.fieldId,
+            occupationalField: r.OccupationalField
+              ? { title: r.OccupationalField.title, slug: r.OccupationalField.slug }
+              : null,
+            requiredSkills: r.RoleSkill.map(rs => ({
+              skillId: rs.skillId,
+              requiredLevel: rs.minLevel,
+              skill: {
+                id: rs.Skill.id,
+                title: rs.Skill.title,
+                competenceFieldTitle: rs.Skill.CompetenceField.title,
+              },
+            })),
+          }))}
+          adminPathRoles={adminRolesRaw.map(r => ({
+            id: r.id,
+            title: r.title,
+            level: r.level,
+            occupationalField: r.OccupationalField
+              ? { title: r.OccupationalField.title }
+              : null,
+          }))}
+          adminOccupationalFields={adminOccupationalFieldsRaw.map(f => ({
+            id: f.id,
+            slug: f.slug,
+            title: f.title,
+          }))}
+          adminSkills={adminSkillsRaw.map(s => ({
+            id: s.id,
+            title: s.title,
+            competenceFieldTitle: s.CompetenceField.title,
+          }))}
+          adminCareerPaths={adminCareerPathsRaw.map(p => ({
+            id: p.id,
+            fromRoleId: p.fromRoleId,
+            toRoleId: p.toRoleId,
+            isTypical: p.isTypical,
+            description: p.description,
+            fromRole: {
+              id: p.FromRole.id,
+              title: p.FromRole.title,
+              level: p.FromRole.level,
+            },
+            toRole: {
+              id: p.ToRole.id,
+              title: p.ToRole.title,
+              level: p.ToRole.level,
+            },
+          }))}
         />
       </div>
     </>
