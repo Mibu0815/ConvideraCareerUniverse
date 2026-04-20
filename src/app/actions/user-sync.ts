@@ -100,6 +100,30 @@ export async function updateUserTargetRole(
 }
 
 /**
+ * Updates the user's profile (name)
+ */
+export async function updateUserProfile(
+  userId: string,
+  data: { name: string }
+): Promise<PrismaUser> {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name: data.name,
+      updatedAt: new Date(),
+    },
+  })
+
+  // Also update Supabase user metadata
+  const supabase = await createClient()
+  await supabase.auth.updateUser({
+    data: { name: data.name },
+  })
+
+  return user as PrismaUser
+}
+
+/**
  * Checks if user has completed onboarding
  */
 export async function checkOnboardingStatus(email: string): Promise<boolean> {

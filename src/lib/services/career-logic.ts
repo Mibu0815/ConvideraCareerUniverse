@@ -346,7 +346,7 @@ export function calculateResponsibilityDiff(
         normalizeText(toResp.text)
       );
 
-      if (similarity > 0.7 && (!bestMatch || similarity > bestMatch.similarity)) {
+      if (similarity >= 0.4 && (!bestMatch || similarity > bestMatch.similarity)) {
         bestMatch = { id: fromResp.id, similarity };
       }
     }
@@ -392,9 +392,23 @@ function normalizeText(text: string): string {
     .trim();
 }
 
+function normalizeWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[-–—]/g, ' ')
+    .replace(/[^a-zäöüß\s]/g, '')
+    .split(/\s+/)
+    .map(w => w
+      .replace(/(ierung|ung|tion|ment|schaft|heit|keit|isch|liche[nrs]?|enden?|ender|endes)$/g, '')
+      .replace(/(ern|en|er|es|em|te[ns]?|st|nd)$/g, '')
+      .replace(/[ns]$/g, '')
+    )
+    .filter(w => w.length > 2);
+}
+
 function calculateSimilarity(a: string, b: string): number {
-  const wordsA = new Set(a.split(' ').filter((w) => w.length > 2));
-  const wordsB = new Set(b.split(' ').filter((w) => w.length > 2));
+  const wordsA = new Set(normalizeWords(a));
+  const wordsB = new Set(normalizeWords(b));
 
   if (wordsA.size === 0 && wordsB.size === 0) return 1;
   if (wordsA.size === 0 || wordsB.size === 0) return 0;

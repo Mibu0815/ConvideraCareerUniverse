@@ -169,7 +169,7 @@ export async function getEnrichedSkillDescription(
     // Generate new enriched description
     const enriched = await enrichSkillDescription(
       focus.Skill.title,
-      focus.Skill.description,
+      focus.Skill.description ?? '',
       focus.CompetenceField.title
     );
 
