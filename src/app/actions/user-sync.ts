@@ -11,6 +11,7 @@ export interface PrismaUser {
   avatarUrl: string | null
   currentRoleId: string | null
   targetRoleId: string | null
+  platformRole: string
 }
 
 /**

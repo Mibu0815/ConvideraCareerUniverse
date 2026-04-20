@@ -7,11 +7,13 @@ import { createClient } from '@/lib/supabase/client';
 import { updateUserProfile, updateUserCurrentRole, updateUserTargetRole } from '@/app/actions/user-sync';
 import { RoleSelector } from '@/app/my-career/components/RoleSelector';
 import type { GroupedRoles } from '@/app/actions/get-roles';
+import { PLATFORM_ROLE_BADGE } from '@/lib/constants/platform-roles';
 
 interface ProfileFormProps {
   userId: string;
   initialName: string;
   email: string;
+  platformRole: string;
   currentRoleName: string | null;
   targetRoleName: string | null;
   currentRoleId: string | null;
@@ -24,6 +26,7 @@ export function ProfileForm({
   userId,
   initialName,
   email,
+  platformRole,
   currentRoleId,
   targetRoleId,
   groupedRoles,
@@ -98,7 +101,19 @@ export function ProfileForm({
             {initials}
           </div>
           <div>
-            <h2 className="text-lg font-bold text-convidera-dark">{name || email}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-convidera-dark">{name || email}</h2>
+              {(() => {
+                const badge = PLATFORM_ROLE_BADGE[platformRole];
+                return (
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge?.bg ?? 'bg-gray-50'} ${badge?.text ?? 'text-gray-700'}`}
+                  >
+                    {badge?.label ?? platformRole}
+                  </span>
+                );
+              })()}
+            </div>
             <p className="text-sm text-gray-500">{email}</p>
           </div>
         </div>
