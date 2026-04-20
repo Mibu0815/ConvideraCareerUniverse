@@ -28,7 +28,7 @@ function RegisterForm() {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const redirect = searchParams.get('redirect') || '/onboarding';
+  const redirect = searchParams.get('redirect') || '/my-career';
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);

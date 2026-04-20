@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Sparkles, Mail, Lock, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Sparkles, Mail, Lock, Loader2, Send } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const C = {
@@ -24,6 +25,8 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [mode, setMode] = useState<'password' | 'magic'>('password');
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const redirect = searchParams.get('redirect') || '/';
@@ -39,12 +42,24 @@ function LoginForm() {
     setError('');
     try {
       const supabase = createClient();
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (authError) throw authError;
-      router.push(redirect);
+
+      if (mode === 'magic') {
+        const { error: otpError } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+          },
+        });
+        if (otpError) throw otpError;
+        setMagicLinkSent(true);
+      } else {
+        const { error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (authError) throw authError;
+        router.push(redirect);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
     } finally {
@@ -72,6 +87,10 @@ function LoginForm() {
         .login-btn:disabled{opacity:0.7;cursor:not-allowed}
         .input-field{transition:all .2s ease}
         .input-field:focus{outline:none;border-color:#0055FF;box-shadow:0 0 0 4px rgba(0,85,255,.12)}
+        .mode-tab{transition:all .2s ease;cursor:pointer;border:none;background:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif}
+        .mode-tab.active{background:#0A0A0B;color:#fff}
+        .mode-tab:not(.active){color:#64748B}
+        .mode-tab:not(.active):hover{background:rgba(0,0,0,0.05)}
       `}</style>
 
       <div style={{
@@ -134,82 +153,140 @@ function LoginForm() {
           }}>
             Bereit für dein<br/>nächstes Level?
           </h1>
-          <p style={{ ...anim(3), fontSize: '15px', color: C.textMuted, lineHeight: 1.6, marginBottom: '36px' }}>
+          <p style={{ ...anim(3), fontSize: '15px', color: C.textMuted, lineHeight: 1.6, marginBottom: '28px' }}>
             Melde dich mit deinem Convidera-Account an.
           </p>
 
-          <form onSubmit={handleLogin}>
-            <div style={{ ...anim(4), marginBottom: '20px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: C.textFaint, letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>
-                E-Mail Adresse
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} color={C.textFaint} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }}/>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@convidera.com"
-                  required
-                  className="input-field"
-                  style={{
-                    width: '100%', padding: '14px 16px 14px 48px',
-                    borderRadius: '14px', border: '1.5px solid ' + C.border,
-                    fontSize: '15px', fontWeight: 500, color: C.dark,
-                    background: 'rgba(255,255,255,.9)',
-                    fontFamily: "'Outfit',sans-serif",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ ...anim(5), marginBottom: '24px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: C.textFaint, letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>
-                Passwort
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} color={C.textFaint} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }}/>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="input-field"
-                  style={{
-                    width: '100%', padding: '14px 16px 14px 48px',
-                    borderRadius: '14px', border: '1.5px solid ' + C.border,
-                    fontSize: '15px', fontWeight: 500, color: C.dark,
-                    background: 'rgba(255,255,255,.9)',
-                    fontFamily: "'Outfit',sans-serif",
-                  }}
-                />
-              </div>
-            </div>
-
-            {error && (
-              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px' }}>
-                <p style={{ fontSize: '13px', color: '#DC2626' }}>{error}</p>
-              </div>
-            )}
-
-            <button type="submit" disabled={isLoading || !email || !password} className="login-btn" style={{
-              ...anim(6),
-              width: '100%', padding: '16px 24px',
-              borderRadius: '14px', border: 'none',
-              background: C.dark, color: '#fff',
-              fontSize: '15px', fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              animation: email && password && !isLoading ? 'btnGlow 3s infinite' : 'none',
-              fontFamily: "'Outfit',sans-serif",
-            }}>
-              {isLoading ? (
-                <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }}/> Anmelden...</>
-              ) : (
-                <><Sparkles size={18}/> Access Universe</>
-              )}
+          {/* Mode Toggle */}
+          <div style={{ ...anim(4), display: 'flex', gap: '4px', padding: '4px', background: 'rgba(0,0,0,0.04)', borderRadius: '14px', marginBottom: '28px' }}>
+            <button className={`mode-tab ${mode === 'password' ? 'active' : ''}`} onClick={() => { setMode('password'); setMagicLinkSent(false); setError(''); }}>
+              Passwort
             </button>
-          </form>
+            <button className={`mode-tab ${mode === 'magic' ? 'active' : ''}`} onClick={() => { setMode('magic'); setMagicLinkSent(false); setError(''); }}>
+              Magic Link
+            </button>
+          </div>
+
+          {magicLinkSent ? (
+            <div style={{ ...anim(5), textAlign: 'center', padding: '24px 0' }}>
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '20px',
+                background: 'rgba(0,85,255,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 20px',
+              }}>
+                <Send size={28} color={C.blue} />
+              </div>
+              <h2 style={{ fontSize: '20px', fontWeight: 700, color: C.dark, marginBottom: '8px' }}>
+                E-Mail gesendet!
+              </h2>
+              <p style={{ fontSize: '14px', color: C.textMuted, lineHeight: 1.6 }}>
+                Wir haben einen Login-Link an <strong>{email}</strong> gesendet.
+                Prüfe dein Postfach und klicke auf den Link.
+              </p>
+              <button
+                onClick={() => { setMagicLinkSent(false); setEmail(''); }}
+                style={{
+                  marginTop: '24px', padding: '10px 24px',
+                  borderRadius: '12px', border: '1.5px solid ' + C.border,
+                  background: 'transparent', color: C.dark,
+                  fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                  fontFamily: "'Outfit',sans-serif",
+                }}
+              >
+                Andere E-Mail verwenden
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleLogin}>
+              <div style={{ ...anim(5), marginBottom: '20px' }}>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: C.textFaint, letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>
+                  E-Mail Adresse
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={18} color={C.textFaint} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }}/>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@convidera.com"
+                    required
+                    className="input-field"
+                    style={{
+                      width: '100%', padding: '14px 16px 14px 48px',
+                      borderRadius: '14px', border: '1.5px solid ' + C.border,
+                      fontSize: '15px', fontWeight: 500, color: C.dark,
+                      background: 'rgba(255,255,255,.9)',
+                      fontFamily: "'Outfit',sans-serif",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {mode === 'password' && (
+                <div style={{ ...anim(6), marginBottom: '24px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: C.textFaint, letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '10px', display: 'block' }}>
+                    Passwort
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={18} color={C.textFaint} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }}/>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="input-field"
+                      style={{
+                        width: '100%', padding: '14px 16px 14px 48px',
+                        borderRadius: '14px', border: '1.5px solid ' + C.border,
+                        fontSize: '15px', fontWeight: 500, color: C.dark,
+                        background: 'rgba(255,255,255,.9)',
+                        fontFamily: "'Outfit',sans-serif",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {error && (
+                <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px' }}>
+                  <p style={{ fontSize: '13px', color: '#DC2626' }}>{error}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading || !email || (mode === 'password' && !password)}
+                className="login-btn"
+                style={{
+                  ...anim(7),
+                  width: '100%', padding: '16px 24px',
+                  borderRadius: '14px', border: 'none',
+                  background: C.dark, color: '#fff',
+                  fontSize: '15px', fontWeight: 600, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  animation: email && (mode === 'magic' || password) && !isLoading ? 'btnGlow 3s infinite' : 'none',
+                  fontFamily: "'Outfit',sans-serif",
+                }}
+              >
+                {isLoading ? (
+                  <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }}/> {mode === 'magic' ? 'Link senden...' : 'Anmelden...'}</>
+                ) : mode === 'magic' ? (
+                  <><Send size={18}/> Magic Link senden</>
+                ) : (
+                  <><Sparkles size={18}/> Access Universe</>
+                )}
+              </button>
+            </form>
+          )}
+
+          <p style={{ ...anim(8), marginTop: '24px', textAlign: 'center', fontSize: '14px', color: C.textMuted }}>
+            Noch kein Account?{' '}
+            <Link href="/auth/register" style={{ color: C.dark, fontWeight: 600, textDecoration: 'none' }}>
+              Registrieren
+            </Link>
+          </p>
         </div>
 
         <div style={{ position: 'absolute', bottom: '24px', left: 0, right: 0, textAlign: 'center' }}>
