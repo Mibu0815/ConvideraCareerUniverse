@@ -90,24 +90,26 @@ export function Navigation({
           'bg-canvas-dark text-text-inverse',
           'border-b border-white/5',
         )}
+        aria-label="Primary"
       >
-        <div className="h-full max-w-page mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 shrink-0"
-            aria-label="Career Universe Home"
-          >
-            <div className="h-8 w-8 rounded-md bg-white/10 flex items-center justify-center">
-              <span className="text-text-inverse font-bold text-body-s">c</span>
-            </div>
-            <span className="hidden sm:inline text-body font-semibold text-text-inverse">
-              Career Universe
-            </span>
-            <span className="hidden sm:inline text-caption text-text-inverse-muted px-1.5 py-0.5 rounded-sm bg-white/10">
-              2.0
-            </span>
-          </Link>
+        <div className="h-full w-full px-4 md:px-6 lg:px-8">
+          <div className="h-full max-w-page mx-auto flex items-center justify-between gap-4 min-w-0">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 shrink-0"
+              aria-label="Career Universe Home"
+            >
+              <div className="h-8 w-8 rounded-md bg-white/10 flex items-center justify-center shrink-0">
+                <span className="text-text-inverse font-bold text-body-s">c</span>
+              </div>
+              <span className="hidden sm:inline text-body font-semibold text-text-inverse whitespace-nowrap">
+                Career Universe
+              </span>
+              <span className="hidden sm:inline text-caption text-text-inverse-muted px-1.5 py-0.5 rounded-sm bg-white/10 whitespace-nowrap">
+                2.0
+              </span>
+            </Link>
 
           {/* Desktop nav */}
           <ul className="hidden md:flex items-center gap-1">
@@ -132,7 +134,7 @@ export function Navigation({
                     {active && (
                       <motion.span
                         layoutId="nav-indicator"
-                        className="absolute -bottom-1 left-1/2 h-1 w-1 rounded-pill bg-white -translate-x-1/2"
+                        className="absolute -bottom-[1px] left-0 right-0 h-0.5 bg-white rounded-pill"
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -166,6 +168,7 @@ export function Navigation({
             >
               <Menu className="h-5 w-5" />
             </button>
+          </div>
           </div>
         </div>
       </nav>

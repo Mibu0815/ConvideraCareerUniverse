@@ -85,15 +85,9 @@ export function FloatingFocusBar() {
             damping: 30,
             mass: 1,
           }}
+          className="fixed bottom-4 inset-x-4 md:left-auto md:right-4 md:w-auto md:max-w-md"
           style={{
-            position: 'fixed',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
             zIndex: 1000,
-            width: '100%',
-            maxWidth: '720px',
-            padding: '0 20px',
           }}
         >
           <div
