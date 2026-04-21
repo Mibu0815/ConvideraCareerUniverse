@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Convidera Brand Colors */
+  /* Convidera Brand Colors (legacy — kept for existing components) */
   --brand-black: #000000;
   --brand-white: #FFFFFF;
   --brand-gray-50: #F9FAFB;
@@ -20,6 +20,61 @@
 
   --background: var(--brand-white);
   --foreground: var(--brand-gray-900);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     Career Universe 2.0 Design System — Convidera-aligned
+     RGB triples for Tailwind /<alpha-value> compatibility
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Neutral */
+  --canvas: 245 246 248;
+  --canvas-dark: 10 10 11;
+  --surface: 255 255 255;
+  --surface-soft: 250 250 251;
+  --border: 228 230 234;
+  --border-strong: 209 213 219;
+  --divider: 239 240 243;
+
+  /* Text */
+  --text-primary: 10 10 11;
+  --text-secondary: 90 93 101;
+  --text-muted: 155 159 167;
+  --text-inverse: 245 246 248;
+
+  /* Brand */
+  --brand-dot: 255 90 31;
+  --brand-blue: 0 85 255;
+  --brand-blue-hover: 0 68 204;
+  --brand-blue-subtle: 232 239 255;
+
+  /* Zones */
+  --zone-personal: 0 168 120;
+  --zone-personal-soft: 230 247 240;
+  --zone-admin: 10 10 11;
+  --zone-admin-soft: 243 243 244;
+  --zone-domain: 0 85 255;
+  --zone-domain-soft: 232 239 255;
+
+  /* Status */
+  --success: 0 168 120;
+  --success-soft: 230 247 240;
+  --warning: 255 90 31;
+  --warning-soft: 255 240 232;
+  --danger: 229 72 77;
+  --danger-soft: 253 236 236;
+  --info: 0 85 255;
+  --info-soft: 232 239 255;
+
+  /* Levels */
+  --level-1: 219 234 254;
+  --level-2: 147 197 253;
+  --level-3: 59 130 246;
+  --level-4: 30 64 175;
+
+  /* Layout */
+  --nav-height: 64px;
+  --page-max-width: 1400px;
+  --content-max-width: 1200px;
 }
 
 body {
@@ -367,4 +422,18 @@ a:focus-visible,
     rgba(255, 255, 255, 0.4) 3px,
     rgba(255, 255, 255, 0.4) 6px
   );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Design System 2.0 utilities
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Inverse-color section (admin zones, statement pages) */
+.dark-section {
+  background-color: rgb(var(--canvas-dark));
+  color: rgb(var(--text-inverse));
+}
+
+.dark-section .text-muted {
+  color: rgb(var(--text-muted));
 }
