@@ -6,6 +6,7 @@ import { EvidenceTimeline } from '@/components/evidence/EvidenceTimeline'
 import { TimelineExportButton } from '@/components/evidence/TimelineExportButton'
 import { Navigation } from '@/components/shared/Navigation'
 import { ValidationBadge } from '@/components/shared/ValidationBadge'
+import { PageShell, PageHeader } from '@/components/layout'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,25 +34,21 @@ export default async function TimelinePage() {
         platformRole={dbUser.platformRole}
         validationBadge={<ValidationBadge />}
       />
-      <div className="min-h-screen bg-gray-50 pt-16">
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-2xl font-medium text-gray-900">
-                Meine Karriere-Timeline
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Dokumentierter Skill-Fortschritt
-              </p>
-            </div>
+      <PageShell width="content">
+        <PageHeader
+          eyebrow="Karriere-Verlauf"
+          accent
+          title="Meine Timeline"
+          description="Dokumentierter Skill-Fortschritt über die Zeit"
+          actions={
             <TimelineExportButton
               userId={dbUser.id}
               userName={dbUser.name ?? undefined}
             />
-          </div>
-          <EvidenceTimeline grouped={grouped} />
-        </div>
-      </div>
+          }
+        />
+        <EvidenceTimeline grouped={grouped} />
+      </PageShell>
     </>
   )
 }
