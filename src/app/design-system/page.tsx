@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
+import { ArrowRight, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { isAdmin } from '@/lib/auth/permissions'
-import { PageShell, PageHeader, Section, Card } from '@/components/layout'
+import { PageShell, PageHeader, Section, Card, Button, Status } from '@/components/layout'
 
 export const dynamic = 'force-dynamic'
 
@@ -74,12 +75,12 @@ const TYPE_SCALE = [
 ]
 
 const SPACING_SCALE = [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32]
-const RADII = [
-  { name: 'sm', cls: 'rounded-sm' },
-  { name: 'md', cls: 'rounded-md' },
-  { name: 'lg', cls: 'rounded-lg' },
-  { name: 'xl', cls: 'rounded-xl' },
-]
+const RADII_EXAMPLES = [
+  { radius: 'sm', label: '6px',  usage: 'Chips, small inputs, icon buttons' },
+  { radius: 'md', label: '10px', usage: 'Buttons, text inputs, dropdowns' },
+  { radius: 'lg', label: '16px', usage: 'Cards, panels, dialogs' },
+  { radius: 'xl', label: '24px', usage: 'Hero cards, statement elements' },
+] as const
 const SHADOWS = [
   { name: 'xs', cls: 'shadow-xs' },
   { name: 'sm', cls: 'shadow-sm' },
@@ -157,13 +158,29 @@ export default async function DesignSystemPage() {
         </div>
       </Section>
 
-      <Section title="Border Radius" divider>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {RADII.map(r => (
-            <div key={r.name} className="text-center">
-              <div className={`${r.cls} bg-brand-blue h-24 w-full mb-2`} aria-hidden />
-              <p className="text-body-s font-medium text-text-primary">{r.name}</p>
-              <p className="text-caption text-text-muted font-mono">{r.cls}</p>
+      <Section title="Border Radius" description="Different scales for different UI elements" divider>
+        <div className="space-y-8">
+          {RADII_EXAMPLES.map(({ radius, label, usage }) => (
+            <div key={radius} className="flex items-start gap-8">
+              <div className="w-32 shrink-0">
+                <p className="text-h4 text-text-primary">{radius}</p>
+                <p className="text-caption text-text-muted">{label}</p>
+                <p className="text-body-s text-text-secondary mt-2">{usage}</p>
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className={`inline-flex items-center px-3 py-1 bg-surface border border-border text-body-s rounded-${radius}`}>
+                  Skill Chip
+                </span>
+                <button className={`h-10 px-4 bg-brand-blue text-white text-body font-medium rounded-${radius}`}>
+                  Action Button
+                </button>
+                <div className={`px-5 py-4 bg-surface border border-border rounded-${radius} max-w-xs`}>
+                  <p className="text-body font-medium text-text-primary">Card Surface</p>
+                  <p className="text-body-s text-text-secondary mt-1">
+                    Realistic content example
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -219,20 +236,94 @@ export default async function DesignSystemPage() {
         </div>
       </Section>
 
-      <Section title="Status Pills" divider>
-        <div className="flex flex-wrap gap-3">
-          <span className="inline-flex items-center px-3 py-1.5 bg-status-success-soft text-status-success text-body-s font-medium rounded-pill">
-            Success
-          </span>
-          <span className="inline-flex items-center px-3 py-1.5 bg-status-warning-soft text-status-warning text-body-s font-medium rounded-pill">
-            Warning
-          </span>
-          <span className="inline-flex items-center px-3 py-1.5 bg-status-danger-soft text-status-danger text-body-s font-medium rounded-pill">
-            Danger
-          </span>
-          <span className="inline-flex items-center px-3 py-1.5 bg-status-info-soft text-status-info text-body-s font-medium rounded-pill">
-            Info
-          </span>
+      <Section title="Buttons" description="Variants and sizes" divider>
+        <div className="space-y-8">
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">Variants</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button variant="primary">Primary action</Button>
+              <Button variant="secondary">Secondary</Button>
+              <Button variant="ghost">Ghost</Button>
+              <Button variant="dark">Dark</Button>
+              <Button variant="danger">Danger</Button>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">Sizes</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button size="sm">Small</Button>
+              <Button size="md">Medium (default)</Button>
+              <Button size="lg">Large</Button>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">With Icons</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button iconLeft={<ArrowRight className="h-4 w-4 rotate-180" />}>Back</Button>
+              <Button iconRight={<ArrowRight className="h-4 w-4" />}>Continue</Button>
+              <Button variant="secondary" iconLeft={<Plus className="h-4 w-4" />}>
+                Add skill
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">States</p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button>Default</Button>
+              <Button disabled>Disabled</Button>
+              <Button loading>Loading</Button>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">Full Width</p>
+            <div className="max-w-md">
+              <Button fullWidth iconRight={<ArrowRight className="h-4 w-4" />}>
+                Impuls fortsetzen
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Status" description="Pills, inline and banner variants" divider>
+        <div className="space-y-6">
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">Pills</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Status type="success">Validated</Status>
+              <Status type="warning">Pending Review</Status>
+              <Status type="danger">Rejected</Status>
+              <Status type="info">In Progress</Status>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">Inline</p>
+            <div className="flex items-center gap-6 flex-wrap">
+              <Status type="success" variant="inline">3 skills validated</Status>
+              <Status type="warning" variant="inline">2 awaiting validation</Status>
+              <Status type="danger" variant="inline">1 rejected</Status>
+              <Status type="info" variant="inline">5 in progress</Status>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-caption uppercase text-text-muted mb-3">Banner</p>
+            <div className="space-y-3 max-w-2xl">
+              <Status type="success" variant="banner">
+                <strong>Skill validated.</strong> Your evidence has been approved
+                by the domain expert.
+              </Status>
+              <Status type="warning" variant="banner">
+                <strong>17 Kompetenzfelder ohne Domain Experten.</strong>{' '}
+                Validations are blocked for these fields.
+              </Status>
+            </div>
+          </div>
         </div>
       </Section>
 
