@@ -65,6 +65,7 @@ const config: Config = {
           secondary: "rgb(var(--text-secondary) / <alpha-value>)",
           muted: "rgb(var(--text-muted) / <alpha-value>)",
           inverse: "rgb(var(--text-inverse) / <alpha-value>)",
+          "inverse-muted": "rgb(var(--text-muted) / <alpha-value>)",
         },
         zone: {
           personal: {
@@ -148,6 +149,17 @@ const config: Config = {
         page: "var(--page-max-width)",
         content: "var(--content-max-width)",
         narrow: "720px",
+      },
+      zIndex: {
+        base: "0",
+        dropdown: "10",
+        sticky: "20",
+        banner: "30",
+        overlay: "40",
+        modal: "50",
+        popover: "60",
+        toast: "70",
+        tooltip: "80",
       },
       transitionTimingFunction: {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",

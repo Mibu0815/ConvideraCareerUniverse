@@ -33,7 +33,7 @@ export default async function ValidationsPage() {
         platformRole={dbUser.platformRole}
         validationBadge={<ValidationBadge />}
       />
-      <div className="min-h-screen bg-gray-50 pt-14">
+      <div className="min-h-screen bg-gray-50 pt-16">
         <div className="max-w-2xl mx-auto px-4 py-8">
           <div className="mb-8">
             <h1 className="text-2xl font-medium text-gray-900">

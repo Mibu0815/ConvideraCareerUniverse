@@ -163,7 +163,7 @@ export default async function ProfilePage() {
         platformRole={user.platformRole}
         validationBadge={<ValidationBadge />}
       />
-      <div className="min-h-screen bg-gray-50 pt-14">
+      <div className="min-h-screen bg-gray-50 pt-16">
         <ProfileClient
           user={{
             id: user.id,
