@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { getDashboardLearningData, getLearningRoadmap, type DashboardLearningData } from '@/app/actions/learning-journey';
 import { getUserState } from '@/lib/userStateGuard';
 import CareerUniverse from '@/components/CareerUniverse';
+import { Navigation } from '@/components/shared/Navigation';
+import { ValidationBadge } from '@/components/shared/ValidationBadge';
 
 // Ensure fresh data on each request (no caching)
 export const dynamic = 'force-dynamic';
@@ -71,6 +73,7 @@ async function getUserWithRolesAndLearning() {
       email: true,
       currentRoleId: true,
       targetRoleId: true,
+      platformRole: true,
     },
   });
 
@@ -174,5 +177,14 @@ export default async function Home() {
   // For 'setup' state: Show dashboard but with clear CTA to select skills
   // For 'active' state: Show full personalized dashboard
 
-  return <CareerUniverse userData={userData} userState={userState} />;
+  return (
+    <>
+      <Navigation
+        userName={userData.name ?? userData.email}
+        platformRole={userData.platformRole}
+        validationBadge={<ValidationBadge />}
+      />
+      <CareerUniverse userData={userData} userState={userState} />
+    </>
+  );
 }
