@@ -77,8 +77,8 @@ model CareerPath {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  FromRole    Role     @relation("CareerPathFrom", fields: [fromRoleId], references: [id], onDelete: Cascade)
-  ToRole      Role     @relation("CareerPathTo", fields: [toRoleId], references: [id], onDelete: Cascade)
+  FromRole Role @relation("CareerPathFrom", fields: [fromRoleId], references: [id], onDelete: Cascade)
+  ToRole   Role @relation("CareerPathTo", fields: [toRoleId], references: [id], onDelete: Cascade)
 
   @@unique([fromRoleId, toRoleId])
   @@index([fromRoleId])
@@ -87,25 +87,25 @@ model CareerPath {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Skill {
-  id                  String              @id @default(cuid())
-  title               String
-  slug                String              @unique
-  description         String?
-  fieldId             String
+  id                 String              @id @default(cuid())
+  title              String
+  slug               String              @unique
+  description        String?
+  fieldId            String
   // AI Content Fields (Hybrid-Skill Card)
-  coreDescription     String?             // Fundamental knowledge (2020 basis)
-  aiLayerDescription  String?             // AI-powered approach (2026 upgrade)
-  aiToolTip           String?             // Recommended AI tool
-  realWorldCaseLink   String?             // Link to internal project/repo
-  realWorldExpert     String?             // Internal expert name
-  lastAiUpdate        DateTime?           // When Claude last updated content
-  RoleSkill           RoleSkill[]
-  CompetenceField     CompetenceField     @relation(fields: [fieldId], references: [id])
-  UserSkillEvidence   UserSkillEvidence[]
-  LearningFocus       LearningFocus[]
-  SkillAssessment     SkillAssessment[]
-  Evidence            Evidence[]
-  AssessmentHistory   AssessmentHistory[]
+  coreDescription    String? // Fundamental knowledge (2020 basis)
+  aiLayerDescription String? // AI-powered approach (2026 upgrade)
+  aiToolTip          String? // Recommended AI tool
+  realWorldCaseLink  String? // Link to internal project/repo
+  realWorldExpert    String? // Internal expert name
+  lastAiUpdate       DateTime? // When Claude last updated content
+  RoleSkill          RoleSkill[]
+  CompetenceField    CompetenceField     @relation(fields: [fieldId], references: [id])
+  UserSkillEvidence  UserSkillEvidence[]
+  LearningFocus      LearningFocus[]
+  SkillAssessment    SkillAssessment[]
+  Evidence           Evidence[]
+  AssessmentHistory  AssessmentHistory[]
 
   @@unique([title, fieldId])
   @@index([fieldId])
@@ -268,7 +268,7 @@ model SkillAssessment {
   userId         String
   skillId        String
   selfLevel      Int      @default(0) // 0-4
-  validatedLevel Int?     // Validated by Functional Lead
+  validatedLevel Int? // Validated by Functional Lead
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -311,29 +311,29 @@ model LearningPlan {
 }
 
 model LearningFocus {
-  id                   String            @id @default(cuid())
-  learningPlanId       String
-  skillId              String
-  competenceFieldId    String
-  currentLevel         Int               @default(0)
-  targetLevel          Int
-  gapSize              Int
-  priority             FocusPriority     @default(GROWTH)
-  status               FocusStatus       @default(NOT_STARTED)
-  focusOrder           Int?
-  focusedAt            DateTime?
-  completedAt          DateTime?
+  id                  String             @id @default(cuid())
+  learningPlanId      String
+  skillId             String
+  competenceFieldId   String
+  currentLevel        Int                @default(0)
+  targetLevel         Int
+  gapSize             Int
+  priority            FocusPriority      @default(GROWTH)
+  status              FocusStatus        @default(NOT_STARTED)
+  focusOrder          Int?
+  focusedAt           DateTime?
+  completedAt         DateTime?
   // New: Internal project references for real-world experience tracking
-  internalProjectRefs  Json?             // Array of { projectId, projectName, role, contribution, completedAt }
-  enrichedDescription  Json?             // Cached AI-enriched skill description
-  smartResources       Json?             // Cached smart resource recommendations
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  LearningPlan         LearningPlan      @relation(fields: [learningPlanId], references: [id], onDelete: Cascade)
-  Skill                Skill             @relation(fields: [skillId], references: [id])
-  CompetenceField      CompetenceField   @relation(fields: [competenceFieldId], references: [id])
-  EvidenceNote         EvidenceNote[]
-  PracticalImpulse     PracticalImpulse[]
+  internalProjectRefs Json? // Array of { projectId, projectName, role, contribution, completedAt }
+  enrichedDescription Json? // Cached AI-enriched skill description
+  smartResources      Json? // Cached smart resource recommendations
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  LearningPlan        LearningPlan       @relation(fields: [learningPlanId], references: [id], onDelete: Cascade)
+  Skill               Skill              @relation(fields: [skillId], references: [id])
+  CompetenceField     CompetenceField    @relation(fields: [competenceFieldId], references: [id])
+  EvidenceNote        EvidenceNote[]
+  PracticalImpulse    PracticalImpulse[]
 
   @@unique([learningPlanId, skillId])
   @@index([learningPlanId])
@@ -351,9 +351,9 @@ enum CareerGoalStatus {
 }
 
 enum FocusPriority {
-  CRITICAL  // gapSize >= 2 OR currentLevel === 0
-  GROWTH    // gapSize === 1, skill in current role
-  STRETCH   // skill only in target role
+  CRITICAL // gapSize >= 2 OR currentLevel === 0
+  GROWTH // gapSize === 1, skill in current role
+  STRETCH // skill only in target role
 }
 
 enum FocusStatus {
@@ -377,50 +377,50 @@ model EvidenceNote {
 }
 
 model PracticalImpulse {
-  id                 String         @id @default(cuid())
-  learningFocusId    String
-  targetLevel        ImpulseLevel
-  currentStep        ImpulseStep    @default(CHECK_IN)
+  id              String       @id @default(cuid())
+  learningFocusId String
+  targetLevel     ImpulseLevel
+  currentStep     ImpulseStep  @default(CHECK_IN)
 
   // Check-In Phase
-  checkInMessage     String?
-  checkInViewedAt    DateTime?
+  checkInMessage  String?
+  checkInViewedAt DateTime?
 
   // Task Phase - Three-Step Model (Glashaus-Prinzip)
-  prompt             String         // Legacy field
-  taskDescription    String?
-  expectedOutcome    String?
-  estimatedMinutes   Int?
-  taskStartedAt      DateTime?
+  prompt           String // Legacy field
+  taskDescription  String?
+  expectedOutcome  String?
+  estimatedMinutes Int?
+  taskStartedAt    DateTime?
 
   // Three-Step Structure
-  vorbereitungText   String?        // Step 1: Preparation
-  durchfuehrungText  String?        // Step 2: Execution
-  ergebnisCheckText  String?        // Step 3: Result verification
+  vorbereitungText  String? // Step 1: Preparation
+  durchfuehrungText String? // Step 2: Execution
+  ergebnisCheckText String? // Step 3: Result verification
 
   // Interactive Scaffolding Support
-  supportConcept     String?        // The term/concept being explained
-  supportExplanation String?        // Plain-language explanation
-  supportTemplate    String?        // Markdown template for "Hilf mir"
+  supportConcept     String? // The term/concept being explained
+  supportExplanation String? // Plain-language explanation
+  supportTemplate    String? // Markdown template for "Hilf mir"
 
   // Reflection Phase
-  reflectionQuestion String?
-  userReflection     String?
+  reflectionQuestion  String?
+  userReflection      String?
   reflectionStartedAt DateTime?
 
   // Evidence Phase
-  evidenceSaved      Boolean        @default(false)
+  evidenceSaved      Boolean   @default(false)
   evidenceNoteId     String?
   evidenceSavedAt    DateTime?
   functionalLeadId   String?
   functionalLeadName String?
 
   // Status
-  isCompleted        Boolean        @default(false)
-  completedAt        DateTime?
-  generatedAt        DateTime       @default(now())
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  generatedAt DateTime  @default(now())
 
-  LearningFocus      LearningFocus  @relation(fields: [learningFocusId], references: [id], onDelete: Cascade)
+  LearningFocus LearningFocus @relation(fields: [learningFocusId], references: [id], onDelete: Cascade)
 
   @@index([learningFocusId])
   @@index([isCompleted])
@@ -443,9 +443,9 @@ enum ImpulseStep {
 // ─── Platform Access & Activity Tracking ───
 
 enum PlatformRole {
-  USER             // Regular user
-  FUNCTIONAL_LEAD  // Can access admin dashboard
-  ADMIN            // Full platform admin
+  USER // Regular user
+  FUNCTIONAL_LEAD // Can access admin dashboard
+  ADMIN // Full platform admin
 }
 
 enum ActivityType {
@@ -457,14 +457,14 @@ enum ActivityType {
 }
 
 model ActivityLog {
-  id          String       @id @default(cuid())
-  userId      String
+  id           String       @id @default(cuid())
+  userId       String
   activityType ActivityType
-  entityId    String?      // ID of related entity (impulseId, skillId, etc.)
-  entityName  String?      // Human-readable name for display
-  metadata    Json?        // Additional context (tech tags, duration, etc.)
-  createdAt   DateTime     @default(now())
-  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entityId     String? // ID of related entity (impulseId, skillId, etc.)
+  entityName   String? // Human-readable name for display
+  metadata     Json? // Additional context (tech tags, duration, etc.)
+  createdAt    DateTime     @default(now())
+  User         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([activityType])
@@ -476,10 +476,10 @@ model ActivityLog {
 model Feedback {
   id           String   @id @default(cuid())
   userId       String
-  rating       String   // "positive" | "negative"
+  rating       String // "positive" | "negative"
   comment      String?
-  contextSkill String?  // Skill name for context
-  contextType  String   // "impulse_completed" | "skill_started"
+  contextSkill String? // Skill name for context
+  contextType  String // "impulse_completed" | "skill_started"
   createdAt    DateTime @default(now())
   User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -504,9 +504,9 @@ model AssessmentHistory {
   assessedById String?
   createdAt    DateTime       @default(now())
 
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skill        Skill          @relation(fields: [skillId], references: [id])
-  assessedBy   User?          @relation("AssessmentHistoryAssessor", fields: [assessedById], references: [id])
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill      Skill @relation(fields: [skillId], references: [id])
+  assessedBy User? @relation("AssessmentHistoryAssessor", fields: [assessedById], references: [id])
 
   @@index([userId, skillId, createdAt])
 }
@@ -520,25 +520,25 @@ enum AssessmentStatus {
 }
 
 model Evidence {
-  id              String           @id @default(cuid())
-  userId          String
-  skillId         String
-  title           String
-  description     String           @db.Text
-  evidenceUrl     String?
-  status          AssessmentStatus @default(SELF_ASSESSED)
-  selfLevel       Int
-  validatedLevel  Int?
-  validatedById   String?
-  validatedAt     DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  userId         String
+  skillId        String
+  title          String
+  description    String           @db.Text
+  evidenceUrl    String?
+  status         AssessmentStatus @default(SELF_ASSESSED)
+  selfLevel      Int
+  validatedLevel Int?
+  validatedById  String?
+  validatedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skill           Skill            @relation(fields: [skillId], references: [id])
-  validatedBy     User?            @relation("ValidatedEvidence", fields: [validatedById], references: [id])
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill            Skill             @relation(fields: [skillId], references: [id])
+  validatedBy      User?             @relation("ValidatedEvidence", fields: [validatedById], references: [id])
   validationEvents ValidationEvent[]
-  timelineEvents  TimelineEvent[]
+  timelineEvents   TimelineEvent[]
 
   @@index([userId, skillId])
 }
@@ -552,22 +552,22 @@ model ValidationEvent {
   comment     String?          @db.Text
   createdAt   DateTime         @default(now())
 
-  evidence    Evidence         @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
-  validator   User             @relation(fields: [validatorId], references: [id])
+  evidence  Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  validator User     @relation(fields: [validatorId], references: [id])
 }
 
 model TimelineEvent {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
   evidenceId  String?
   eventType   String
   title       String
-  description String?   @db.Text
+  description String?  @db.Text
   metadata    Json?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  evidence    Evidence? @relation(fields: [evidenceId], references: [id])
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  evidence Evidence? @relation(fields: [evidenceId], references: [id])
 
   @@index([userId, createdAt])
 }

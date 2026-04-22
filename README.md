@@ -91,3 +91,35 @@ scripts/
    - `DIRECT_URL`
    - `ANTHROPIC_API_KEY`
 4. Deploy
+
+## Database Migrations
+
+Migration history was realigned with the live schema on 2026-04-22.
+The single `20240115000000_init` migration represents the full current
+production schema (24 tables, 12 enums).
+
+### Schema changes workflow
+
+1. Edit `prisma/schema.prisma`
+2. Create migration: `npx prisma migrate dev --name descriptive_name`
+3. Commit both the schema change AND the new migration directory
+
+### Production deployment
+
+Run on the production database after deploy:
+
+```bash
+npx prisma migrate deploy
+```
+
+### Don't use
+
+- `prisma db push` — bypasses migration history (got us into baselining
+  trouble; see `chore(db): realign init migration` commit for context)
+- `prisma migrate reset` against production — drops all data
+
+### Connection strings
+
+- `DATABASE_URL` (port 6543, `pgbouncer=true`) — runtime via Supabase pooler
+- `DIRECT_URL` (port 5432) — Prisma CLI migrate commands (needs prepared
+  statement support)
