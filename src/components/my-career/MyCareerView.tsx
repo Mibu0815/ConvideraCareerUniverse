@@ -1,9 +1,10 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useMemo, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import type { PlatformRole } from "@prisma/client"
 import { Navigation } from "@/components/shared"
+import { CareerRadarChart } from "@/app/my-career/compare/components/CareerRadarChart"
 import {
   Target,
   ChevronRight,
@@ -201,6 +202,20 @@ export function MyCareerView({
   const achievedGoals = goals.filter((g) => g.status === "ACHIEVED")
   const memberDate = new Date(memberSince)
 
+  const radarData = useMemo(() => {
+    return skillsByField.map((group) => {
+      const current = group.skills.reduce((max, s) => {
+        const lvl = s.validatedLevel ?? s.selfLevel
+        return lvl > max ? lvl : max
+      }, 0)
+      const target = group.skills.reduce((max, s) => {
+        const lvl = s.requiredLevel ?? 0
+        return lvl > max ? lvl : max
+      }, current)
+      return { subject: group.fieldName, current, target, fullMark: 4 }
+    })
+  }, [skillsByField])
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation
@@ -220,6 +235,17 @@ export function MyCareerView({
             {memberDate.toLocaleDateString("de-DE", { month: "long", year: "numeric" })}
           </p>
         </div>
+
+        {/* ── Skill Balance Radar ── */}
+        {radarData.length >= 3 && (
+          <section className="mb-8">
+            <CareerRadarChart
+              data={radarData}
+              currentRoleName={currentRole?.title ?? "Heute"}
+              targetRoleName={targetRole?.title ?? "Ziel"}
+            />
+          </section>
+        )}
 
         {/* ── Career Snapshot ── */}
         <section className="mb-8">

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { TargetRoleProvider, FocusSkillProvider } from "@/context";
-import { FloatingFocusBar } from "@/components/FloatingFocusBar";
 import "./globals.css";
 
 const inter = Inter({
@@ -29,7 +28,6 @@ export default function RootLayout({
           <TargetRoleProvider>
             <FocusSkillProvider>
               {children}
-              <FloatingFocusBar />
             </FocusSkillProvider>
           </TargetRoleProvider>
         </AuthProvider>

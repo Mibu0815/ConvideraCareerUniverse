@@ -7,6 +7,7 @@ import { motion } from "framer-motion"
 import { Sparkles, Target, ChevronDown, Check } from "lucide-react"
 import { Navigation } from "@/components/shared"
 import { SkillTimelineItem } from "./SkillTimelineItem"
+import { MentorTip } from "./MentorTip"
 import { useFocusSkill } from "@/context"
 import type { LearningRoadmap as RoadmapType } from "@/app/actions/learning-journey"
 import type { StructuredImpulse } from "@/types/practical-impulse"
@@ -156,6 +157,10 @@ export function LearningJourneyView({
               <span className="text-xs text-gray-400">
                 {focusedSkills.length}/3 Fokus
               </span>
+            </div>
+
+            <div className="mb-4">
+              <MentorTip skillTitle={focusedSkills[0]?.Skill?.title} />
             </div>
 
             <div className="space-y-4">
